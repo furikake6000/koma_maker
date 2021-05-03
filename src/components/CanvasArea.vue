@@ -1,7 +1,7 @@
 <template lang="pug">
   .canvas-area.text-center.blue-grey.darken-4
     canvas(
-      refs="canvas"
+      ref="canvas"
       width="840"
       height="1188"
     )
