@@ -1,4 +1,5 @@
 # koma_maker
+Procreateなどコマ機能がないお絵かきツールで使えるコマテンプレのジェネレーター
 
 ## Project setup
 ```
