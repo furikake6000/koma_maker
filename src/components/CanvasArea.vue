@@ -62,29 +62,28 @@ export default class CanvasArea extends Vue{
     });
   }
 
-  private isDrawingPartition: boolean = false;
+  private mouseDownPos: Vector | null = null;
 
   onMouseDown(e: MouseEvent) {
-    const mousePos = this.currentMousePosOfCanvas(e);
+    this.mouseDownPos = this.currentMousePosOfCanvas(e);
 
     // 新しい仕切り線を追加
-    this.partitions.push({ start: mousePos, end: mousePos });
-    this.isDrawingPartition = true;
+    this.partitions.push({ start: this.mouseDownPos, end: this.mouseDownPos });
   }
 
   onMouseMove(e: MouseEvent) {
+    // 描画中でなかったらreturn
+    if (this.mouseDownPos == null) return;
+
     const mousePos = this.currentMousePosOfCanvas(e);
 
     // 最後の仕切り線の終点を更新
-    if (this.isDrawingPartition) {
-      this.partitions[this.partitions.length - 1].end = mousePos;
-    }
-
+    this.partitions[this.partitions.length - 1].end = mousePos;
     this.renderFrames();
   }
 
   onMouseUp() {
-    this.isDrawingPartition = false;
+    this.mouseDownPos = null;
   }
 
   currentMousePosOfCanvas(e: MouseEvent): Vector {
