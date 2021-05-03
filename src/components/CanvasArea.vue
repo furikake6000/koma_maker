@@ -3,6 +3,7 @@
     canvas(
       ref="canvas"
       @mousedown="onMouseDown"
+      @mousemove="onMouseMove"
       @mouseup="onMouseUp"
       width="840"
       height="1188"
@@ -17,9 +18,13 @@ const CANVAS_HEIGHT: number = 1188;
 const FRAME_WIDTH: number = 600;
 const FRAME_HEIGHT: number = 880;
 
+type Vector = { [key in 'x' | 'y']: number; }
+type Partition = { [key in 'start' | 'end']: Vector; }
+
 @Component
 export default class CanvasArea extends Vue{
   private ctx: CanvasRenderingContext2D | null = null;
+  private partitions: Array<Partition> = []; // 各partitionは[始点X, 始点Y, 終点X, 終点Y]で構成
 
   mounted() {
     // ctxの初期化
@@ -37,42 +42,61 @@ export default class CanvasArea extends Vue{
       throw new Error('Cannot access to canvas.');
     }
 
-    this.ctx.beginPath();
-    this.ctx.moveTo(CANVAS_WIDTH / 2 - FRAME_WIDTH / 2, CANVAS_HEIGHT / 2 - FRAME_HEIGHT / 2); // 左上
-    this.ctx.lineTo(CANVAS_WIDTH / 2 + FRAME_WIDTH / 2, CANVAS_HEIGHT / 2 - FRAME_HEIGHT / 2); // 右上
-    this.ctx.lineTo(CANVAS_WIDTH / 2 + FRAME_WIDTH / 2, CANVAS_HEIGHT / 2 + FRAME_HEIGHT / 2); // 右下
-    this.ctx.lineTo(CANVAS_WIDTH / 2 - FRAME_WIDTH / 2, CANVAS_HEIGHT / 2 + FRAME_HEIGHT / 2); // 左下
-    this.ctx.closePath();
-    this.ctx.stroke();
+    const ctx = this.ctx;
+
+    // 既存の描画内容のリセット
+    ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+
+    // 内枠を描画
+    ctx.strokeRect(
+      CANVAS_WIDTH / 2 - FRAME_WIDTH / 2, CANVAS_HEIGHT / 2 - FRAME_HEIGHT / 2,
+      FRAME_WIDTH, FRAME_HEIGHT
+    );
+
+    // 割線の描画
+    this.partitions.forEach(partition => {
+      ctx.beginPath();
+      ctx.moveTo(partition.start.x, partition.start.y);
+      ctx.lineTo(partition.end.x, partition.end.y);
+      ctx.stroke();
+    });
   }
 
-  private mouseDownPos: Array<number> = [];
+  private isDrawingPartition: boolean = false;
 
   onMouseDown(e: MouseEvent) {
-    this.mouseDownPos = this.currentMousePosOfCanvas(e);
+    const mousePos = this.currentMousePosOfCanvas(e);
+
+    // 新しい仕切り線を追加
+    this.partitions.push({ start: mousePos, end: mousePos });
+    this.isDrawingPartition = true;
   }
 
-  onMouseUp(e: MouseEvent) {
-    if (this.ctx == null) {
-      throw new Error('Cannot access to canvas.');
+  onMouseMove(e: MouseEvent) {
+    const mousePos = this.currentMousePosOfCanvas(e);
+
+    // 最後の仕切り線の終点を更新
+    if (this.isDrawingPartition) {
+      this.partitions[this.partitions.length - 1].end = mousePos;
     }
 
-    const mouseUpPos: Array<number> = this.currentMousePosOfCanvas(e);
-
-    // 開始から終点までの線を引く
-    this.ctx.beginPath();
-    this.ctx.moveTo(this.mouseDownPos[0], this.mouseDownPos[1]);
-    this.ctx.lineTo(mouseUpPos[0], mouseUpPos[1]);
-    this.ctx.stroke();
+    this.renderFrames();
   }
 
-  currentMousePosOfCanvas(e: MouseEvent): Array<number> {
+  onMouseUp() {
+    this.isDrawingPartition = false;
+  }
+
+  currentMousePosOfCanvas(e: MouseEvent): Vector {
     if (!(this.$refs.canvas instanceof HTMLCanvasElement)) {
       throw new Error('Canvas element not found.');
     }
 
     const expandRate: number = CANVAS_WIDTH / this.$refs.canvas.clientWidth;
-    return [Math.floor(e.offsetX * expandRate), Math.floor(e.offsetY * expandRate)];
+    return {
+      x: Math.floor(e.offsetX * expandRate),
+      y: Math.floor(e.offsetY * expandRate)
+    };
   }
 }
 </script>
