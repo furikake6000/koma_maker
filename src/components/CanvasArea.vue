@@ -2,8 +2,8 @@
   .canvas-area.text-center.blue-grey.darken-4
     canvas(
       refs="canvas"
-      width="420"
-      height="600"
+      width="840"
+      height="1188"
     )
 </template>
 
@@ -24,6 +24,8 @@ export default class CanvasArea extends Vue{
 
 <style lang="sass" scoped>
   canvas
+    max-width: 80vw
+    max-height: 80vh
     margin: 40px
     background-color: white
 </style>
