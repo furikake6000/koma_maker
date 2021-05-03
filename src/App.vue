@@ -31,17 +31,17 @@
         v-icon mdi-open-in-new
 
     v-main
-      HelloWorld
+      CanvasArea
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue';
+import CanvasArea from './components/CanvasArea.vue';
 
 export default {
   name: 'App',
 
   components: {
-    HelloWorld,
+    CanvasArea
   },
 
   data: () => ({
