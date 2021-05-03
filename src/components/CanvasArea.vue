@@ -8,7 +8,9 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue';
+import { Component, Vue } from 'vue-property-decorator';
+
+@Component
 export default class CanvasArea extends Vue{
   private ctx: CanvasRenderingContext2D | null = null;
 
