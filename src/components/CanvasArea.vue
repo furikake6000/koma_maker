@@ -2,6 +2,8 @@
   .canvas-area.text-center.blue-grey.darken-4
     canvas(
       ref="canvas"
+      @mousedown="onMouseDown"
+      @mouseup="onMouseUp"
       width="840"
       height="1188"
     )
@@ -24,8 +26,7 @@ export default class CanvasArea extends Vue{
     if (!(this.$refs.canvas instanceof HTMLCanvasElement)) {
       throw new Error('Canvas element not found.');
     }
-    const canvas: HTMLCanvasElement = this.$refs.canvas;
-    this.ctx = canvas.getContext('2d');
+    this.ctx = this.$refs.canvas.getContext('2d');
 
     // コマ枠の描画
     this.renderFrames();
@@ -43,6 +44,35 @@ export default class CanvasArea extends Vue{
     this.ctx.lineTo(CANVAS_WIDTH / 2 - FRAME_WIDTH / 2, CANVAS_HEIGHT / 2 + FRAME_HEIGHT / 2); // 左下
     this.ctx.closePath();
     this.ctx.stroke();
+  }
+
+  private mouseDownPos: Array<number> = [];
+
+  onMouseDown(e: MouseEvent) {
+    this.mouseDownPos = this.currentMousePosOfCanvas(e);
+  }
+
+  onMouseUp(e: MouseEvent) {
+    if (this.ctx == null) {
+      throw new Error('Cannot access to canvas.');
+    }
+
+    const mouseUpPos: Array<number> = this.currentMousePosOfCanvas(e);
+
+    // 開始から終点までの線を引く
+    this.ctx.beginPath();
+    this.ctx.moveTo(this.mouseDownPos[0], this.mouseDownPos[1]);
+    this.ctx.lineTo(mouseUpPos[0], mouseUpPos[1]);
+    this.ctx.stroke();
+  }
+
+  currentMousePosOfCanvas(e: MouseEvent): Array<number> {
+    if (!(this.$refs.canvas instanceof HTMLCanvasElement)) {
+      throw new Error('Canvas element not found.');
+    }
+
+    const expandRate: number = CANVAS_WIDTH / this.$refs.canvas.clientWidth;
+    return [Math.floor(e.offsetX * expandRate), Math.floor(e.offsetY * expandRate)];
   }
 }
 </script>
