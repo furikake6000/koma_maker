@@ -22,7 +22,7 @@ const FRAME_HEIGHT: number = 880;
 @Component
 export default class CanvasArea extends Vue{
   private ctx: CanvasRenderingContext2D | null = null;
-  private Lines: Array<Line> = [];
+  private lines: Array<Line> = [];
 
   mounted() {
     // ctxの初期化
@@ -52,7 +52,7 @@ export default class CanvasArea extends Vue{
     );
 
     // 割線の描画
-    this.Lines.forEach(Line => {
+    this.lines.forEach(Line => {
       ctx.beginPath();
       ctx.moveTo(Line.start.x, Line.start.y);
       ctx.lineTo(Line.end.x, Line.end.y);
@@ -66,7 +66,7 @@ export default class CanvasArea extends Vue{
     this.mouseDownPos = this.currentMousePosOfCanvas(e);
 
     // 新しい仕切り線を追加
-    this.Lines.push(new Line(this.mouseDownPos, this.mouseDownPos));
+    this.lines.push(new Line(this.mouseDownPos, this.mouseDownPos));
   }
 
   onMouseMove(e: MouseEvent) {
@@ -76,7 +76,7 @@ export default class CanvasArea extends Vue{
     const mousePos = this.currentMousePosOfCanvas(e);
 
     // 最後の仕切り線の終点を更新
-    this.Lines[this.Lines.length - 1].end = mousePos;
+    this.lines[this.lines.length - 1].end = mousePos;
     this.renderFrames();
   }
 
