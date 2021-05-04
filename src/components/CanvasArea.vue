@@ -19,12 +19,12 @@ const FRAME_WIDTH: number = 600;
 const FRAME_HEIGHT: number = 880;
 
 type Vector = { [key in 'x' | 'y']: number; }
-type Partition = { [key in 'start' | 'end']: Vector; }
+type Line = { [key in 'start' | 'end']: Vector; }
 
 @Component
 export default class CanvasArea extends Vue{
   private ctx: CanvasRenderingContext2D | null = null;
-  private partitions: Array<Partition> = []; // 各partitionは[始点X, 始点Y, 終点X, 終点Y]で構成
+  private Lines: Array<Line> = []; // 各Lineは[始点X, 始点Y, 終点X, 終点Y]で構成
 
   mounted() {
     // ctxの初期化
@@ -54,10 +54,10 @@ export default class CanvasArea extends Vue{
     );
 
     // 割線の描画
-    this.partitions.forEach(partition => {
+    this.Lines.forEach(Line => {
       ctx.beginPath();
-      ctx.moveTo(partition.start.x, partition.start.y);
-      ctx.lineTo(partition.end.x, partition.end.y);
+      ctx.moveTo(Line.start.x, Line.start.y);
+      ctx.lineTo(Line.end.x, Line.end.y);
       ctx.stroke();
     });
   }
@@ -68,7 +68,7 @@ export default class CanvasArea extends Vue{
     this.mouseDownPos = this.currentMousePosOfCanvas(e);
 
     // 新しい仕切り線を追加
-    this.partitions.push({ start: this.mouseDownPos, end: this.mouseDownPos });
+    this.Lines.push({ start: this.mouseDownPos, end: this.mouseDownPos });
   }
 
   onMouseMove(e: MouseEvent) {
@@ -78,7 +78,7 @@ export default class CanvasArea extends Vue{
     const mousePos = this.currentMousePosOfCanvas(e);
 
     // 最後の仕切り線の終点を更新
-    this.partitions[this.partitions.length - 1].end = mousePos;
+    this.Lines[this.Lines.length - 1].end = mousePos;
     this.renderFrames();
   }
 
