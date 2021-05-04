@@ -12,19 +12,17 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
+import { Vector, Line } from '../helper/Geometry';
 
 const CANVAS_WIDTH: number = 840;
 const CANVAS_HEIGHT: number = 1188;
 const FRAME_WIDTH: number = 600;
 const FRAME_HEIGHT: number = 880;
 
-type Vector = { [key in 'x' | 'y']: number; }
-type Line = { [key in 'start' | 'end']: Vector; }
-
 @Component
 export default class CanvasArea extends Vue{
   private ctx: CanvasRenderingContext2D | null = null;
-  private Lines: Array<Line> = []; // 各Lineは[始点X, 始点Y, 終点X, 終点Y]で構成
+  private Lines: Array<Line> = [];
 
   mounted() {
     // ctxの初期化
@@ -68,7 +66,7 @@ export default class CanvasArea extends Vue{
     this.mouseDownPos = this.currentMousePosOfCanvas(e);
 
     // 新しい仕切り線を追加
-    this.Lines.push({ start: this.mouseDownPos, end: this.mouseDownPos });
+    this.Lines.push(new Line(this.mouseDownPos, this.mouseDownPos));
   }
 
   onMouseMove(e: MouseEvent) {
@@ -92,10 +90,7 @@ export default class CanvasArea extends Vue{
     }
 
     const expandRate: number = CANVAS_WIDTH / this.$refs.canvas.clientWidth;
-    return {
-      x: Math.floor(e.offsetX * expandRate),
-      y: Math.floor(e.offsetY * expandRate)
-    };
+    return new Vector(Math.floor(e.offsetX * expandRate), Math.floor(e.offsetY * expandRate));
   }
 }
 </script>
