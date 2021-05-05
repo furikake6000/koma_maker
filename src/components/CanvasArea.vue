@@ -93,7 +93,7 @@ export default class CanvasArea extends Vue{
     const mousePos = this.currentMousePosOfCanvas(e);
 
     // 現在引いている線を取得
-    const currentLine = new Line(this.mouseDownPos, mousePos);
+    const currentLine = new Line(this.mouseDownPos, mousePos, false);
     // 線がいずれかの線に交わるまで伸ばす
     const crossLines = this.lines.slice(0, -1).concat(EDGES);
     this.lines[this.lines.length - 1] = this.lineWidenToEdges(currentLine, crossLines);
@@ -123,7 +123,7 @@ export default class CanvasArea extends Vue{
     for (const crossLine of crossLines) {
       const crossPos: Vector | null = line.CrossPoint(crossLine);
       console.log(crossPos);
-      if (crossPos == null) break;  // 交わらなければ無視
+      if (crossPos == null) continue;  // 交わらなければ無視
 
       if (crossPos.ComparedTo(line.start) < 0) {
         if (startPoint == null || crossPos.ComparedTo(startPoint) > 0) {

@@ -63,10 +63,12 @@ export class Vector {
 export class Line {
   public start: Vector;
   public end: Vector;
+  public isSegment: boolean;
 
-  constructor(start: Vector = new Vector(), end: Vector = new Vector()) {
+  constructor(start: Vector = new Vector(), end: Vector = new Vector(), isSegment: boolean = true) {
     this.start = start;
     this.end = end;
+    this.isSegment = isSegment;
   }
 
   // 方向ベクトル
@@ -105,7 +107,14 @@ export class Line {
     const targetDir = target.Direction();
     const delta: number = myDir.CrossTo(targetDir);
     const ksi: number = targetDir.y * (target.end.x - this.start.x) - targetDir.x * (target.end.y - this.start.y);
+    const eta: number = myDir.x * (target.end.y - this.start.y) - myDir.y * (target.end.x - this.start.x);
     const ramda: number = ksi / delta;
+    const mu: number = eta / delta;
+    
+    // 線分判定
+    if (this.isSegment && (ramda < 0.0 || ramda > 1.0)) return null;
+    if (target.isSegment && (mu < 0.0 || mu > 1.0)) return null;
+
     return this.start.Plus(myDir.Times(ramda));
   }
 }
