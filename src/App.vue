@@ -31,17 +31,22 @@
         v-icon mdi-open-in-new
 
     v-main
-      CanvasArea
+      .d-flex
+        .flex-grow-1
+          CanvasArea
+        PropertyPanel
 </template>
 
 <script>
 import CanvasArea from './components/CanvasArea.vue';
+import PropertyPanel from './components/PropertyPanel.vue';
 
 export default {
   name: 'App',
 
   components: {
-    CanvasArea
+    CanvasArea,
+    PropertyPanel
   },
 
   data: () => ({
@@ -49,3 +54,8 @@ export default {
   }),
 };
 </script>
+
+<style lang="sass" scoped>
+  .property-panel
+
+</style>

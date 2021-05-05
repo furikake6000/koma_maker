@@ -163,8 +163,8 @@ export default class CanvasArea extends Vue{
 
 <style lang="sass" scoped>
   canvas
-    max-width: 80vw
-    max-height: 80vh
-    margin: 40px
+    max-width: 80%
+    max-height: 90vh
+    margin: 40px 0
     background-color: white
 </style>
