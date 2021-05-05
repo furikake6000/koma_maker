@@ -33,8 +33,10 @@
     v-main
       .d-flex
         .flex-grow-1
-          CanvasArea
-        PropertyPanel
+          CanvasArea(:properties="properties")
+        PropertyPanel(
+          @propertiesChanged="onPropertiesChanged($event, properties)"
+        )
 </template>
 
 <script>
@@ -50,8 +52,14 @@ export default {
   },
 
   data: () => ({
-    //
+    properties: {}
   }),
+
+  methods: {
+    onPropertiesChanged(properties) {
+      this.properties = properties;
+    }
+  }
 };
 </script>
 

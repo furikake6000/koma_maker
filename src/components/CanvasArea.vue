@@ -11,7 +11,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator';
+import { Component, Prop, Watch, Vue } from 'vue-property-decorator';
 import { Vector, Line } from '../helper/Geometry';
 
 const CANVAS_WIDTH: number = 840;
@@ -38,10 +38,11 @@ const EDGES = [TOP_EDGE, BOTTOM_EDGE, LEFT_EDGE, RIGHT_EDGE];
 
 @Component
 export default class CanvasArea extends Vue{
+  @Prop()
+  public properties!: { [key: string]: number };
+
   private ctx: CanvasRenderingContext2D | null = null;
   private lines: Array<Line> = [];
-  private lineWidth: number = 5;  // 線の太さ
-  private frameSpace: number = 10; // コマとコマとの間隔
 
   mounted() {
     // ctxの初期化
@@ -51,6 +52,11 @@ export default class CanvasArea extends Vue{
     this.ctx = this.$refs.canvas.getContext('2d');
 
     // コマ枠の描画
+    this.renderFrames();
+  }
+
+  @Watch('properties', { deep: true })
+  onPropertiesChanged() {
     this.renderFrames();
   }
 
@@ -65,7 +71,7 @@ export default class CanvasArea extends Vue{
     ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
     // 内枠を描画
-    ctx.lineWidth = this.lineWidth;
+    ctx.lineWidth = this.properties.lineWidth;
     ctx.strokeStyle = 'black';
     ctx.strokeRect(
       CANVAS_WIDTH / 2 - FRAME_WIDTH / 2, CANVAS_HEIGHT / 2 - FRAME_HEIGHT / 2,
@@ -74,7 +80,7 @@ export default class CanvasArea extends Vue{
 
     // 割線の描画
     // 最初に黒線を描画
-    ctx.lineWidth = this.lineWidth * 2 + this.frameSpace;
+    ctx.lineWidth = this.properties.lineWidth * 2 + this.properties.frameSpace;
     ctx.lineCap = 'butt';
     this.lines.forEach(Line => {
       ctx.beginPath();
@@ -84,7 +90,7 @@ export default class CanvasArea extends Vue{
     });
 
     // 黒線の上から白線を引くことでコマ間隔を表現
-    ctx.lineWidth = this.frameSpace;
+    ctx.lineWidth = this.properties.frameSpace;
     ctx.strokeStyle = 'white';
     ctx.lineCap = 'round';
     this.lines.forEach(Line => {
