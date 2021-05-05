@@ -18,6 +18,23 @@ const CANVAS_WIDTH: number = 840;
 const CANVAS_HEIGHT: number = 1188;
 const FRAME_WIDTH: number = 600;
 const FRAME_HEIGHT: number = 880;
+const TOP_EDGE = new Line(
+  new Vector(CANVAS_WIDTH / 2 - FRAME_WIDTH / 2, CANVAS_HEIGHT / 2 - FRAME_HEIGHT / 2),
+  new Vector(CANVAS_WIDTH / 2 + FRAME_WIDTH / 2, CANVAS_HEIGHT / 2 - FRAME_HEIGHT / 2)
+);
+const BOTTOM_EDGE = new Line(
+  new Vector(CANVAS_WIDTH / 2 - FRAME_WIDTH / 2, CANVAS_HEIGHT / 2 + FRAME_HEIGHT / 2),
+  new Vector(CANVAS_WIDTH / 2 + FRAME_WIDTH / 2, CANVAS_HEIGHT / 2 + FRAME_HEIGHT / 2)
+);
+const LEFT_EDGE = new Line(
+  new Vector(CANVAS_WIDTH / 2 - FRAME_WIDTH / 2, CANVAS_HEIGHT / 2 - FRAME_HEIGHT / 2),
+  new Vector(CANVAS_WIDTH / 2 - FRAME_WIDTH / 2, CANVAS_HEIGHT / 2 + FRAME_HEIGHT / 2)
+);
+const RIGHT_EDGE = new Line(
+  new Vector(CANVAS_WIDTH / 2 + FRAME_WIDTH / 2, CANVAS_HEIGHT / 2 - FRAME_HEIGHT / 2),
+  new Vector(CANVAS_WIDTH / 2 + FRAME_WIDTH / 2, CANVAS_HEIGHT / 2 + FRAME_HEIGHT / 2)
+);
+const EDGES = [TOP_EDGE, BOTTOM_EDGE, LEFT_EDGE, RIGHT_EDGE];
 
 @Component
 export default class CanvasArea extends Vue{
@@ -75,8 +92,12 @@ export default class CanvasArea extends Vue{
 
     const mousePos = this.currentMousePosOfCanvas(e);
 
-    // 最後の仕切り線の終点を更新
-    this.lines[this.lines.length - 1].end = mousePos;
+    // 現在引いている線を取得
+    const currentLine = new Line(this.mouseDownPos, mousePos);
+    // 線がいずれかの線に交わるまで伸ばす
+    const crossLines = this.lines.slice(0, -1).concat(EDGES);
+    this.lines[this.lines.length - 1] = this.lineWidenToEdges(currentLine, crossLines);
+
     this.renderFrames();
   }
 
@@ -91,6 +112,34 @@ export default class CanvasArea extends Vue{
 
     const expandRate: number = CANVAS_WIDTH / this.$refs.canvas.clientWidth;
     return new Vector(Math.floor(e.offsetX * expandRate), Math.floor(e.offsetY * expandRate));
+  }
+
+  // 与えられた線分lをどれか他の線に交わるまで伸ばす
+  private lineWidenToEdges(line: Line, crossLines: Array<Line>): Line {
+    // 伸ばした線の両端点となる予定の変数
+    let startPoint: Vector | null = null;
+    let endPoint: Vector | null = null;
+
+    for (const crossLine of crossLines) {
+      const crossPos: Vector | null = line.CrossPoint(crossLine);
+      console.log(crossPos);
+      if (crossPos == null) break;  // 交わらなければ無視
+
+      if (crossPos.ComparedTo(line.start) < 0) {
+        if (startPoint == null || crossPos.ComparedTo(startPoint) > 0) {
+          startPoint = crossPos;
+        }
+      } else {
+        if (endPoint == null || crossPos.ComparedTo(endPoint) < 0) {
+          endPoint = crossPos;
+        }
+      }
+    }
+
+    if (startPoint != null && endPoint != null) {
+      return new Line(startPoint, endPoint);
+    }
+    return line;
   }
 }
 </script>

@@ -42,6 +42,21 @@ export class Vector {
   public IsParallelTo(target: Vector): boolean {
     return this.CrossTo(target) == 0;
   }
+
+  // 上下・左右位置の比較(上下比較が優先)
+  // Vectorが同じでない限り0にはならない
+  public ComparedTo(target: Vector): number {
+    if (this.y > target.y) {
+      return 1;
+    } else if (this.y < target.y) {
+      return -1;
+    } else if (this.x > target.x) {
+      return 1;
+    } else if (this.x < target.x) {
+      return -1;
+    }
+    return 0;
+  }
 }
 
 // 線分を表す
@@ -90,7 +105,7 @@ export class Line {
     const targetDir = target.Direction();
     const delta: number = myDir.CrossTo(targetDir);
     const ksi: number = targetDir.y * (target.end.x - this.start.x) - targetDir.x * (target.end.y - this.start.y);
-    const ramda: number = delta / ksi;
-    return myDir.Plus(targetDir.Minus(myDir).Times(ramda)); // myDir + (targetDir - myDir) * ramda
+    const ramda: number = ksi / delta;
+    return this.start.Plus(myDir.Times(ramda));
   }
 }
