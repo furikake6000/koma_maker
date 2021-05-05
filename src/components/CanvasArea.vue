@@ -40,6 +40,8 @@ const EDGES = [TOP_EDGE, BOTTOM_EDGE, LEFT_EDGE, RIGHT_EDGE];
 export default class CanvasArea extends Vue{
   private ctx: CanvasRenderingContext2D | null = null;
   private lines: Array<Line> = [];
+  private lineWidth: number = 5;  // 線の太さ
+  private frameSpace: number = 10; // コマとコマとの間隔
 
   mounted() {
     // ctxの初期化
@@ -53,22 +55,38 @@ export default class CanvasArea extends Vue{
   }
 
   renderFrames() {
-    if (this.ctx == null) {
+    const ctx = this.ctx;
+
+    if (ctx == null) {
       throw new Error('Cannot access to canvas.');
     }
-
-    const ctx = this.ctx;
 
     // 既存の描画内容のリセット
     ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
     // 内枠を描画
+    ctx.lineWidth = this.lineWidth;
+    ctx.strokeStyle = 'black';
     ctx.strokeRect(
       CANVAS_WIDTH / 2 - FRAME_WIDTH / 2, CANVAS_HEIGHT / 2 - FRAME_HEIGHT / 2,
       FRAME_WIDTH, FRAME_HEIGHT
     );
 
     // 割線の描画
+    // 最初に黒線を描画
+    ctx.lineWidth = this.lineWidth * 2 + this.frameSpace;
+    ctx.lineCap = 'butt';
+    this.lines.forEach(Line => {
+      ctx.beginPath();
+      ctx.moveTo(Line.start.x, Line.start.y);
+      ctx.lineTo(Line.end.x, Line.end.y);
+      ctx.stroke();
+    });
+
+    // 黒線の上から白線を引くことでコマ間隔を表現
+    ctx.lineWidth = this.frameSpace;
+    ctx.strokeStyle = 'white';
+    ctx.lineCap = 'round';
     this.lines.forEach(Line => {
       ctx.beginPath();
       ctx.moveTo(Line.start.x, Line.start.y);
