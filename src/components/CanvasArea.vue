@@ -122,7 +122,6 @@ export default class CanvasArea extends Vue{
 
     for (const crossLine of crossLines) {
       const crossPos: Vector | null = line.CrossPoint(crossLine);
-      console.log(crossPos);
       if (crossPos == null) continue;  // 交わらなければ無視
 
       if (crossPos.ComparedTo(line.start) < 0) {
