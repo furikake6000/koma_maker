@@ -16,7 +16,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator';
+import { Component, Vue } from 'vue-property-decorator';
 import { Vector, Line } from '../helper/Geometry';
 import PropertyPanel from './PropertyPanel.vue';
 
@@ -48,9 +48,7 @@ const EDGES = [TOP_EDGE, BOTTOM_EDGE, LEFT_EDGE, RIGHT_EDGE];
   }
 })
 export default class CanvasArea extends Vue{
-  @Prop()
   private properties: { [key: string]: number } = {};
-
   private ctx: CanvasRenderingContext2D | null = null;
   private lines: Array<Line> = [];
 
