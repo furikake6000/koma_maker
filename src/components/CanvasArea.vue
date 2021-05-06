@@ -12,6 +12,7 @@
         )
     PropertyPanel(
       @propertiesChanged="onPropertiesChanged($event, properties)"
+      @download="download"
     )
 </template>
 
@@ -66,6 +67,20 @@ export default class CanvasArea extends Vue{
   onPropertiesChanged(properties: { [key: string]: number }) {
     this.properties = properties;
     this.renderFrames();
+  }
+
+  download() {
+    if (!(this.$refs.canvas instanceof HTMLCanvasElement)) {
+      throw new Error('Canvas element not found.');
+    }
+
+    this.$refs.canvas.toBlob(blob => {
+      const dataURI: string = window.URL.createObjectURL(blob);
+      let dlElement: HTMLAnchorElement = document.createElement('a');
+      dlElement.href = dataURI;
+      dlElement.download = 'image.png';
+      dlElement.click();
+    });
   }
 
   renderFrames() {

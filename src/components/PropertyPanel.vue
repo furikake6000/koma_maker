@@ -14,6 +14,12 @@
       max = "50"
       thumb-label="always"
     )
+
+    v-btn.mt-4(
+      @click = "download"
+      x-large rounded block
+      color = "primary"
+    ) ダウンロード
 </template>
 
 <script lang="ts">
@@ -36,6 +42,10 @@ export default class PropertyPanel extends Vue{
   @Watch('properties', { deep: true })
   onPropertiesChanged() {
     this.$emit('propertiesChanged', this.properties);
+  }
+
+  download() {
+    this.$emit('download');
   }
 }
 </script>
