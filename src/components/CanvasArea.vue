@@ -1,18 +1,24 @@
 <template lang="pug">
-  .canvas-area.text-center.blue-grey.darken-4
-    canvas(
-      ref="canvas"
-      @mousedown="onMouseDown"
-      @mousemove="onMouseMove"
-      @mouseup="onMouseUp"
-      width="840"
-      height="1188"
+  .canvas-area.d-flex
+    .flex-grow-1
+      .text-center.blue-grey.darken-4
+        canvas(
+          ref="canvas"
+          @mousedown="onMouseDown"
+          @mousemove="onMouseMove"
+          @mouseup="onMouseUp"
+          width="840"
+          height="1188"
+        )
+    PropertyPanel(
+      @propertiesChanged="onPropertiesChanged($event, properties)"
     )
 </template>
 
 <script lang="ts">
-import { Component, Prop, Watch, Vue } from 'vue-property-decorator';
+import { Component, Prop, Vue } from 'vue-property-decorator';
 import { Vector, Line } from '../helper/Geometry';
+import PropertyPanel from './PropertyPanel.vue';
 
 const CANVAS_WIDTH: number = 840;
 const CANVAS_HEIGHT: number = 1188;
@@ -36,10 +42,14 @@ const RIGHT_EDGE = new Line(
 );
 const EDGES = [TOP_EDGE, BOTTOM_EDGE, LEFT_EDGE, RIGHT_EDGE];
 
-@Component
+@Component({
+  components: {
+    PropertyPanel
+  }
+})
 export default class CanvasArea extends Vue{
   @Prop()
-  public properties!: { [key: string]: number };
+  private properties: { [key: string]: number } = {};
 
   private ctx: CanvasRenderingContext2D | null = null;
   private lines: Array<Line> = [];
@@ -55,8 +65,8 @@ export default class CanvasArea extends Vue{
     this.renderFrames();
   }
 
-  @Watch('properties', { deep: true })
-  onPropertiesChanged() {
+  onPropertiesChanged(properties: { [key: string]: number }) {
+    this.properties = properties;
     this.renderFrames();
   }
 

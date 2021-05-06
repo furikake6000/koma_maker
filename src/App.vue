@@ -31,35 +31,22 @@
         v-icon mdi-open-in-new
 
     v-main
-      .d-flex
-        .flex-grow-1
-          CanvasArea(:properties="properties")
-        PropertyPanel(
-          @propertiesChanged="onPropertiesChanged($event, properties)"
-        )
+      CanvasArea
 </template>
 
 <script>
 import CanvasArea from './components/CanvasArea.vue';
-import PropertyPanel from './components/PropertyPanel.vue';
 
 export default {
   name: 'App',
 
   components: {
-    CanvasArea,
-    PropertyPanel
+    CanvasArea
   },
 
   data: () => ({
-    properties: {}
+    //
   }),
-
-  methods: {
-    onPropertiesChanged(properties) {
-      this.properties = properties;
-    }
-  }
 };
 </script>
 
