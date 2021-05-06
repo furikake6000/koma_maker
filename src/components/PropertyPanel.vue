@@ -27,7 +27,10 @@ export default class PropertyPanel extends Vue{
   }
 
   mounted() {
-    this.onPropertiesChanged();
+    // CanvasAreaのcanvas読み込みを待つためnextTickで反映する
+    this.$nextTick(() => {
+      this.onPropertiesChanged();
+    });
   }
 
   @Watch('properties', { deep: true })
