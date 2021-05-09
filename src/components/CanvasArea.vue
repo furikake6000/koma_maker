@@ -127,7 +127,7 @@ export default class CanvasArea extends Vue{
   private mouseDownPos: Vector | null = null;
 
   onMouseDown(e: MouseEvent) {
-    this.mouseDownPos = this.currentMousePosOfCanvas(e);
+    this.mouseDownPos = this.offsetPosToCanvasPos(new Vector(e.offsetX, e.offsetY));
 
     // 新しい仕切り線を追加
     this.lines.push(new Line(this.mouseDownPos, this.mouseDownPos));
@@ -137,7 +137,7 @@ export default class CanvasArea extends Vue{
     // 描画中でなかったらreturn
     if (this.mouseDownPos == null) return;
 
-    const mousePos = this.currentMousePosOfCanvas(e);
+    const mousePos = this.offsetPosToCanvasPos(new Vector(e.offsetX, e.offsetY));
 
     // 現在引いている線を取得
     const currentLine = new Line(this.mouseDownPos, mousePos, false);
@@ -152,13 +152,14 @@ export default class CanvasArea extends Vue{
     this.mouseDownPos = null;
   }
 
-  currentMousePosOfCanvas(e: MouseEvent): Vector {
+  // offsetX, offsetY -> canvas上の座標の変換
+  private offsetPosToCanvasPos(offsetPos: Vector): Vector {
     if (!(this.$refs.canvas instanceof HTMLCanvasElement)) {
       throw new Error('Canvas element not found.');
     }
 
     const expandRate: number = CANVAS_WIDTH / this.$refs.canvas.clientWidth;
-    return new Vector(Math.floor(e.offsetX * expandRate), Math.floor(e.offsetY * expandRate));
+    return new Vector(Math.floor(offsetPos.x * expandRate), Math.floor(offsetPos.y * expandRate));
   }
 
   // 与えられた線分lをどれか他の線に交わるまで伸ばす
