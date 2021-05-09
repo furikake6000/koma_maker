@@ -126,30 +126,42 @@ export default class CanvasArea extends Vue{
 
   private mouseDownPos: Vector | null = null;
 
-  onMouseDown(e: MouseEvent) {
-    this.mouseDownPos = this.offsetPosToCanvasPos(new Vector(e.offsetX, e.offsetY));
+  // posから新しい境界線を引き始める
+  drawStart(pos: Vector) {
+    this.mouseDownPos = pos;
 
     // 新しい仕切り線を追加
-    this.lines.push(new Line(this.mouseDownPos, this.mouseDownPos));
+    this.lines.push(new Line(pos, pos));
   }
 
-  onMouseMove(e: MouseEvent) {
+  // 現在引いている新しい境界線がposを通るように修正する
+  drawMove(pos: Vector) {
     // 描画中でなかったらreturn
     if (this.mouseDownPos == null) return;
 
-    const mousePos = this.offsetPosToCanvasPos(new Vector(e.offsetX, e.offsetY));
-
     // 現在引いている線を取得
-    const currentLine = new Line(this.mouseDownPos, mousePos, false);
+    const currentLine = new Line(this.mouseDownPos, pos, false);
     // 線がいずれかの線に交わるまで伸ばす
     const crossLines = this.lines.slice(0, -1).concat(EDGES);
     this.lines[this.lines.length - 1] = this.lineWidenToEdges(currentLine, crossLines);
+  }
 
+  // 線を引くのを終了する
+  drawEnd() {
+    this.mouseDownPos = null;
+  }
+
+  onMouseDown(e: MouseEvent) {
+    this.drawStart(this.offsetPosToCanvasPos(new Vector(e.offsetX, e.offsetY)));
+  }
+
+  onMouseMove(e: MouseEvent) {
+    this.drawMove(this.offsetPosToCanvasPos(new Vector(e.offsetX, e.offsetY)));
     this.renderFrames();
   }
 
   onMouseUp() {
-    this.mouseDownPos = null;
+    this.drawEnd();
   }
 
   // offsetX, offsetY -> canvas上の座標の変換
