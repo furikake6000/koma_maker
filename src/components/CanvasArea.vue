@@ -7,6 +7,10 @@
           @mousedown="onMouseDown"
           @mousemove="onMouseMove"
           @mouseup="onMouseUp"
+          @touchstart="onTouchStart"
+          @touchmove="onTouchMove"
+          @touchend="onTouchEnd"
+          @touchcancel="onTouchCancel"
           width="840"
           height="1188"
         )
@@ -133,7 +137,6 @@ export default class CanvasArea extends Vue{
     // 新しい仕切り線を追加
     this.lines.push(new Line(pos, pos));
   }
-
   // 現在引いている新しい境界線がposを通るように修正する
   drawMove(pos: Vector) {
     // 描画中でなかったらreturn
@@ -145,24 +148,63 @@ export default class CanvasArea extends Vue{
     const crossLines = this.lines.slice(0, -1).concat(EDGES);
     this.lines[this.lines.length - 1] = this.lineWidenToEdges(currentLine, crossLines);
   }
-
   // 線を引くのを終了する 線の長さが0だったら線を消去する
   drawEnd() {
     this.mouseDownPos = null;
     if(this.lines[this.lines.length - 1].Length() == 0) this.lines.pop();
   }
 
+  // マウスイベント
   onMouseDown(e: MouseEvent) {
     this.drawStart(this.offsetPosToCanvasPos(new Vector(e.offsetX, e.offsetY)));
   }
-
   onMouseMove(e: MouseEvent) {
     this.drawMove(this.offsetPosToCanvasPos(new Vector(e.offsetX, e.offsetY)));
     this.renderFrames();
   }
-
   onMouseUp() {
     this.drawEnd();
+  }
+
+  private currentTouchIdentifier: number = 0;
+
+  // タッチイベント
+  onTouchStart(e: TouchEvent) {
+    // 既に線を引いている状態だったらreturn
+    if (this.mouseDownPos != null) return;
+
+    const touch = e.changedTouches[0];
+    this.currentTouchIdentifier = touch.identifier;
+
+    this.drawStart(this.offsetPosToCanvasPos(this.touchOffsetPos(e, touch)));
+  }
+  onTouchMove(e: TouchEvent) {
+    e.preventDefault(); // キャンバスタップで上下に移動しちゃうのをキャンセル
+    const touch = e.changedTouches.item(this.currentTouchIdentifier);
+
+    if (touch == null) return;  // 見つからなかったらreturn
+
+    this.drawMove(this.offsetPosToCanvasPos(this.touchOffsetPos(e, touch)));
+    this.renderFrames();
+  }
+  onTouchEnd() {
+    this.drawEnd();
+  }
+  // 自動回転などでタッチがキャンセルされたら線引き状態を解除し引いていた先は消す
+  onTouchCancel() {
+    if (this.mouseDownPos != null) {
+      this.mouseDownPos = null;
+      this.lines.pop();
+    }
+  }
+
+  // TouchにはoffsetX, offsetYが存在しないのでその代替(要素の左上からの座標)
+  private touchOffsetPos(e: TouchEvent, t: Touch): Vector {
+    const clientRect = (e.currentTarget as Element).getBoundingClientRect();
+    return new Vector(
+      t.clientX - window.pageXOffset - clientRect.left,
+      t.clientY - window.pageYOffset - clientRect.top
+    );
   }
 
   // offsetX, offsetY -> canvas上の座標の変換
