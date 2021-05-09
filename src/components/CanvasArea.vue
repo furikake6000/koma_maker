@@ -146,9 +146,10 @@ export default class CanvasArea extends Vue{
     this.lines[this.lines.length - 1] = this.lineWidenToEdges(currentLine, crossLines);
   }
 
-  // 線を引くのを終了する
+  // 線を引くのを終了する 線の長さが0だったら線を消去する
   drawEnd() {
     this.mouseDownPos = null;
+    if(this.lines[this.lines.length - 1].Length() == 0) this.lines.pop();
   }
 
   onMouseDown(e: MouseEvent) {
