@@ -180,7 +180,8 @@ export default class CanvasArea extends Vue{
   }
   onTouchMove(e: TouchEvent) {
     e.preventDefault(); // キャンバスタップで上下に移動しちゃうのをキャンセル
-    const touch = e.changedTouches.item(this.currentTouchIdentifier);
+    // iOS上ではTouchList.item()の挙動が他と異なるためIDのタッチを取り出すには必ずfindを使う
+    const touch = Array.from(e.changedTouches).find(touch => touch.identifier == this.currentTouchIdentifier);
 
     if (touch == null) return;  // 見つからなかったらreturn
 
