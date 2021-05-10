@@ -180,16 +180,17 @@ export default class CanvasArea extends Vue{
   }
   onTouchMove(e: TouchEvent) {
     e.preventDefault(); // キャンバスタップで上下に移動しちゃうのをキャンセル
-    // iOS上ではTouchList.item()の挙動が他と異なるためIDのタッチを取り出すには必ずfindを使う
-    const touch = Array.from(e.changedTouches).find(touch => touch.identifier == this.currentTouchIdentifier);
+    const touch = this.currentTouch(e.changedTouches);
 
     if (touch == null) return;  // 見つからなかったらreturn
 
     this.drawMove(this.offsetPosToCanvasPos(this.touchOffsetPos(e, touch)));
     this.renderFrames();
   }
-  onTouchEnd() {
-    this.drawEnd();
+  onTouchEnd(e: TouchEvent) {
+    if (this.currentTouch(e.changedTouches) != null) {
+      this.drawEnd();
+    }
   }
   // 自動回転などでタッチがキャンセルされたら線引き状態を解除し引いていた先は消す
   onTouchCancel() {
@@ -206,6 +207,14 @@ export default class CanvasArea extends Vue{
       t.clientX - window.pageXOffset - clientRect.left,
       t.clientY - window.pageYOffset - clientRect.top
     );
+  }
+
+  // currentTouchIdentifierから取得した現在のTouch
+  private currentTouch(touches: TouchList): Touch | null {
+    // iOS上ではTouchList.item()の挙動が他と異なるためIDのタッチを取り出すには必ずfindを使う
+    const touch = Array.from(touches).find(touch => touch.identifier == this.currentTouchIdentifier);
+    if (touch == undefined) return null;
+    return touch;
   }
 
   // offsetX, offsetY -> canvas上の座標の変換
