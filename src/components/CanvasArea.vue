@@ -132,8 +132,13 @@ export default class CanvasArea extends Vue{
 
   // posから新しい境界線を引き始める
   drawStart(pos: Vector) {
-    this.mouseDownPos = pos;
+    // 枠外だったら線を引くのはやめる
+    if (!pos.IsInRect(
+      CANVAS_WIDTH / 2 - FRAME_WIDTH / 2, CANVAS_HEIGHT / 2 - FRAME_HEIGHT / 2,
+      FRAME_WIDTH, FRAME_HEIGHT
+    )) return;
 
+    this.mouseDownPos = pos;
     // 新しい仕切り線を追加
     this.lines.push(new Line(pos, pos));
   }

@@ -57,6 +57,18 @@ export class Vector {
     }
     return 0;
   }
+
+  // Rectの中に入っているかの判別
+  public IsInRect(x: number, y: number, width: number, height: number): boolean {
+    if (
+      this.x >= x &&
+      this.y >= y &&
+      this.x <= x + width &&
+      this.y <= y + height
+    ) return true;
+
+    return false;
+  }
 }
 
 // 線分を表す
