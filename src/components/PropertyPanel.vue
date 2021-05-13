@@ -52,6 +52,7 @@ export default class PropertyPanel extends Vue{
 
 <style lang="sass" scoped>
   .property-panel
-    width: 360px
     padding: 20px
+    @media (min-width: 600px)
+      width: 300px
 </style>

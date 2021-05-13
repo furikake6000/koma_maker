@@ -1,5 +1,5 @@
 <template lang="pug">
-  .canvas-area.d-flex
+  .canvas-area.d-sm-flex
     .flex-grow-1
       .text-center.blue-grey.darken-4
         canvas(
