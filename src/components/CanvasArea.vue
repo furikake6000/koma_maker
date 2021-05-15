@@ -1,19 +1,26 @@
 <template lang="pug">
   .canvas-area.d-sm-flex
     .flex-grow-1
-      .text-center.blue-grey.darken-4
-        canvas(
-          ref="canvas"
-          @mousedown="onMouseDown"
-          @mousemove="onMouseMove"
-          @mouseup="onMouseUp"
-          @touchstart="onTouchStart"
-          @touchmove="onTouchMove"
-          @touchend="onTouchEnd"
-          @touchcancel="onTouchCancel"
-          width="840"
-          height="1188"
-        )
+      .blue-grey.darken-4.pt-8.pb-6
+        .text-center
+          canvas(
+            ref="canvas"
+            @mousedown="onMouseDown"
+            @mousemove="onMouseMove"
+            @mouseup="onMouseUp"
+            @touchstart="onTouchStart"
+            @touchmove="onTouchMove"
+            @touchend="onTouchEnd"
+            @touchcancel="onTouchCancel"
+            width="840"
+            height="1188"
+          )
+        .text-right.pt-4.px-6
+          v-btn-toggle(v-model="drawTool" mandatory rounded)
+            v-btn
+              v-icon mdi-pencil
+            v-btn
+              v-icon mdi-eraser
     PropertyPanel(
       @propertiesChanged="onPropertiesChanged($event, properties)"
       @download="download"
@@ -56,6 +63,7 @@ export default class CanvasArea extends Vue{
   private properties: { [key: string]: number } = {};
   private ctx: CanvasRenderingContext2D | null = null;
   private lines: Array<Line> = [];
+  private drawTool: number = 0;
 
   mounted() {
     // ctxの初期化
@@ -265,6 +273,5 @@ export default class CanvasArea extends Vue{
   canvas
     max-width: 80%
     max-height: 90vh
-    margin: 40px 0
     background-color: white
 </style>
