@@ -166,6 +166,13 @@ export default class CanvasArea extends Vue{
     this.mouseDownPos = null;
     if(this.lines[this.lines.length - 1].Length() == 0) this.lines.pop();
   }
+  // 線を引くのをキャンセルする（引いている線は削除する）
+  drawCancel() {
+    if (this.mouseDownPos != null) {
+      this.mouseDownPos = null;
+      this.lines.pop();
+    }
+  }
 
   // マウスイベント
   onMouseDown(e: MouseEvent) {
@@ -207,10 +214,7 @@ export default class CanvasArea extends Vue{
   }
   // 自動回転などでタッチがキャンセルされたら線引き状態を解除し引いていた先は消す
   onTouchCancel() {
-    if (this.mouseDownPos != null) {
-      this.mouseDownPos = null;
-      this.lines.pop();
-    }
+    this.drawCancel();
   }
 
   // TouchにはoffsetX, offsetYが存在しないのでその代替(要素の左上からの座標)
