@@ -49,8 +49,3 @@ export default {
   }),
 };
 </script>
-
-<style lang="sass" scoped>
-  .property-panel
-
-</style>
