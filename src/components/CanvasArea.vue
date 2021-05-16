@@ -28,8 +28,9 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator';
+import { Component, Watch, Vue } from 'vue-property-decorator';
 import { Vector, Line } from '../helper/Geometry';
+import ClickTouchHelper from '../helper/ClickTouchHelper';
 import PropertyPanel from './PropertyPanel.vue';
 
 const CANVAS_WIDTH: number = 840;
@@ -54,6 +55,8 @@ const RIGHT_EDGE = new Line(
 );
 const EDGES = [TOP_EDGE, BOTTOM_EDGE, LEFT_EDGE, RIGHT_EDGE];
 
+const CTHelper = new ClickTouchHelper();
+
 @Component({
   components: {
     PropertyPanel
@@ -74,6 +77,14 @@ export default class CanvasArea extends Vue{
 
     // コマ枠の描画
     this.renderFrames();
+  }
+
+  @Watch('drawTool')
+  onDrawToolChanged(newTool: number, oldTool: number) {
+    // ペンツールからの切替時、現在引いている線を削除する
+    if (oldTool == 0) {
+      this.drawCancel();
+    }
   }
 
   onPropertiesChanged(properties: { [key: string]: number }) {
@@ -174,47 +185,82 @@ export default class CanvasArea extends Vue{
     }
   }
 
+  // 消しゴムを適用
+  erase(pos: Vector) {
+    const eraseAreaWidth = this.properties.lineWidth + this.properties.frameSpace / 2;
+
+    function isNotInEraseArea(line: Line): boolean {
+      return line.Distance(pos) > eraseAreaWidth;
+    }
+
+    this.lines = this.lines.filter(isNotInEraseArea);
+  }
+
   // マウスイベント
   onMouseDown(e: MouseEvent) {
-    this.drawStart(this.offsetPosToCanvasPos(new Vector(e.offsetX, e.offsetY)));
+    if(this.drawTool == 0) {
+      this.drawStart(this.offsetPosToCanvasPos(new Vector(e.offsetX, e.offsetY)));
+    }
   }
   onMouseMove(e: MouseEvent) {
-    this.drawMove(this.offsetPosToCanvasPos(new Vector(e.offsetX, e.offsetY)));
+    const mousePosOfCanvas = this.offsetPosToCanvasPos(new Vector(e.offsetX, e.offsetY));
+    if(this.drawTool == 0) {
+      this.drawMove(mousePosOfCanvas);
+    }
+
+    if(this.drawTool == 1 && CTHelper.IsPressing()) {
+      this.erase(mousePosOfCanvas);
+    }
+
     this.renderFrames();
   }
   onMouseUp() {
-    this.drawEnd();
+    if(this.drawTool == 0) {
+      this.drawEnd();
+    }
   }
 
   private currentTouchIdentifier: number = 0;
 
   // タッチイベント
   onTouchStart(e: TouchEvent) {
-    // 既に線を引いている状態だったらreturn
-    if (this.mouseDownPos != null) return;
+    if(this.drawTool == 0) {
+      // 既に線を引いている状態だったらreturn
+      if (this.mouseDownPos != null) return;
 
-    const touch = e.changedTouches[0];
-    this.currentTouchIdentifier = touch.identifier;
+      const touch = e.changedTouches[0];
+      this.currentTouchIdentifier = touch.identifier;
 
-    this.drawStart(this.offsetPosToCanvasPos(this.touchOffsetPos(e, touch)));
+      this.drawStart(this.offsetPosToCanvasPos(this.touchOffsetPos(e, touch)));
+    }
   }
   onTouchMove(e: TouchEvent) {
     e.preventDefault(); // キャンバスタップで上下に移動しちゃうのをキャンセル
     const touch = this.currentTouch(e.changedTouches);
-
     if (touch == null) return;  // 見つからなかったらreturn
 
-    this.drawMove(this.offsetPosToCanvasPos(this.touchOffsetPos(e, touch)));
+    const touchPosOfCanvas = this.offsetPosToCanvasPos(this.touchOffsetPos(e, touch));
+
+    if(this.drawTool == 0) {
+      this.drawMove(touchPosOfCanvas);
+    }
+
+    if(this.drawTool == 1 && CTHelper.IsPressing()) {
+      this.erase(touchPosOfCanvas);
+    }
+
     this.renderFrames();
   }
   onTouchEnd(e: TouchEvent) {
-    if (this.currentTouch(e.changedTouches) != null) {
+    if (this.drawTool == 0 && this.currentTouch(e.changedTouches) != null) {
       this.drawEnd();
     }
   }
   // 自動回転などでタッチがキャンセルされたら線引き状態を解除し引いていた先は消す
   onTouchCancel() {
-    this.drawCancel();
+    if (this.drawTool == 0) {
+      this.drawCancel();
+    }
   }
 
   // TouchにはoffsetX, offsetYが存在しないのでその代替(要素の左上からの座標)
