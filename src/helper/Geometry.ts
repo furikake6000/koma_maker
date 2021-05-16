@@ -38,6 +38,11 @@ export class Vector {
     return this.x * target.y - this.y * target.x;
   }
 
+  // 2点間の距離
+  public Distance(target: Vector): number {
+    return this.Minus(target).Length();
+  }
+
   // targetと自分が平行かどうかの判定
   public IsParallelTo(target: Vector): boolean {
     return this.CrossTo(target) == 0;
@@ -128,5 +133,34 @@ export class Line {
     if (target.isSegment && (mu < 0.0 || mu > 1.0)) return null;
 
     return this.start.Plus(myDir.Times(ramda));
+  }
+
+  // 自分と点targetとの距離を返す
+  public Distance(target: Vector): number {
+    // 直線をax+by+c=0の形で表したときのa, b, cを算出
+    const a = this.end.y - this.start.y;
+    const b = this.start.x - this.end.x;
+    const c = this.end.x * this.start.y - this.start.x * this.end.y;
+
+    // 点と直線の距離の公式
+    const lengthToLine = Math.abs(a * target.x + b * target.y + c) / this.Length();
+
+    if (this.isSegment) {
+      // targetが2点から引いた垂線の中にあるかを取得
+      const ps = b * this.start.x + a * this.start.y;
+      const pe = b * this.end.x + a * this.end.y;
+      const pt = b * target.x + a * target.y;
+      
+      if (pt >= Math.min(ps, pe) && pt <= Math.max(ps, pe)) {
+        // targetは2点から引いた垂線の中にある
+        return lengthToLine;
+      }
+
+      // targetは垂線の外にある
+      // この場合距離は2点からtargetへの距離のうち小さい方となる
+      return Math.min(target.Distance(this.start), target.Distance(this.end));
+    } else {
+      return lengthToLine;
+    }
   }
 }
