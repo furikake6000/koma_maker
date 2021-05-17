@@ -11,6 +11,11 @@ export class Vector {
   get x() { return this.x_; }
   get y() { return this.y_; }
 
+  // 等号
+  public Equals(target: Vector): boolean {
+    return this.x == target.x && this.y == target.y;
+  }
+
   // 長さ
   public Length(): number {
     return Math.sqrt(this.LengthSq());
@@ -169,5 +174,30 @@ export class Line {
     } else {
       return lengthToLine;
     }
+  }
+}
+
+export class Polygon {
+  private points_: Array<Vector> = [];
+
+  get points() { return this.points_; }
+
+  constructor(points: Array<Vector>) {
+    this.points_ = points;
+  }
+
+  // Contextを渡したらポリゴンをstrokeしてくれるメソッド
+  public Draw(ctx: CanvasRenderingContext2D) {
+    if (this.points.length == 0) return;
+
+    ctx.beginPath();
+    // 最後の点に行った後各点を回る
+    const lastPoint = this.points[this.points.length - 1];
+    ctx.moveTo(lastPoint.x, lastPoint.y);
+    for(const p of this.points) {
+      ctx.lineTo(p.x, p.y);
+    }
+
+    ctx.stroke();
   }
 }
