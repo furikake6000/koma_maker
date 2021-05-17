@@ -1,12 +1,15 @@
 // 2次元ベクトル、点を表すことも
 export class Vector {
-  public x: number;
-  public y: number;
+  private x_: number;
+  private y_: number;
 
   constructor(x: number = 0, y: number = 0) {
-    this.x = x;
-    this.y = y;
+    this.x_ = x;
+    this.y_ = y;
   }
+
+  get x() { return this.x_; }
+  get y() { return this.y_; }
 
   // 長さ
   public Length(): number {
@@ -78,14 +81,18 @@ export class Vector {
 
 // 線分を表す
 export class Line {
-  public start: Vector;
-  public end: Vector;
-  public isSegment: boolean;
+  private start_: Vector;
+  private end_: Vector;
+  private isSegment_: boolean;
+
+  get start() { return this.start_; }
+  get end() { return this.end_; }
+  get isSegment() { return this.isSegment_; }
 
   constructor(start: Vector = new Vector(), end: Vector = new Vector(), isSegment: boolean = true) {
-    this.start = start;
-    this.end = end;
-    this.isSegment = isSegment;
+    this.start_ = start;
+    this.end_ = end;
+    this.isSegment_ = isSegment;
   }
 
   // 方向ベクトル
