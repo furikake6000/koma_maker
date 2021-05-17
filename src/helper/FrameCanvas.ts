@@ -1,4 +1,4 @@
-export default class Canvas {
+export default class FrameCanvas {
   private canvasObject: HTMLCanvasElement;
   private ctx: CanvasRenderingContext2D;
   private frameWidth: number;

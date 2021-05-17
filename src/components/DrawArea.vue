@@ -23,7 +23,7 @@
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
 import PropertyPanel from './PropertyPanel.vue';
-import Canvas from '../helper/Canvas';
+import FrameCanvas from '../helper/FrameCanvas';
 
 const FRAME_WIDTH: number = 600;
 const FRAME_HEIGHT: number = 880;
@@ -36,14 +36,14 @@ const FRAME_HEIGHT: number = 880;
 export default class DrawArea extends Vue{
   private drawTool: number = 0;
   private properties: { [key: string]: number } = {};
-  private canvas: Canvas | null = null;
+  private canvas: FrameCanvas | null = null;
 
   mounted() {
     // canvasの初期化
     if (!(this.$refs.canvasObject instanceof HTMLCanvasElement)) {
       throw new Error('Canvas element not found.');
     }
-    this.canvas = new Canvas(this.$refs.canvasObject, FRAME_WIDTH, FRAME_HEIGHT, this.properties);
+    this.canvas = new FrameCanvas(this.$refs.canvasObject, FRAME_WIDTH, FRAME_HEIGHT, this.properties);
   }
 
   // PropertiesPanelからプロパティの変更を受け取るためのイベント
