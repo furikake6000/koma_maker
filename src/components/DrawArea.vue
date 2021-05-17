@@ -53,7 +53,17 @@ export default class DrawArea extends Vue{
 
   // PropertiesPanelのダウンロードボタンが押されたときのイベント
   download() {
-    // TODO: キャンバス画像のダウンロード
+    if (!(this.$refs.canvasObject instanceof HTMLCanvasElement)) {
+      throw new Error('Canvas element not found.');
+    }
+
+    this.$refs.canvasObject.toBlob(blob => {
+      const dataURI: string = window.URL.createObjectURL(blob);
+      let dlElement: HTMLAnchorElement = document.createElement('a');
+      dlElement.href = dataURI;
+      dlElement.download = 'image.png';
+      dlElement.click();
+    });
   }
 }
 </script>
