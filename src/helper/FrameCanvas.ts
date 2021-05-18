@@ -12,8 +12,8 @@ export default class FrameCanvas {
   // private frameSpace: number = 0;
 
   // マンガコマ枠構成要素
-  private nodes: Array<Line> = [];
-  private frames: Array<Polygon> = [];
+  private nodes: Set<Line> = new Set<Line>();
+  private frames: Set<Polygon> = new Set<Polygon>();
 
   constructor(canvasObject: HTMLCanvasElement, frameWidth: number, frameHeight: number, properties: { [key: string]: number }) {
     // キャンバスの初期化
@@ -38,15 +38,13 @@ export default class FrameCanvas {
       new Vector(this.canvasObject.width / 2 + this.frameWidth / 2, this.canvasObject.height / 2 + this.frameHeight / 2),
       new Vector(this.canvasObject.width / 2 - this.frameWidth / 2, this.canvasObject.height / 2 + this.frameHeight / 2)
     ];
-    this.nodes = [
-      new Line(points[0], points[1]),
-      new Line(points[1], points[2]),
-      new Line(points[2], points[3]),
-      new Line(points[3], points[0])
-    ];
-    this.frames = [
-      new Polygon([points[0], points[1], points[2], points[3]])
-    ];
+    this.nodes.clear();
+    this.nodes.add(new Line(points[0], points[1]));
+    this.nodes.add(new Line(points[1], points[2]));
+    this.nodes.add(new Line(points[2], points[3]));
+    this.nodes.add(new Line(points[3], points[0]));
+    this.frames.clear();
+    this.frames.add(new Polygon([points[0], points[1], points[2], points[3]]));
   }
 
   public Render() {
@@ -61,9 +59,7 @@ export default class FrameCanvas {
     this.ctx.lineJoin = 'miter';
 
     // コマの描画
-    for(const frame of this.frames) {
-      frame.Draw(this.ctx);
-    }
+    this.frames.forEach(frame => frame.Draw(this.ctx));
   }
 
   public ChangeProperties(properties: { [key: string]: number }) {
