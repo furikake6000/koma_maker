@@ -69,4 +69,27 @@ export default class FrameCanvas {
     // 変更後の内容で描画
     this.Render();
   }
+
+  // 引いた線が既にあるいずれかのnodesに交わるまで伸ばす
+  // 返り値は伸ばしたLine
+  public ExtendedLine(line: Line): Line {
+    let startPoint: Vector | null = null;
+    let endPoint: Vector | null = null;
+
+    this.nodes.forEach(crossLine => {
+      const crossPos = line.CrossPoint(crossLine);
+      if (crossPos == null) return; // 交わらなければ無視
+
+      if (crossPos.ComparedTo(line.start) < 0 && (startPoint == null || crossPos.ComparedTo(startPoint) > 0)) {
+        startPoint = crossPos;
+      }
+
+      if (crossPos.ComparedTo(line.start) >= 0 && (endPoint == null || crossPos.ComparedTo(endPoint) < 0)) {
+        endPoint = crossPos;
+      }
+    });
+
+    const extLine = new Line(startPoint || line.start, endPoint || line.end);
+    return extLine;
+  }
 }
