@@ -14,6 +14,9 @@ export default class FrameCanvas {
   // マンガコマ枠構成要素
   private nodes: Set<Line> = new Set<Line>();
   private frames: Set<Polygon> = new Set<Polygon>();
+  
+  // 新しい線を引くときに使う変数
+  private drawingLine: Line | null = null; // 現在引いている線の始点
 
   constructor(canvasObject: HTMLCanvasElement, frameWidth: number, frameHeight: number, properties: { [key: string]: number }) {
     // キャンバスの初期化
@@ -47,6 +50,7 @@ export default class FrameCanvas {
     this.frames.add(new Polygon([points[0], points[1], points[2], points[3]]));
   }
 
+  // キャンバスにコマを描画する
   public Render() {
     // 既存の描画内容のリセット
     this.ctx.fillStyle = 'white';
@@ -60,8 +64,27 @@ export default class FrameCanvas {
 
     // コマの描画
     this.frames.forEach(frame => frame.Draw(this.ctx));
+
+    // drawingLine（現在引いている線）の描画
+    if (this.drawingLine) {
+      // 破線を引くように設定
+      this.ctx.lineWidth = 3.0;
+      this.ctx.setLineDash([6.0, 6.0]);
+
+      // 描画する線を算出
+      const dLineExt = this.ExtendedLine(this.drawingLine);
+      
+      // 描画
+      this.ctx.moveTo(dLineExt.start.x, dLineExt.start.y);
+      this.ctx.lineTo(dLineExt.end.x, dLineExt.end.y);
+      this.ctx.stroke();
+
+      // 破線の設定をもとに戻す
+      this.ctx.setLineDash([]);
+    }
   }
 
+  // プロパティを変える
   public ChangeProperties(properties: { [key: string]: number }) {
     this.lineWidth = properties.lineWidth;
     // this.frameSpace = properties.frameSpace;
@@ -91,5 +114,52 @@ export default class FrameCanvas {
 
     const extLine = new Line(startPoint || line.start, endPoint || line.end);
     return extLine;
+  }
+
+  // 線を引く系のメソッド
+  // posから新しい境界線を引き始める
+  drawStart(pos: Vector) {
+    // 枠外だったら線を引くのはやめる
+    if (!pos.IsInRect(
+      this.canvasObject.width / 2 - this.frameWidth / 2, this.canvasObject.height / 2 - this.frameHeight / 2,
+      this.frameWidth, this.frameHeight
+    )) return;
+
+    // 既に描画中だったらreturn
+    if (this.drawingLine != null) return;
+
+    this.drawingLine = new Line(pos, pos, false);
+  }
+
+  // 現在引いている新しい境界線がposを通るように修正する
+  drawMove(pos: Vector) {
+    // 描画中でなかったらreturn
+    if (this.drawingLine == null) return;
+
+    // drawingLineを更新
+    this.drawingLine = new Line(this.drawingLine.start, pos, false);
+
+    // 描画を更新
+    this.Render();
+  }
+
+  // 線を引くのを終了する 線の長さが0だったら線を消去する
+  drawEnd() {
+    this.drawingLine = null;
+    // TODO: 引いた線をnodesに追加する
+  }
+  // 線を引くのをキャンセルする（引いている線は削除する）
+  drawCancel() {
+    this.drawingLine = null;
+  }
+
+  // offsetX, offsetY -> canvas上の座標の変換
+  offsetPosToCanvasPos(offsetPos: Vector): Vector {
+    if (!(this.canvasObject instanceof HTMLCanvasElement)) {
+      throw new Error('Canvas element not found.');
+    }
+
+    const expandRate: number = this.canvasObject.width / this.canvasObject.clientWidth;
+    return new Vector(Math.floor(offsetPos.x * expandRate), Math.floor(offsetPos.y * expandRate));
   }
 }
