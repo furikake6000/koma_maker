@@ -141,8 +141,8 @@ export class Line {
     const mu: number = eta / delta;
     
     // 線分判定
-    if (this.isSegment && (ramda < 0.0 || ramda > 1.0)) return null;
-    if (target.isSegment && (mu < 0.0 || mu > 1.0)) return null;
+    if (this.isSegment && (ramda < 0.0 || ramda >= 1.0)) return null;
+    if (target.isSegment && (mu < 0.0 || mu >= 1.0)) return null;
 
     return this.start.Plus(myDir.Times(ramda));
   }
