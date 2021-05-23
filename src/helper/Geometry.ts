@@ -188,6 +188,17 @@ export class Polygon {
     this.points_ = points;
   }
 
+  // ポリゴンを構成している辺のArrayを返してくれるメソッド
+  public Nodes(): Array<Line> {
+    const nodes = [];
+    for(let i=0; i<this.points.length; i++) {
+      const startPoint = this.points[i];
+      const endPoint = (i == this.points.length - 1 ? this.points[0] : this.points[i + 1]);
+      nodes.push(new Line(startPoint, endPoint));
+    }
+    return nodes;
+  }
+
   // Contextを渡したらポリゴンをstrokeしてくれるメソッド
   public Draw(ctx: CanvasRenderingContext2D) {
     if (this.points.length == 0) return;
@@ -201,5 +212,21 @@ export class Polygon {
     }
 
     ctx.stroke();
+  }
+
+  // Vectorで表された点がポリゴンの中にあるか判定するメソッド
+  // (参考: https://www.nttpc.co.jp/technology/number_algorithm.html)
+  public ContainsPoint(target: Vector): boolean {
+    const crossLines = this.Nodes().filter(node => {
+      // targetから伸ばしたx軸と平行な線がnodeと交わるか否か
+      if((node.start.y <= target.y && node.end.y > target.y) || (node.start.y > target.y && node.end.y <= target.y)) {
+        // 交わる点はtargetよりも右側にあるか
+        const crossX = node.start.x + (target.y - node.start.y) / (node.end.y - node.start.y) * (node.end.x - node.start.x);
+        if (crossX > target.x) return true;
+      }
+      return false;
+    });
+    // 交点の数が奇数ならポリゴンの中
+    return crossLines.length % 2 == 1;
   }
 }
