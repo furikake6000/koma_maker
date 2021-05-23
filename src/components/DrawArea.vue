@@ -43,7 +43,7 @@ const FRAME_HEIGHT: number = 880;
   }
 })
 export default class DrawArea extends Vue{
-  // ---- data ----------------------------
+  // ---- data ----
 
   private drawTool: number = 0;
   private properties: { [key: string]: number } = {};
@@ -51,7 +51,7 @@ export default class DrawArea extends Vue{
 
   private currentTouchID: number = 0; // 現在線を引いているTouchのidentifier
 
-  // ---- events --------------------------
+  // ---- events ----
 
   mounted() {
     // canvasの初期化
@@ -61,15 +61,15 @@ export default class DrawArea extends Vue{
     this.canvas = new FrameCanvas(this.$refs.canvasObject, FRAME_WIDTH, FRAME_HEIGHT, this.properties);
   }
 
-  // ---- methods ------------------------
+  // ---- public methods ----
 
   // PropertiesPanelからプロパティの変更を受け取るためのイベント
-  onPropertiesChanged(properties: { [key: string]: number }) {
+  public onPropertiesChanged(properties: { [key: string]: number }) {
     this.canvas?.changeProperties(properties);
   }
 
   // PropertiesPanelのダウンロードボタンが押されたときのイベント
-  download() {
+  public download() {
     if (!(this.$refs.canvasObject instanceof HTMLCanvasElement)) {
       throw new Error('Canvas element not found.');
     }
@@ -84,14 +84,14 @@ export default class DrawArea extends Vue{
   }
 
   // マウスイベント群
-  onMouseDown(e: MouseEvent) {
+  public onMouseDown(e: MouseEvent) {
     if (this.canvas == null) throw new Error('Canvas not found.');
 
     if(this.drawTool == 0) {
       this.canvas.drawStart(this.canvas.offsetPosToCanvasPos(new Vector(e.offsetX, e.offsetY)));
     }
   }
-  onMouseMove(e: MouseEvent) {
+  public onMouseMove(e: MouseEvent) {
     if (this.canvas == null) throw new Error('Canvas not found.');
 
     const mousePosOfCanvas = this.canvas.offsetPosToCanvasPos(new Vector(e.offsetX, e.offsetY));
@@ -99,7 +99,7 @@ export default class DrawArea extends Vue{
       this.canvas.drawMove(mousePosOfCanvas);
     }
   }
-  onMouseUp() {
+  public onMouseUp() {
     if (this.canvas == null) throw new Error('Canvas not found.');
 
     if(this.drawTool == 0) {
@@ -108,7 +108,7 @@ export default class DrawArea extends Vue{
   }
 
   // タッチイベント群
-  onTouchStart(e: TouchEvent) {
+  public onTouchStart(e: TouchEvent) {
     if (this.canvas == null) throw new Error('Canvas not found.');
 
     if(this.drawTool == 0) {
@@ -118,7 +118,7 @@ export default class DrawArea extends Vue{
       this.canvas.drawStart(this.canvas.offsetPosToCanvasPos(ClickTouchHelper.touchOffsetPos(e, touch)));
     }
   }
-  onTouchMove(e: TouchEvent) {
+  public onTouchMove(e: TouchEvent) {
     // スクロールしてしまうのを防ぐ
     e.preventDefault();
 
@@ -133,14 +133,14 @@ export default class DrawArea extends Vue{
       this.canvas.drawMove(touchPosOfCanvas);
     }
   }
-  onTouchEnd(e: TouchEvent) {
+  public onTouchEnd(e: TouchEvent) {
     if (this.canvas == null) throw new Error('Canvas not found.');
 
     if (this.drawTool == 0 && this.currentTouch(e.changedTouches) != null) {
       this.canvas.drawEnd();
     }
   }
-  onTouchCancel() {
+  public onTouchCancel() {
     if (this.canvas == null) throw new Error('Canvas not found.');
 
     if (this.drawTool == 0) {
@@ -148,7 +148,7 @@ export default class DrawArea extends Vue{
     }
   }
 
-  // ---- private methods ------
+  // ---- private methods ----
 
   // currentTouchIDとchangedTouchesから取得したcurrentTouch
   private currentTouch(touches: TouchList): Touch | null {

@@ -18,6 +18,8 @@ export default class FrameCanvas {
   // 新しい線を引くときに使う変数
   private drawingLine: Line | null = null; // 現在引いている線の始点
 
+  // ---- public methods ----
+
   constructor(canvasObject: HTMLCanvasElement, frameWidth: number, frameHeight: number, properties: { [key: string]: number }) {
     // キャンバスの初期化
     this.canvasObject = canvasObject;
@@ -118,7 +120,7 @@ export default class FrameCanvas {
 
   // 線を引く系のメソッド
   // posから新しい境界線を引き始める
-  drawStart(pos: Vector) {
+  public drawStart(pos: Vector) {
     // 枠外だったら線を引くのはやめる
     if (!pos.IsInRect(
       this.canvasObject.width / 2 - this.frameWidth / 2, this.canvasObject.height / 2 - this.frameHeight / 2,
@@ -132,7 +134,7 @@ export default class FrameCanvas {
   }
 
   // 現在引いている新しい境界線がposを通るように修正する
-  drawMove(pos: Vector) {
+  public drawMove(pos: Vector) {
     // 描画中でなかったらreturn
     if (this.drawingLine == null) return;
 
@@ -144,17 +146,17 @@ export default class FrameCanvas {
   }
 
   // 線を引くのを終了する 線の長さが0だったら線を消去する
-  drawEnd() {
+  public drawEnd() {
     this.drawingLine = null;
     // TODO: 引いた線をnodesに追加する
   }
   // 線を引くのをキャンセルする（引いている線は削除する）
-  drawCancel() {
+  public drawCancel() {
     this.drawingLine = null;
   }
 
   // offsetX, offsetY -> canvas上の座標の変換
-  offsetPosToCanvasPos(offsetPos: Vector): Vector {
+  public offsetPosToCanvasPos(offsetPos: Vector): Vector {
     if (!(this.canvasObject instanceof HTMLCanvasElement)) {
       throw new Error('Canvas element not found.');
     }
@@ -162,4 +164,6 @@ export default class FrameCanvas {
     const expandRate: number = this.canvasObject.width / this.canvasObject.clientWidth;
     return new Vector(Math.floor(offsetPos.x * expandRate), Math.floor(offsetPos.y * expandRate));
   }
+
+  // ---- private methods ----
 }
