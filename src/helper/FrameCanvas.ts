@@ -95,29 +95,6 @@ export default class FrameCanvas {
     this.render();
   }
 
-  // 引いた線が既にあるいずれかのnodesに交わるまで伸ばす
-  // 返り値は伸ばしたLine
-  public extendedLine(line: Line): Line {
-    let startPoint: Vector | null = null;
-    let endPoint: Vector | null = null;
-
-    this.nodes.forEach(crossLine => {
-      const crossPos = line.CrossPoint(crossLine);
-      if (crossPos == null) return; // 交わらなければ無視
-
-      if (crossPos.ComparedTo(line.start) < 0 && (startPoint == null || crossPos.ComparedTo(startPoint) > 0)) {
-        startPoint = crossPos;
-      }
-
-      if (crossPos.ComparedTo(line.start) >= 0 && (endPoint == null || crossPos.ComparedTo(endPoint) < 0)) {
-        endPoint = crossPos;
-      }
-    });
-
-    const extLine = new Line(startPoint || line.start, endPoint || line.end);
-    return extLine;
-  }
-
   // 線を引く系のメソッド
   // posから新しい境界線を引き始める
   public drawStart(pos: Vector) {
@@ -166,4 +143,37 @@ export default class FrameCanvas {
   }
 
   // ---- private methods ----
+
+  // 引いた線が既にあるいずれかのnodesに交わるまで伸ばす
+  // 返り値は伸ばしたLine
+  private extendedLine(line: Line): Line {
+    return this.extendedLineAndCrossLine(line)[0];
+  }
+
+  // 引いた線が既にあるいずれかのnodesに交わるまで伸ばす
+  // 返り値は伸ばしたLineとそれに衝突した2つの線(nullとなる可能性がある)
+  private extendedLineAndCrossLine(line: Line): [Line, Line | null, Line | null] {
+    let startPoint: Vector | null = null;
+    let startCrossLine: Line | null = null;
+    let endPoint: Vector | null = null;
+    let endCrossLine: Line | null = null;
+
+    this.nodes.forEach(crossLine => {
+      const crossPos = line.CrossPoint(crossLine);
+      if (crossPos == null) return; // 交わらなければ無視
+
+      if (crossPos.ComparedTo(line.start) < 0 && (startPoint == null || crossPos.ComparedTo(startPoint) > 0)) {
+        startPoint = crossPos;
+        startCrossLine = crossLine;
+      }
+
+      if (crossPos.ComparedTo(line.start) >= 0 && (endPoint == null || crossPos.ComparedTo(endPoint) < 0)) {
+        endPoint = crossPos;
+        endCrossLine = crossLine;
+      }
+    });
+
+    const extLine = new Line(startPoint || line.start, endPoint || line.end);
+    return [extLine, startCrossLine, endCrossLine];
+  }
 }
