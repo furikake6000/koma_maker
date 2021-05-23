@@ -124,8 +124,16 @@ export default class FrameCanvas {
 
   // 線を引くのを終了する 線の長さが0だったら線を消去する
   public drawEnd() {
+    // 描画中でなかったらreturn
+    if (this.drawingLine == null) return;
+
+    // 引かれた線をもとにコマを分割
+    this.divideFrame(this.drawingLine);
+
     this.drawingLine = null;
-    // TODO: 引いた線をnodesに追加する
+
+    // 描画を更新
+    this.render();
   }
   // 線を引くのをキャンセルする（引いている線は削除する）
   public drawCancel() {
@@ -143,6 +151,76 @@ export default class FrameCanvas {
   }
 
   // ---- private methods ----
+
+  // コマを指定されたLineで分割する
+  private divideFrame(divideLine: Line) {
+    // 分割対象のコマを探す
+    const dividedFrame = Array.from(this.frames).find(frame => {
+      return frame.ContainsPoint(divideLine.start);
+    });
+    if (dividedFrame == undefined) throw new Error('Failed to divide frame: frame not found.');
+
+    // コマを分割する線と分割される線を求める
+    const result = this.extendedLineAndCrossLine(divideLine);
+    if (result[1] == null || result[2] == null) {
+      throw new Error('Failed to divide frame: given line is invalid.');
+    }
+    const [partition, startCrossLine, endCrossLine] = result;
+
+    // すべてのコマに対して、分割対象の辺があったら分割する
+    this.frames.forEach(frame => {
+      for(let i = 0; i < frame.points.length; i++) {
+        const point = frame.points[i];
+        const nextPoint = frame.points[(i == frame.points.length - 1 ? 0 : i + 1)];
+
+        if (
+            point.Equals(startCrossLine.start) && nextPoint.Equals(startCrossLine.end) ||
+            point.Equals(startCrossLine.end) && nextPoint.Equals(startCrossLine.start)
+        ) {
+          frame.points.splice(i + 1, 0, partition.start); // 分割された点を挿入
+          i += 1;
+        }
+        if (
+          point.Equals(endCrossLine.start) && nextPoint.Equals(endCrossLine.end) ||
+          point.Equals(endCrossLine.end) && nextPoint.Equals(endCrossLine.start)
+      ) {
+        frame.points.splice(i + 1, 0, partition.end); // 分割された点を挿入
+        i += 1;
+      }
+      }
+    });
+
+    // 分割対象のコマを分割する
+    const frameA: Array<Vector> = [], frameB: Array<Vector> = []; // 新しいframeの点群
+    let appendToA: boolean = true; // 点をどちらに追加するか、分割対象の店を見つけたら切り替える
+    for(let i = 0; i < dividedFrame.points.length ; i++) {
+      const point = dividedFrame.points[i];
+
+      (appendToA ? frameA : frameB).push(point);
+      if (point.Equals(partition.start)) {
+        (appendToA ? frameA : frameB).push(partition.end);
+        appendToA = !appendToA;
+      }
+      if (point.Equals(partition.end)) {
+        (appendToA ? frameA : frameB).push(partition.start);
+        appendToA = !appendToA;
+      }
+    }
+
+    // nodesの増減作業
+    this.nodes.add(new Line(startCrossLine.start, partition.start));
+    this.nodes.add(new Line(partition.start, startCrossLine.end));
+    this.nodes.add(new Line(endCrossLine.start, partition.end));
+    this.nodes.add(new Line(partition.end, endCrossLine.end));
+    this.nodes.add(partition);
+    this.nodes.delete(startCrossLine);
+    this.nodes.delete(endCrossLine);
+
+    // framesの増減作業
+    this.frames.add(new Polygon(frameA));
+    this.frames.add(new Polygon(frameB));
+    this.frames.delete(dividedFrame);
+  }
 
   // 引いた線が既にあるいずれかのnodesに交わるまで伸ばす
   // 返り値は伸ばしたLine
