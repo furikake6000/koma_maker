@@ -65,7 +65,7 @@ export default class DrawArea extends Vue{
 
   // PropertiesPanelからプロパティの変更を受け取るためのイベント
   onPropertiesChanged(properties: { [key: string]: number }) {
-    this.canvas?.ChangeProperties(properties);
+    this.canvas?.changeProperties(properties);
   }
 
   // PropertiesPanelのダウンロードボタンが押されたときのイベント

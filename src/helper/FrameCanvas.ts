@@ -32,7 +32,7 @@ export default class FrameCanvas {
     // プロパティの初期化
     this.frameWidth = frameWidth;
     this.frameHeight = frameHeight;
-    this.ChangeProperties(properties);
+    this.changeProperties(properties);
 
     // nodesとframesの初期化
     const points = [
@@ -51,7 +51,7 @@ export default class FrameCanvas {
   }
 
   // キャンバスにコマを描画する
-  public Render() {
+  public render() {
     // 既存の描画内容のリセット
     this.ctx.fillStyle = 'white';
     this.ctx.fillRect(0, 0, this.canvasObject.width, this.canvasObject.height);
@@ -72,7 +72,7 @@ export default class FrameCanvas {
       this.ctx.setLineDash([6.0, 6.0]);
 
       // 描画する線を算出
-      const dLineExt = this.ExtendedLine(this.drawingLine);
+      const dLineExt = this.extendedLine(this.drawingLine);
       
       // 描画
       this.ctx.moveTo(dLineExt.start.x, dLineExt.start.y);
@@ -85,17 +85,17 @@ export default class FrameCanvas {
   }
 
   // プロパティを変える
-  public ChangeProperties(properties: { [key: string]: number }) {
+  public changeProperties(properties: { [key: string]: number }) {
     this.lineWidth = properties.lineWidth;
     // this.frameSpace = properties.frameSpace;
 
     // 変更後の内容で描画
-    this.Render();
+    this.render();
   }
 
   // 引いた線が既にあるいずれかのnodesに交わるまで伸ばす
   // 返り値は伸ばしたLine
-  public ExtendedLine(line: Line): Line {
+  public extendedLine(line: Line): Line {
     let startPoint: Vector | null = null;
     let endPoint: Vector | null = null;
 
@@ -140,7 +140,7 @@ export default class FrameCanvas {
     this.drawingLine = new Line(this.drawingLine.start, pos, false);
 
     // 描画を更新
-    this.Render();
+    this.render();
   }
 
   // 線を引くのを終了する 線の長さが0だったら線を消去する
