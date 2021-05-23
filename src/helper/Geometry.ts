@@ -1,3 +1,5 @@
+// TODO: なぜかメソッドが大文字なので修正する
+
 // 2次元ベクトル、点を表すことも
 export class Vector {
   private x_: number;
