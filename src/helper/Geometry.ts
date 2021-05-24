@@ -28,9 +28,19 @@ export class Vector {
     return this.x * this.x + this.y * this.y;
   }
 
+  // 自分を正規化(長さを1にする)したものを返す
+  public Normalized(): Vector {
+    return this.DivBy(this.Length());
+  }
+
   // 掛け算
   public Times(val: number): Vector {
     return new Vector(this.x * val, this.y * val);
+  }
+
+  // 割り算
+  public DivBy(val: number): Vector {
+    return new Vector(this.x / val, this.y / val);
   }
 
   // 足し算
@@ -56,6 +66,11 @@ export class Vector {
   // targetと自分が平行かどうかの判定
   public IsParallelTo(target: Vector): boolean {
     return this.CrossTo(target) == 0;
+  }
+
+  // 単位法線ベクトル
+  public UnitNormalVector(): Vector {
+    return new Vector(this.y, -this.x).Normalized();
   }
 
   // 上下・左右位置の比較(上下比較が優先)
@@ -120,6 +135,11 @@ export class Line {
   // targetと自分が平行かどうかの判定
   public IsParallelTo(target: Line): boolean {
     return this.Direction().IsParallelTo(target.Direction());
+  }
+
+  // 単位法線ベクトル
+  public UnitNormalVector(): Vector {
+    return this.Direction().UnitNormalVector();
   }
 
   // 自分とtargetとの交点を返す
