@@ -231,28 +231,16 @@ export default class FrameCanvas {
   // 引いた線が既にあるいずれかのnodesに交わるまで伸ばす
   // 返り値は伸ばしたLineとそれに衝突した2つの線(nullとなる可能性がある)
   private extendedLineAndCrossLine(line: Line): [Line, Line | null, Line | null] {
-    let startPoint: Vector | null = null;
-    let startCrossLine: Line | null = null;
-    let endPoint: Vector | null = null;
-    let endCrossLine: Line | null = null;
-
-    this.nodes.forEach(crossLine => {
-      const crossPos = line.CrossPoint(crossLine);
-      if (crossPos == null) return; // 交わらなければ無視
-
-      if (crossPos.ComparedTo(line.start) < 0 && (startPoint == null || crossPos.ComparedTo(startPoint) > 0)) {
-        startPoint = crossPos;
-        startCrossLine = crossLine;
-      }
-
-      if (crossPos.ComparedTo(line.start) >= 0 && (endPoint == null || crossPos.ComparedTo(endPoint) < 0)) {
-        endPoint = crossPos;
-        endCrossLine = crossLine;
-      }
+    // line.startが含まれてるコマを探す
+    const collidedFrame = Array.from(this.frames).find(frame => {
+      return frame.ContainsPoint(line.start);
     });
 
-    const extLine = new Line(startPoint || line.start, endPoint || line.end);
-    return [extLine, startCrossLine, endCrossLine];
+    // なかったら適当にnullを返す
+    if (collidedFrame == undefined) return [line, null, null];
+
+    // 見つかったコマとlineとの当たり判定を返す
+    return collidedFrame.CollideWithLine(line);
   }
 
   // コマのpolygonからframeSpaceだけ縮小した新しいpolygonを作成
