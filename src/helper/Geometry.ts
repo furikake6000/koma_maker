@@ -70,7 +70,7 @@ export class Vector {
 
   // 単位法線ベクトル
   public UnitNormalVector(): Vector {
-    return new Vector(this.y, -this.x).Normalized();
+    return new Vector(-this.y, this.x).Normalized();
   }
 
   // 上下・左右位置の比較(上下比較が優先)
@@ -206,6 +206,20 @@ export class Polygon {
 
   constructor(points: Array<Vector>) {
     this.points_ = points;
+  }
+
+  public static FromNodes(nodes: Array<Line>): Polygon {
+    const points: Array<Vector> = [];
+    for(let i = 0; i < nodes.length; i++) {
+      const node = nodes[i];
+      const nextNode = nodes[(i == nodes.length - 1 ? 0 : i + 1)];
+
+      const crossPoint = node.CrossPoint(nextNode);
+      if(crossPoint == null) continue;
+      points.push(crossPoint);
+    }
+
+    return new Polygon(points);
   }
 
   // ポリゴンを構成している辺のArrayを返してくれるメソッド

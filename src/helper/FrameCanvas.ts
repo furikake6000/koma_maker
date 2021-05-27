@@ -9,7 +9,7 @@ export default class FrameCanvas {
   private frameWidth: number;
   private frameHeight: number;
   private lineWidth: number = 0;
-  // private frameSpace: number = 0;
+  private frameSpace: number = 0;
 
   // マンガコマ枠構成要素
   private nodes: Set<Line> = new Set<Line>();
@@ -65,7 +65,7 @@ export default class FrameCanvas {
     this.ctx.lineJoin = 'miter';
 
     // コマの描画
-    this.frames.forEach(frame => frame.Draw(this.ctx));
+    this.frames.forEach(frame => this.shrinkedFrame(frame).Draw(this.ctx));
 
     // drawingLine（現在引いている線）の描画
     if (this.drawingLine) {
@@ -89,7 +89,7 @@ export default class FrameCanvas {
   // プロパティを変える
   public changeProperties(properties: { [key: string]: number }) {
     this.lineWidth = properties.lineWidth;
-    // this.frameSpace = properties.frameSpace;
+    this.frameSpace = properties.frameSpace;
 
     // 変更後の内容で描画
     this.render();
@@ -253,5 +253,18 @@ export default class FrameCanvas {
 
     const extLine = new Line(startPoint || line.start, endPoint || line.end);
     return [extLine, startCrossLine, endCrossLine];
+  }
+
+  // コマのpolygonからframeSpaceだけ縮小した新しいpolygonを作成
+  private shrinkedFrame(frame: Polygon): Polygon {
+    const shrinkedNodes: Array<Line> = [];
+    for(const node of frame.Nodes()) {
+      const unitVec = node.UnitNormalVector().Times(this.frameSpace / 2 + this.lineWidth / 2);
+      const start = node.start.Plus(unitVec);
+      const end = node.end.Plus(unitVec);
+      shrinkedNodes.push(new Line(start, end, false));
+    }
+
+    return Polygon.FromNodes(shrinkedNodes);
   }
 }
