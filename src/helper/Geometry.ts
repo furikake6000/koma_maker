@@ -142,6 +142,15 @@ export class Line {
     return this.Direction().UnitNormalVector();
   }
 
+  // 線に対して点がどっち向きにあるかを調べる
+  // 1: 法線方向 / -1: 逆方向 / 0: 線上
+  public SideOfPoint(point: Vector): number {
+    const startToPoint = point.Minus(this.start); // startからpointへのベクトル
+
+    // startからendのベクトルとstartからpointへのベクトルの外積の符号が点の向きを表す
+    return Math.sign(this.Direction().CrossTo(startToPoint));
+  }
+
   // 自分とtargetとの交点を返す
   // 自分とtargetが平行、もしくはどちらかが長さ0の場合nullを返す
   public CrossPoint(target: Line): Vector | null {
@@ -289,5 +298,52 @@ export class Polygon {
 
     const extLine = new Line(startPoint || line.start, endPoint || line.end);
     return [extLine, startCrossLine, endCrossLine];
+  }
+
+  // ポリゴンをLineで2つに分解するメソッド
+  // 帰ってくるポリゴンは[法線側, 法線と逆側]の順番
+  public DivideWithLine(line: Line): [Polygon, Polygon] {
+
+    // ポリゴンの最初の方が法線方向かどうか調べる
+    const firstPointNotOnLine = this.points.find(p => line.SideOfPoint(p) != 0);
+    if (firstPointNotOnLine == undefined) return [new Polygon([]), new Polygon([])];
+    const isInNormSide = (line.SideOfPoint(firstPointNotOnLine) == 1);
+
+    // 当たり判定調査
+    const [partition, startCrossLine, endCrossLine] = this.CollideWithLine(line);
+
+    // そもそも線がポリゴンにかすっていない場合
+    if (startCrossLine == null || endCrossLine == null) {
+      return isInNormSide ? [this, new Polygon([])] : [new Polygon([]), this];
+    }
+
+    // 分割対象のコマを分割する
+    const normPoly: Array<Vector> = [], otherPoly: Array<Vector> = []; // frameAが法線側 frameBが逆側
+    let appendSide: boolean = isInNormSide; // 点をどちらに追加するか、分割対象の店を見つけたら切り替える
+    for(let i = 0; i < this.points.length ; i++) {
+      const point = this.points[i];
+      const nextPoint = this.points[(i == this.points.length - 1 ? 0 : i + 1)];
+
+      (appendSide ? normPoly : otherPoly).push(point);
+      if (
+        point.Equals(startCrossLine.start) && nextPoint.Equals(startCrossLine.end) ||
+        point.Equals(startCrossLine.end) && nextPoint.Equals(startCrossLine.start)
+      ) {
+        (appendSide ? normPoly : otherPoly).push(partition.start);
+        (appendSide ? normPoly : otherPoly).push(partition.end);
+        appendSide = !appendSide;
+      }
+      if (
+        point.Equals(endCrossLine.start) && nextPoint.Equals(endCrossLine.end) ||
+        point.Equals(endCrossLine.end) && nextPoint.Equals(endCrossLine.start)
+      ) {
+        (appendSide ? normPoly : otherPoly).push(partition.end);
+        (appendSide ? normPoly : otherPoly).push(partition.start);
+        appendSide = !appendSide;
+      }
+    }
+
+    return [new Polygon(normPoly), new Polygon(otherPoly)];
+
   }
 }
