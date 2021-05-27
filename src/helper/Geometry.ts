@@ -285,12 +285,12 @@ export class Polygon {
       const crossPos = line.CrossPoint(node);
       if (crossPos == null) continue; // 交わらなければ無視
 
-      if (crossPos.ComparedTo(line.start) < 0 && (startPoint == null || crossPos.ComparedTo(startPoint) > 0)) {
+      if (startPoint == null || crossPos.ComparedTo(startPoint) > 0) {
         startPoint = crossPos;
         startCrossLine = node;
       }
 
-      if (crossPos.ComparedTo(line.start) >= 0 && (endPoint == null || crossPos.ComparedTo(endPoint) < 0)) {
+      if (endPoint == null || crossPos.ComparedTo(endPoint) < 0) {
         endPoint = crossPos;
         endCrossLine = node;
       }
