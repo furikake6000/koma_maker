@@ -161,11 +161,24 @@ export default class FrameCanvas {
     if (dividedFrame == undefined) throw new Error('Failed to divide frame: frame not found.');
 
     // コマを分割する線と分割される線を求める
-    const result = this.extendedLineAndCrossLine(divideLine);
-    if (result[1] == null || result[2] == null) {
+    const [partition, startCrossLine, endCrossLine] = dividedFrame.CollideWithLine(divideLine);
+    if (startCrossLine == null || endCrossLine == null) {
       throw new Error('Failed to divide frame: given line is invalid.');
     }
-    const [partition, startCrossLine, endCrossLine] = result;
+
+    // 分割対象のコマを分割する
+    const newFrames = dividedFrame.DivideWithLine(divideLine);
+    for (const newFrame of newFrames) this.frames.add(newFrame);
+    this.frames.delete(dividedFrame);
+
+    // nodesの増減作業
+    this.nodes.add(new Line(startCrossLine.start, partition.start));
+    this.nodes.add(new Line(partition.start, startCrossLine.end));
+    this.nodes.add(new Line(endCrossLine.start, partition.end));
+    this.nodes.add(new Line(partition.end, endCrossLine.end));
+    this.nodes.add(partition);
+    this.nodes.delete(startCrossLine);
+    this.nodes.delete(endCrossLine);
 
     // すべてのコマに対して、分割対象の辺があったら分割する
     this.frames.forEach(frame => {
@@ -183,64 +196,27 @@ export default class FrameCanvas {
         if (
           point.Equals(endCrossLine.start) && nextPoint.Equals(endCrossLine.end) ||
           point.Equals(endCrossLine.end) && nextPoint.Equals(endCrossLine.start)
-      ) {
-        frame.points.splice(i + 1, 0, partition.end); // 分割された点を挿入
-        i += 1;
-      }
+        ) {
+          frame.points.splice(i + 1, 0, partition.end); // 分割された点を挿入
+          i += 1;
+        }
       }
     });
-
-    // 分割対象のコマを分割する
-    const frameA: Array<Vector> = [], frameB: Array<Vector> = []; // 新しいframeの点群
-    let appendToA: boolean = true; // 点をどちらに追加するか、分割対象の店を見つけたら切り替える
-    for(let i = 0; i < dividedFrame.points.length ; i++) {
-      const point = dividedFrame.points[i];
-
-      (appendToA ? frameA : frameB).push(point);
-      if (point.Equals(partition.start)) {
-        (appendToA ? frameA : frameB).push(partition.end);
-        appendToA = !appendToA;
-      }
-      if (point.Equals(partition.end)) {
-        (appendToA ? frameA : frameB).push(partition.start);
-        appendToA = !appendToA;
-      }
-    }
-
-    // nodesの増減作業
-    this.nodes.add(new Line(startCrossLine.start, partition.start));
-    this.nodes.add(new Line(partition.start, startCrossLine.end));
-    this.nodes.add(new Line(endCrossLine.start, partition.end));
-    this.nodes.add(new Line(partition.end, endCrossLine.end));
-    this.nodes.add(partition);
-    this.nodes.delete(startCrossLine);
-    this.nodes.delete(endCrossLine);
-
-    // framesの増減作業
-    this.frames.add(new Polygon(frameA));
-    this.frames.add(new Polygon(frameB));
-    this.frames.delete(dividedFrame);
   }
 
   // 引いた線が既にあるいずれかのnodesに交わるまで伸ばす
   // 返り値は伸ばしたLine
   private extendedLine(line: Line): Line {
-    return this.extendedLineAndCrossLine(line)[0];
-  }
-
-  // 引いた線が既にあるいずれかのnodesに交わるまで伸ばす
-  // 返り値は伸ばしたLineとそれに衝突した2つの線(nullとなる可能性がある)
-  private extendedLineAndCrossLine(line: Line): [Line, Line | null, Line | null] {
     // line.startが含まれてるコマを探す
     const collidedFrame = Array.from(this.frames).find(frame => {
       return frame.ContainsPoint(line.start);
     });
 
-    // なかったら適当にnullを返す
-    if (collidedFrame == undefined) return [line, null, null];
+    // なかったらlineをそのまま返す
+    if (collidedFrame == undefined) return line;
 
     // 見つかったコマとlineとの当たり判定を返す
-    return collidedFrame.CollideWithLine(line);
+    return collidedFrame.CollideWithLine(line)[0];
   }
 
   // コマのpolygonからframeSpaceだけ縮小した新しいpolygonを作成
