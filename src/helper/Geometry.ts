@@ -263,4 +263,31 @@ export class Polygon {
     // 交点の数が奇数ならポリゴンの中
     return crossLines.length % 2 == 1;
   }
+
+  // ポリゴンとLineの当たり判定メソッド
+  // 返り値は[衝突した点を含む線分, startと衝突したノード、endと衝突したノード]の順番
+  public CollideWithLine(line: Line): [Line, Line | null, Line | null] {
+    let startPoint: Vector | null = null;
+    let startCrossLine: Line | null = null;
+    let endPoint: Vector | null = null;
+    let endCrossLine: Line | null = null;
+
+    for (const node of Array.from(this.Nodes())) {
+      const crossPos = line.CrossPoint(node);
+      if (crossPos == null) continue; // 交わらなければ無視
+
+      if (crossPos.ComparedTo(line.start) < 0 && (startPoint == null || crossPos.ComparedTo(startPoint) > 0)) {
+        startPoint = crossPos;
+        startCrossLine = node;
+      }
+
+      if (crossPos.ComparedTo(line.start) >= 0 && (endPoint == null || crossPos.ComparedTo(endPoint) < 0)) {
+        endPoint = crossPos;
+        endCrossLine = node;
+      }
+    }
+
+    const extLine = new Line(startPoint || line.start, endPoint || line.end);
+    return [extLine, startCrossLine, endCrossLine];
+  }
 }
