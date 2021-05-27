@@ -221,14 +221,15 @@ export default class FrameCanvas {
 
   // コマのpolygonからframeSpaceだけ縮小した新しいpolygonを作成
   private shrinkedFrame(frame: Polygon): Polygon {
-    const shrinkedNodes: Array<Line> = [];
+    // shrinkedFrameを各辺のちょっとずらしたやつでひたすら切っていく
+    let shrinkedFrame = new Polygon(frame.points);
     for(const node of frame.Nodes()) {
       const unitVec = node.UnitNormalVector().Times(this.frameSpace / 2 + this.lineWidth / 2);
       const start = node.start.Plus(unitVec);
       const end = node.end.Plus(unitVec);
-      shrinkedNodes.push(new Line(start, end, false));
+      shrinkedFrame = shrinkedFrame.DivideWithLine(new Line(start, end, false))[0];
     }
 
-    return Polygon.FromNodes(shrinkedNodes);
+    return shrinkedFrame;
   }
 }
