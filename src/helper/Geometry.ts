@@ -252,12 +252,13 @@ export class Polygon {
     if (this.points.length == 0) return;
 
     ctx.beginPath();
-    // 最後の点に行った後各点を回る
-    const lastPoint = this.points[this.points.length - 1];
-    ctx.moveTo(lastPoint.x, lastPoint.y);
-    for(const p of this.points) {
-      ctx.lineTo(p.x, p.y);
+    
+    // すべての点を通ってからパスをcloseする
+    ctx.moveTo(this.points[0].x, this.points[0].y);
+    for(let i=0; i<this.points.length; i++) {
+      ctx.lineTo(this.points[i].x, this.points[i].y);
     }
+    ctx.closePath();
 
     ctx.stroke();
   }

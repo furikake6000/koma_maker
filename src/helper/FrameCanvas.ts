@@ -51,7 +51,6 @@ export default class FrameCanvas {
     // スタイルの設定
     this.ctx.lineWidth = this.lineWidth;
     this.ctx.strokeStyle = 'black';
-    this.ctx.lineCap = 'square';
     this.ctx.lineJoin = 'miter';
 
     // コマの描画
