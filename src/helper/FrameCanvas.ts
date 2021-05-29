@@ -37,19 +37,9 @@ export default class FrameCanvas {
     this.changeProperties(properties);
 
     // nodesとframesの初期化
-    const points = [
-      new Vector(this.canvasObject.width / 2 - this.frameWidth / 2, this.canvasObject.height / 2 - this.frameHeight / 2),
-      new Vector(this.canvasObject.width / 2 + this.frameWidth / 2, this.canvasObject.height / 2 - this.frameHeight / 2),
-      new Vector(this.canvasObject.width / 2 + this.frameWidth / 2, this.canvasObject.height / 2 + this.frameHeight / 2),
-      new Vector(this.canvasObject.width / 2 - this.frameWidth / 2, this.canvasObject.height / 2 + this.frameHeight / 2)
-    ];
-    this.nodes.clear();
-    this.nodes.add(new Line(points[0], points[1]));
-    this.nodes.add(new Line(points[1], points[2]));
-    this.nodes.add(new Line(points[2], points[3]));
-    this.nodes.add(new Line(points[3], points[0]));
+    this.nodes = new Set(this.primaryNodes());
     this.frames.clear();
-    this.frames.add(new Polygon([points[0], points[1], points[2], points[3]]));
+    this.frames.add(this.primaryPolygon());
   }
 
   // キャンバスにコマを描画する
@@ -152,6 +142,32 @@ export default class FrameCanvas {
   }
 
   // ---- private methods ----
+
+  // 最初の4点を返す
+  private primaryPoints(): Array<Vector> {
+    return [
+      new Vector(this.canvasObject.width / 2 - this.frameWidth / 2, this.canvasObject.height / 2 - this.frameHeight / 2),
+      new Vector(this.canvasObject.width / 2 + this.frameWidth / 2, this.canvasObject.height / 2 - this.frameHeight / 2),
+      new Vector(this.canvasObject.width / 2 + this.frameWidth / 2, this.canvasObject.height / 2 + this.frameHeight / 2),
+      new Vector(this.canvasObject.width / 2 - this.frameWidth / 2, this.canvasObject.height / 2 + this.frameHeight / 2)
+    ];
+  }
+  
+  // 最初の4辺を返す
+  private primaryNodes(): Array<Line> {
+    const points = this.primaryPoints();
+    return [
+      new Line(points[0], points[1]),
+      new Line(points[1], points[2]),
+      new Line(points[2], points[3]),
+      new Line(points[3], points[0])
+    ];
+  }
+
+  // 最初のポリゴンを返す
+  private primaryPolygon(): Polygon {
+    return new Polygon(this.primaryPoints());
+  }
 
   // コマを指定されたLineで分割する
   private divideFrame(divideLine: Line) {
