@@ -238,9 +238,14 @@ export default class FrameCanvas {
 
   // コマのpolygonからframeSpaceだけ縮小した新しいpolygonを作成
   private shrinkedFrame(frame: Polygon): Polygon {
+    const primaryNodes = this.primaryNodes();
+
     // shrinkedFrameを各辺のちょっとずらしたやつでひたすら切っていく
     let shrinkedFrame = new Polygon(frame.points);
     for(const node of frame.Nodes()) {
+      // もしprimary nodeのいずれかの線上にあったら縮小しない
+      if(primaryNodes.find(pNode => node.IsOnSameLine(pNode)) != undefined) continue;
+
       const unitVec = node.UnitNormalVector().Times(this.frameSpace / 2 + this.lineWidth / 2);
       const start = node.start.Plus(unitVec);
       const end = node.end.Plus(unitVec);

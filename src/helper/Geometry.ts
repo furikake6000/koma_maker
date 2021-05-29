@@ -151,6 +151,11 @@ export class Line {
     return Math.sign(this.Direction().CrossTo(startToPoint));
   }
 
+  // 2つの線分が同じ直線状にあるか調べる
+  public IsOnSameLine(target: Line): boolean {
+    return this.IsParallelTo(target) && this.SideOfPoint(target.start) == 0;
+  }
+
   // 自分とtargetとの交点を返す
   // 自分とtargetが平行、もしくはどちらかが長さ0の場合nullを返す
   public CrossPoint(target: Line): Vector | null {
