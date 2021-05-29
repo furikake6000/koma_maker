@@ -77,6 +77,7 @@ export default class FrameCanvas {
       const dLineExt = this.extendedLine(this.drawingLine);
       
       // 描画
+      this.ctx.beginPath();
       this.ctx.moveTo(dLineExt.start.x, dLineExt.start.y);
       this.ctx.lineTo(dLineExt.end.x, dLineExt.end.y);
       this.ctx.stroke();
