@@ -153,7 +153,7 @@ export class Line {
 
   // 2つの線分が同じ直線状にあるか調べる
   public IsOnSameLine(target: Line): boolean {
-    return this.IsParallelTo(target) && this.SideOfPoint(target.start) == 0;
+    return this.SideOfPoint(target.start) == 0 && this.SideOfPoint(target.end) == 0;
   }
 
   // 自分とtargetとの交点を返す
