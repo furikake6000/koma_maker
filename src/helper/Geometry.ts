@@ -263,7 +263,7 @@ export class Polygon {
     
     // すべての点を通ってからパスをcloseする
     ctx.moveTo(this.points[0].x, this.points[0].y);
-    for(let i=0; i<this.points.length; i++) {
+    for(let i=1; i<this.points.length; i++) {
       ctx.lineTo(this.points[i].x, this.points[i].y);
     }
     ctx.closePath();
