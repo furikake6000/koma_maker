@@ -363,9 +363,11 @@ export class Polygon {
             if (crossLineSide == -1) {
               // 今自分は法線側のポリゴンを作っている
               normPoly.push(otherPartitionPoint);
-            } else {
+            } else if (crossLineSide == 1) {
               // 今自分は法線と逆側のポリゴンを作っている
               otherPoly.push(otherPartitionPoint);
+            } else {
+              // partitionとcrossLineがかぶっているから何もしなくていい
             }
           }
 
