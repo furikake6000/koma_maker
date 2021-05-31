@@ -1,5 +1,7 @@
 // TODO: なぜかメソッドが大文字なので修正する
 
+const ZERO_MARGIN = 0.001;
+
 // 2次元ベクトル、点を表すことも
 export class Vector {
   private x_: number;
@@ -154,9 +156,13 @@ export class Line {
   // 1: 法線方向 / -1: 逆方向 / 0: 線上
   public SideOfPoint(point: Vector): number {
     const startToPoint = point.Minus(this.start); // startからpointへのベクトル
+    const cross = this.Direction().CrossTo(startToPoint);
+
+    // ゼロマージンを考慮
+    if (Math.abs(cross) < ZERO_MARGIN) return 0;
 
     // startからendのベクトルとstartからpointへのベクトルの外積の符号が点の向きを表す
-    return Math.sign(this.Direction().CrossTo(startToPoint));
+    return Math.sign(cross);
   }
 
   // 2つの線分が同じ直線状にあるか調べる
@@ -227,7 +233,7 @@ export class Polygon {
   get points() { return this.points_; }
 
   constructor(points: Array<Vector>) {
-    this.points_ = points;
+    this.points_ = points.slice();
   }
 
   public static FromNodes(nodes: Array<Line>): Polygon {
@@ -321,83 +327,45 @@ export class Polygon {
     // 当たり判定調査
     const [partition, startCrossLine, endCrossLine] = this.CollideWithLine(line);
 
+    // 分割対象として自分を複製した新しいPolygonを作成
+    const dividedPolygon = new Polygon(this.points);
+    // dividedPolygonのノードの中に分割対象があったら分割点を挿入
+    for(let i = 0; i < dividedPolygon.points.length; i++) {
+      const point = dividedPolygon.points[i];
+      const nextPoint = dividedPolygon.points[(i == dividedPolygon.points.length - 1 ? 0 : i + 1)];
+      const node = new Line(point, nextPoint);
+
+      if (startCrossLine?.Equals(node)) {
+        dividedPolygon.points.splice(i + 1, 0, partition.start); // 分割された点を挿入
+        i += 1;
+      }
+      if (endCrossLine?.Equals(node)) {
+        dividedPolygon.points.splice(i + 1, 0, partition.end); // 分割された点を挿入
+        i += 1;
+      }
+    }
+
     const normPoly: Array<Vector> = [];   // lineから見て法線側にあるポリゴン
     const otherPoly: Array<Vector> = [];  // lineから見て法線と逆側にあるポリゴン
 
-    for(let i = 0; i < this.points.length ; i++) {
-      const point = this.points[i];
-      const nextPoint = this.points[(i == this.points.length - 1 ? 0 : i + 1)];
-      const node = new Line(point, nextPoint);
-
+    for(const point of dividedPolygon.points) {
       const side = line.SideOfPoint(point);
-
-      switch(side) {
+      switch (side) {
         case 0: // lineとpointは重なっている
+        case -0:
           // 両方に追加
           normPoly.push(point);
           otherPoly.push(point);
-          
-          {
-            // pointはpartition.startかpartition.endの場合がある
-            // その場合partitionのもう片方の点を今作ってるポリゴンに追加しなければいけない
-            let otherPartitionPoint: Vector | null = null;
-            let otherCrossLinePoint: Vector | null = null;
-
-            if (point.Equals(partition.start)) otherPartitionPoint = partition.end;
-            if (point.Equals(partition.end)) otherPartitionPoint = partition.start;
-
-            if (otherPartitionPoint == null) continue;
-
-            if (startCrossLine != null) {
-              if (point.Equals(startCrossLine.start)) otherCrossLinePoint = startCrossLine.end;
-              if (point.Equals(startCrossLine.end)) otherCrossLinePoint = startCrossLine.start;
-            }
-            if (endCrossLine != null) {
-              if (point.Equals(endCrossLine.start)) otherCrossLinePoint = endCrossLine.end;
-              if (point.Equals(endCrossLine.end)) otherCrossLinePoint = endCrossLine.start;
-            }
-
-            if (otherCrossLinePoint == null) throw new Error('Error: Something went wrong with dividing polygon!');
-
-            const crossLineSide = partition.SideOfPoint(otherCrossLinePoint);
-            if (crossLineSide == -1) {
-              // 今自分は法線側のポリゴンを作っている
-              normPoly.push(otherPartitionPoint);
-            } else if (crossLineSide == 1) {
-              // 今自分は法線と逆側のポリゴンを作っている
-              otherPoly.push(otherPartitionPoint);
-            } else {
-              // partitionとcrossLineがかぶっているから何もしなくていい
-            }
-          }
-
           break;
         case 1: // lineは法線方向
           normPoly.push(point);
-          if (startCrossLine?.Equals(node)) {
-            normPoly.push(partition.start);
-            normPoly.push(partition.end);
-          }
-          if (endCrossLine?.Equals(node)) {
-            normPoly.push(partition.end);
-            normPoly.push(partition.start);
-          }
           break;
         case -1: // lineは法線と逆方向
           otherPoly.push(point);
-          if (startCrossLine?.Equals(node)) {
-            otherPoly.push(partition.start);
-            otherPoly.push(partition.end);
-          }
-          if (endCrossLine?.Equals(node)) {
-            otherPoly.push(partition.end);
-            otherPoly.push(partition.start);
-          }
           break;
       }
     }
 
     return [new Polygon(normPoly), new Polygon(otherPoly)];
-
   }
 }
