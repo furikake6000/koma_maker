@@ -152,7 +152,7 @@ export default class CanvasArea extends Vue{
   // posから新しい境界線を引き始める
   drawStart(pos: Vector) {
     // 枠外だったら線を引くのはやめる
-    if (!pos.IsInRect(
+    if (!pos.isInRect(
       CANVAS_WIDTH / 2 - FRAME_WIDTH / 2, CANVAS_HEIGHT / 2 - FRAME_HEIGHT / 2,
       FRAME_WIDTH, FRAME_HEIGHT
     )) return;
@@ -175,7 +175,7 @@ export default class CanvasArea extends Vue{
   // 線を引くのを終了する 線の長さが0だったら線を消去する
   drawEnd() {
     this.mouseDownPos = null;
-    if(this.lines[this.lines.length - 1].Length() == 0) this.lines.pop();
+    if(this.lines[this.lines.length - 1].length() == 0) this.lines.pop();
   }
   // 線を引くのをキャンセルする（引いている線は削除する）
   drawCancel() {
@@ -190,7 +190,7 @@ export default class CanvasArea extends Vue{
     const eraseAreaWidth = this.properties.lineWidth + this.properties.frameSpace / 2;
 
     function isNotInEraseArea(line: Line): boolean {
-      return line.Distance(pos) > eraseAreaWidth;
+      return line.distance(pos) > eraseAreaWidth;
     }
 
     this.lines = this.lines.filter(isNotInEraseArea);
@@ -297,15 +297,15 @@ export default class CanvasArea extends Vue{
     let endPoint: Vector | null = null;
 
     for (const crossLine of crossLines) {
-      const crossPos: Vector | null = line.CrossPoint(crossLine);
+      const crossPos: Vector | null = line.crossPoint(crossLine);
       if (crossPos == null) continue;  // 交わらなければ無視
 
-      if (crossPos.ComparedTo(line.start) < 0) {
-        if (startPoint == null || crossPos.ComparedTo(startPoint) > 0) {
+      if (crossPos.comparedTo(line.start) < 0) {
+        if (startPoint == null || crossPos.comparedTo(startPoint) > 0) {
           startPoint = crossPos;
         }
       } else {
-        if (endPoint == null || crossPos.ComparedTo(endPoint) < 0) {
+        if (endPoint == null || crossPos.comparedTo(endPoint) < 0) {
           endPoint = crossPos;
         }
       }

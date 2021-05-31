@@ -54,7 +54,7 @@ export default class FrameCanvas {
     this.ctx.lineJoin = 'miter';
 
     // コマの描画
-    this.frames.forEach(frame => this.shrinkedFrame(frame).Draw(this.ctx));
+    this.frames.forEach(frame => this.shrinkedFrame(frame).draw(this.ctx));
 
     // drawingLine（現在引いている線）の描画
     if (this.drawingLine) {
@@ -89,7 +89,7 @@ export default class FrameCanvas {
   // posから新しい境界線を引き始める
   public drawStart(pos: Vector) {
     // 枠外だったら線を引くのはやめる
-    if (!pos.IsInRect(
+    if (!pos.isInRect(
       this.canvasObject.width / 2 - this.frameWidth / 2, this.canvasObject.height / 2 - this.frameHeight / 2,
       this.frameWidth, this.frameHeight
     )) return;
@@ -172,18 +172,18 @@ export default class FrameCanvas {
   private divideFrame(divideLine: Line) {
     // 分割対象のコマを探す
     const dividedFrame = Array.from(this.frames).find(frame => {
-      return frame.ContainsPoint(divideLine.start);
+      return frame.containsPoint(divideLine.start);
     });
     if (dividedFrame == undefined) throw new Error('Failed to divide frame: frame not found.');
 
     // コマを分割する線と分割される線を求める
-    const [partition, startCrossLine, endCrossLine] = dividedFrame.CollideWithLine(divideLine);
+    const [partition, startCrossLine, endCrossLine] = dividedFrame.collideWithLine(divideLine);
     if (startCrossLine == null || endCrossLine == null) {
       throw new Error('Failed to divide frame: given line is invalid.');
     }
 
     // 分割対象のコマを分割する
-    const newFrames = dividedFrame.DivideWithLine(divideLine);
+    const newFrames = dividedFrame.divideWithLine(divideLine);
     for (const newFrame of newFrames) this.frames.add(newFrame);
     this.frames.delete(dividedFrame);
 
@@ -203,15 +203,15 @@ export default class FrameCanvas {
         const nextPoint = frame.points[(i == frame.points.length - 1 ? 0 : i + 1)];
 
         if (
-            point.Equals(startCrossLine.start) && nextPoint.Equals(startCrossLine.end) ||
-            point.Equals(startCrossLine.end) && nextPoint.Equals(startCrossLine.start)
+            point.equals(startCrossLine.start) && nextPoint.equals(startCrossLine.end) ||
+            point.equals(startCrossLine.end) && nextPoint.equals(startCrossLine.start)
         ) {
           frame.points.splice(i + 1, 0, partition.start); // 分割された点を挿入
           i += 1;
         }
         if (
-          point.Equals(endCrossLine.start) && nextPoint.Equals(endCrossLine.end) ||
-          point.Equals(endCrossLine.end) && nextPoint.Equals(endCrossLine.start)
+          point.equals(endCrossLine.start) && nextPoint.equals(endCrossLine.end) ||
+          point.equals(endCrossLine.end) && nextPoint.equals(endCrossLine.start)
         ) {
           frame.points.splice(i + 1, 0, partition.end); // 分割された点を挿入
           i += 1;
@@ -225,14 +225,14 @@ export default class FrameCanvas {
   private extendedLine(line: Line): Line {
     // line.startが含まれてるコマを探す
     const collidedFrame = Array.from(this.frames).find(frame => {
-      return frame.ContainsPoint(line.start);
+      return frame.containsPoint(line.start);
     });
 
     // なかったらlineをそのまま返す
     if (collidedFrame == undefined) return line;
 
     // 見つかったコマとlineとの当たり判定を返す
-    return collidedFrame.CollideWithLine(line)[0];
+    return collidedFrame.collideWithLine(line)[0];
   }
 
   // コマのpolygonからframeSpaceだけ縮小した新しいpolygonを作成
@@ -241,14 +241,14 @@ export default class FrameCanvas {
 
     // shrinkedFrameを各辺のちょっとずらしたやつでひたすら切っていく
     let shrinkedFrame = new Polygon(frame.points);
-    for(const node of frame.Nodes()) {
+    for(const node of frame.nodes()) {
       // もしprimary nodeのいずれかの線上にあったら縮小しない
-      if(primaryNodes.find(pNode => node.IsOnSameLine(pNode)) != undefined) continue;
+      if(primaryNodes.find(pNode => node.isOnSameLine(pNode)) != undefined) continue;
 
-      const unitVec = node.UnitNormalVector().Times(this.frameSpace / 2 + this.lineWidth / 2);
-      const start = node.start.Plus(unitVec);
-      const end = node.end.Plus(unitVec);
-      shrinkedFrame = shrinkedFrame.DivideWithLine(new Line(start, end, false))[0];
+      const unitVec = node.unitNormalVector().times(this.frameSpace / 2 + this.lineWidth / 2);
+      const start = node.start.plus(unitVec);
+      const end = node.end.plus(unitVec);
+      shrinkedFrame = shrinkedFrame.divideWithLine(new Line(start, end, false))[0];
     }
 
     return shrinkedFrame;
