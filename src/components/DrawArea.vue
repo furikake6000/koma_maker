@@ -87,23 +87,40 @@ export default class DrawArea extends Vue{
   public onMouseDown(e: MouseEvent) {
     if (this.canvas == null) throw new Error('Canvas not found.');
 
-    if(this.drawTool == 0) {
-      this.canvas.drawStart(this.canvas.offsetPosToCanvasPos(new Vector(e.offsetX, e.offsetY)));
+    const mousePosOfCanvas = this.canvas.offsetPosToCanvasPos(new Vector(e.offsetX, e.offsetY));
+
+    switch (this.drawTool) {
+      case 0:
+        this.canvas.drawStart(mousePosOfCanvas);
+        break;
+      case 1:
+        this.canvas.mergeStart(mousePosOfCanvas);
+        break;
     }
   }
   public onMouseMove(e: MouseEvent) {
     if (this.canvas == null) throw new Error('Canvas not found.');
 
     const mousePosOfCanvas = this.canvas.offsetPosToCanvasPos(new Vector(e.offsetX, e.offsetY));
-    if(this.drawTool == 0) {
-      this.canvas.drawMove(mousePosOfCanvas);
+    switch (this.drawTool) {
+      case 0:
+        this.canvas.drawMove(mousePosOfCanvas);
+        break;
+      case 1:
+        this.canvas.mergeMove(mousePosOfCanvas);
+        break;
     }
   }
   public onMouseUp() {
     if (this.canvas == null) throw new Error('Canvas not found.');
 
-    if(this.drawTool == 0) {
-      this.canvas.drawEnd();
+    switch (this.drawTool) {
+      case 0:
+        this.canvas.drawEnd();
+        break;
+      case 1:
+        this.canvas.mergeEnd();
+        break;
     }
   }
 
@@ -111,11 +128,17 @@ export default class DrawArea extends Vue{
   public onTouchStart(e: TouchEvent) {
     if (this.canvas == null) throw new Error('Canvas not found.');
 
-    if(this.drawTool == 0) {
-      const touch = e.changedTouches[0];
-      this.currentTouchID = touch.identifier;
+    const touch = e.changedTouches[0];
+    this.currentTouchID = touch.identifier;
+    const touchPosOfCanvas = this.canvas.offsetPosToCanvasPos(ClickTouchHelper.touchOffsetPos(e, touch));
 
-      this.canvas.drawStart(this.canvas.offsetPosToCanvasPos(ClickTouchHelper.touchOffsetPos(e, touch)));
+    switch (this.drawTool) {
+      case 0:
+        this.canvas.drawStart(touchPosOfCanvas);
+        break;
+      case 1:
+        this.canvas.mergeStart(touchPosOfCanvas);
+        break;
     }
   }
   public onTouchMove(e: TouchEvent) {
@@ -126,25 +149,41 @@ export default class DrawArea extends Vue{
 
     const touch = this.currentTouch(e.changedTouches);
     if (touch == null) return;
-
     const touchPosOfCanvas = this.canvas.offsetPosToCanvasPos(ClickTouchHelper.touchOffsetPos(e, touch));
 
-    if(this.drawTool == 0) {
-      this.canvas.drawMove(touchPosOfCanvas);
+    switch (this.drawTool) {
+      case 0:
+        this.canvas.drawMove(touchPosOfCanvas);
+        break;
+      case 1:
+        this.canvas.mergeMove(touchPosOfCanvas);
+        break;
     }
   }
   public onTouchEnd(e: TouchEvent) {
     if (this.canvas == null) throw new Error('Canvas not found.');
 
-    if (this.drawTool == 0 && this.currentTouch(e.changedTouches) != null) {
-      this.canvas.drawEnd();
+    if (this.currentTouch(e.changedTouches) != null) {
+      switch (this.drawTool) {
+        case 0:
+          this.canvas.drawEnd();
+          break;
+        case 1:
+          this.canvas.mergeEnd();
+          break;
+      }
     }
   }
   public onTouchCancel() {
     if (this.canvas == null) throw new Error('Canvas not found.');
 
-    if (this.drawTool == 0) {
-      this.canvas.drawCancel();
+    switch (this.drawTool) {
+      case 0:
+        this.canvas.drawCancel();
+        break;
+      case 1:
+        this.canvas.mergeCancel();
+        break;
     }
   }
 

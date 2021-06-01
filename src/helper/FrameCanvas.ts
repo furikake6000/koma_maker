@@ -18,6 +18,9 @@ export default class FrameCanvas {
   // 新しい線を引くときに使う変数
   private drawingLine: Line | null = null; // 現在引いている線の始点
 
+  // 線を消すときに使う変数
+  private mergedPolygons: Array<Polygon> = [];  // 結合するコマ
+
   // ---- public methods ----
 
   constructor(canvasObject: HTMLCanvasElement, frameWidth: number, frameHeight: number, properties: { [key: string]: number }) {
@@ -49,12 +52,8 @@ export default class FrameCanvas {
     this.ctx.fillRect(0, 0, this.canvasObject.width, this.canvasObject.height);
 
     // スタイルの設定
-    this.ctx.lineWidth = this.lineWidth;
     this.ctx.strokeStyle = 'black';
     this.ctx.lineJoin = 'miter';
-
-    // コマの描画
-    this.frames.forEach(frame => this.shrinkedFrame(frame).draw(this.ctx));
 
     // drawingLine（現在引いている線）の描画
     if (this.drawingLine) {
@@ -74,6 +73,22 @@ export default class FrameCanvas {
       // 破線の設定をもとに戻す
       this.ctx.setLineDash([]);
     }
+
+    // mergedPolygons（現在結合しようとしているポリゴン）の描画
+    if (this.mergedPolygons.length >= 1) {
+      // 色を設定し描画
+      this.ctx.fillStyle = '#FFCDD2';
+      this.mergedPolygons[0].fill(this.ctx);
+    }
+    if (this.mergedPolygons.length >= 2) {
+      // 色を設定し描画
+      this.ctx.fillStyle = '#81D4FA';
+      this.mergedPolygons[1].fill(this.ctx);
+    }
+
+    // コマの描画
+    this.ctx.lineWidth = this.lineWidth;
+    this.frames.forEach(frame => this.shrinkedFrame(frame).draw(this.ctx));
   }
 
   // プロパティを変える
@@ -129,6 +144,52 @@ export default class FrameCanvas {
   // 線を引くのをキャンセルする（引いている線は削除する）
   public drawCancel() {
     this.drawingLine = null;
+    
+    // 描画を更新
+    this.render();
+  }
+
+  // 線を消す（コマをマージする）系のメソッド
+  // posからマージするコマを選び始める
+  public mergeStart(pos: Vector) {
+    // mergedPolygonsを更新
+    const frame = this.frameOfPos(pos);
+    if (frame == undefined) return;
+    this.mergedPolygons = [frame];
+
+    // 描画を更新
+    this.render();
+  }
+
+  // posに存在するコマを2つめのコマとして選ぶ
+  public mergeMove(pos: Vector) {
+    if (this.mergedPolygons.length == 0) return;
+
+    // mergedPolygonsを更新
+    const frame = this.frameOfPos(pos);
+    if (frame == undefined || frame == this.mergedPolygons[0]) return;
+
+    this.mergedPolygons[1] = frame;
+
+    // 描画を更新
+    this.render();
+  }
+
+  // マージを完了する
+  public mergeEnd() {
+    if (this.mergedPolygons.length == 2) {
+      // TODO: コマをマージする
+    }
+
+    this.mergedPolygons = [];
+
+    // 描画を更新
+    this.render();
+  }
+
+  // マージをキャンセルする
+  public mergeCancel() {
+    this.mergedPolygons = [];
     
     // 描画を更新
     this.render();
