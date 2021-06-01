@@ -168,12 +168,17 @@ export default class FrameCanvas {
     return new Polygon(this.primaryPoints());
   }
 
+  // 指定の点にあるコマを返す
+  private frameOfPos(pos: Vector): Polygon | undefined {
+    return Array.from(this.frames).find(frame => {
+      return frame.containsPoint(pos);
+    });
+  }
+
   // コマを指定されたLineで分割する
   private divideFrame(divideLine: Line) {
     // 分割対象のコマを探す
-    const dividedFrame = Array.from(this.frames).find(frame => {
-      return frame.containsPoint(divideLine.start);
-    });
+    const dividedFrame = this.frameOfPos(divideLine.start);
     if (dividedFrame == undefined) throw new Error('Failed to divide frame: frame not found.');
 
     // コマを分割する線と分割される線を求める
