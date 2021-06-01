@@ -125,9 +125,13 @@ export default class FrameCanvas {
     // 描画を更新
     this.render();
   }
+
   // 線を引くのをキャンセルする（引いている線は削除する）
   public drawCancel() {
     this.drawingLine = null;
+    
+    // 描画を更新
+    this.render();
   }
 
   // offsetX, offsetY -> canvas上の座標の変換
