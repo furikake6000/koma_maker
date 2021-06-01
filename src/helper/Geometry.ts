@@ -224,6 +224,8 @@ export class Polygon {
     this.points_ = points.slice();
   }
 
+  // ---- public methods ----
+
   // ポリゴンを構成している辺のArrayを返してくれるメソッド
   public nodes(): Array<Line> {
     const nodes = [];
@@ -239,16 +241,18 @@ export class Polygon {
   public draw(ctx: CanvasRenderingContext2D) {
     if (this.points.length == 0) return;
 
-    ctx.beginPath();
+    this.renderPath(ctx);
     
-    // すべての点を通ってからパスをcloseする
-    ctx.moveTo(this.points[0].x, this.points[0].y);
-    for(let i=1; i<this.points.length; i++) {
-      ctx.lineTo(this.points[i].x, this.points[i].y);
-    }
-    ctx.closePath();
-
     ctx.stroke();
+    }
+
+  // Contextを渡したらポリゴンをfillしてくれるメソッド
+  public fill(ctx: CanvasRenderingContext2D) {
+    if (this.points.length == 0) return;
+
+    this.renderPath(ctx);
+
+    ctx.fill();
   }
 
   // Vectorで表された点がポリゴンの中にあるか判定するメソッド
@@ -341,5 +345,19 @@ export class Polygon {
     }
 
     return [new Polygon(normPoly), new Polygon(otherPoly)];
+  }
+
+  // ---- private methods ----
+  
+  // drawとfillの共通部分を抜き出したメソッド
+  private renderPath(ctx: CanvasRenderingContext2D) {
+    ctx.beginPath();
+    
+    // すべての点を通ってからパスをcloseする
+    ctx.moveTo(this.points[0].x, this.points[0].y);
+    for(let i=1; i<this.points.length; i++) {
+      ctx.lineTo(this.points[i].x, this.points[i].y);
+    }
+    ctx.closePath();
   }
 }
