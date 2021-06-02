@@ -18,7 +18,7 @@ export default class FrameCanvas {
   private drawingLine: Line | null = null; // 現在引いている線の始点
 
   // 線を消すときに使う変数
-  private mergedPolygons: Array<Polygon> = [];  // 結合するコマ
+  private mergingFrames: Array<Polygon> = [];  // 結合するコマ
 
   // ---- public methods ----
 
@@ -73,15 +73,15 @@ export default class FrameCanvas {
     }
 
     // mergedPolygons（現在結合しようとしているポリゴン）の描画
-    if (this.mergedPolygons.length >= 1) {
+    if (this.mergingFrames.length >= 1) {
       // 色を設定し描画
       this.ctx.fillStyle = '#FFCDD2';
-      this.mergedPolygons[0].fill(this.ctx);
+      this.mergingFrames[0].fill(this.ctx);
     }
-    if (this.mergedPolygons.length >= 2) {
+    if (this.mergingFrames.length >= 2) {
       // 色を設定し描画
       this.ctx.fillStyle = '#81D4FA';
-      this.mergedPolygons[1].fill(this.ctx);
+      this.mergingFrames[1].fill(this.ctx);
     }
 
     // コマの描画
@@ -153,7 +153,7 @@ export default class FrameCanvas {
     // mergedPolygonsを更新
     const frame = this.frameOfPos(pos);
     if (frame == undefined) return;
-    this.mergedPolygons = [frame];
+    this.mergingFrames = [frame];
 
     // 描画を更新
     this.render();
@@ -161,13 +161,13 @@ export default class FrameCanvas {
 
   // posに存在するコマを2つめのコマとして選ぶ
   public mergeMove(pos: Vector) {
-    if (this.mergedPolygons.length == 0) return;
+    if (this.mergingFrames.length == 0) return;
 
     // mergedPolygonsを更新
     const frame = this.frameOfPos(pos);
-    if (frame == undefined || frame == this.mergedPolygons[0]) return;
+    if (frame == undefined || frame == this.mergingFrames[0]) return;
 
-    this.mergedPolygons[1] = frame;
+    this.mergingFrames[1] = frame;
 
     // 描画を更新
     this.render();
@@ -175,14 +175,14 @@ export default class FrameCanvas {
 
   // マージを完了する
   public mergeEnd() {
-    if (this.mergedPolygons.length == 2) {
-      const mergedFrame = Polygon.merge(this.mergedPolygons[0], this.mergedPolygons[1]);
+    if (this.mergingFrames.length == 2) {
+      const mergedFrame = Polygon.merge(this.mergingFrames[0], this.mergingFrames[1]);
       this.frames.add(mergedFrame);
-      this.frames.delete(this.mergedPolygons[0]);
-      this.frames.delete(this.mergedPolygons[1]);
+      this.frames.delete(this.mergingFrames[0]);
+      this.frames.delete(this.mergingFrames[1]);
     }
 
-    this.mergedPolygons = [];
+    this.mergingFrames = [];
 
     // 描画を更新
     this.render();
@@ -190,7 +190,7 @@ export default class FrameCanvas {
 
   // マージをキャンセルする
   public mergeCancel() {
-    this.mergedPolygons = [];
+    this.mergingFrames = [];
     
     // 描画を更新
     this.render();
