@@ -220,8 +220,58 @@ export class Polygon {
 
   get points() { return this.points_; }
 
+  // ---- constructor ----
+
   constructor(points: Array<Vector>) {
     this.points_ = points.slice();
+  }
+
+  // ---- static methods ----
+
+  public static merge(poly1: Polygon, poly2: Polygon): Polygon {
+    let currentPolyIs1 = true;
+    let currentPoints = poly1.points;
+    const newPolyPoints = [];
+
+    // 始点を定める: poly2と重複しない最初のpoly1の点
+    const firstIndex = poly1.points.findIndex(p => {
+      return !poly2.points.includes(p);
+    });
+    let index = firstIndex;
+
+    do {
+      const point = currentPoints[index];
+
+      // 点を追加
+      newPolyPoints.push(point);
+
+      // もし自分と違うポリゴンに点が存在していたら
+      // currentPointsとindexを更新する
+      if (currentPolyIs1) {
+        const newIndex = poly2.points.findIndex(p => p == point);
+        if (newIndex != -1) {
+          currentPoints = poly2.points;
+          index = newIndex;
+          currentPolyIs1 = false;
+        }
+      } else {
+        const newIndex = poly1.points.findIndex(p => p == point);
+        if (newIndex != -1) {
+          currentPoints = poly1.points;
+          index = newIndex;
+          currentPolyIs1 = true;
+        }
+      }
+
+      // 次の点に移動
+      if (currentPolyIs1) {
+        index = (index == poly1.points.length - 1 ? 0 : index + 1);
+      } else {
+        index = (index == poly2.points.length - 1 ? 0 : index + 1);
+      }
+    } while (!(currentPolyIs1 == true && index == firstIndex));
+
+    return new Polygon(newPolyPoints);
   }
 
   // ---- public methods ----
@@ -242,9 +292,9 @@ export class Polygon {
     if (this.points.length == 0) return;
 
     this.renderPath(ctx);
-    
+
     ctx.stroke();
-    }
+  }
 
   // Contextを渡したらポリゴンをfillしてくれるメソッド
   public fill(ctx: CanvasRenderingContext2D) {
