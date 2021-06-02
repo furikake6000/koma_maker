@@ -11,8 +11,7 @@ export default class FrameCanvas {
   private lineWidth: number = 0;
   private frameSpace: number = 0;
 
-  // マンガコマ枠構成要素
-  private nodes: Set<Line> = new Set<Line>();
+  // マンガコマ枠
   private frames: Set<Polygon> = new Set<Polygon>();
   
   // 新しい線を引くときに使う変数
@@ -39,8 +38,7 @@ export default class FrameCanvas {
     this.frameHeight = frameHeight;
     this.changeProperties(properties);
 
-    // nodesとframesの初期化
-    this.nodes = new Set(this.primaryNodes());
+    // framesの初期化
     this.frames.clear();
     this.frames.add(this.primaryPolygon());
   }
@@ -256,15 +254,6 @@ export default class FrameCanvas {
     const newFrames = dividedFrame.divideWithLine(divideLine);
     for (const newFrame of newFrames) this.frames.add(newFrame);
     this.frames.delete(dividedFrame);
-
-    // nodesの増減作業
-    this.nodes.add(new Line(startCrossLine.start, partition.start));
-    this.nodes.add(new Line(partition.start, startCrossLine.end));
-    this.nodes.add(new Line(endCrossLine.start, partition.end));
-    this.nodes.add(new Line(partition.end, endCrossLine.end));
-    this.nodes.add(partition);
-    this.nodes.delete(startCrossLine);
-    this.nodes.delete(endCrossLine);
 
     // すべてのコマに対して、分割対象の辺があったら分割する
     this.frames.forEach(frame => {
