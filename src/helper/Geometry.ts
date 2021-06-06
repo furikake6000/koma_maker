@@ -1,3 +1,5 @@
+import Shape from '@doodle3d/clipper-js';
+
 const ZERO_MARGIN = 0.001;
 
 // 2次元ベクトル、点を表すことも
@@ -228,6 +230,14 @@ export class Polygon {
 
   // ---- static methods ----
 
+  // ClipperのShapeをPolygonに変換
+  // 複数のPolygonに分割される可能性があるため、返り値はArrayとなる
+  public static fromShape(shape: Shape): Array<Polygon> {
+    return shape.paths.map(path => {
+      return new Polygon(path.map(p => new Vector(p.X, p.Y)));
+    });
+  }
+
   public static merge(poly1: Polygon, poly2: Polygon): Polygon {
     let currentPolyIs1 = true;
     let currentPoints = poly1.points;
@@ -303,6 +313,16 @@ export class Polygon {
     this.renderPath(ctx);
 
     ctx.fill();
+  }
+
+  // Clipperで使用するShapeへ変換する
+  public toShape(): Shape {
+    // 基本的にPolygonは複数の箇所に分裂することはないため、pathsのサイズは1
+    return new Shape([
+      this.points.map(p => {
+        return { X: p.x, Y: p.y };
+      })
+    ]);
   }
 
   // Vectorで表された点がポリゴンの中にあるか判定するメソッド
