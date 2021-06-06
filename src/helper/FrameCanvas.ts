@@ -176,8 +176,8 @@ export default class FrameCanvas {
   // マージを完了する
   public mergeEnd() {
     if (this.mergingFrames.length == 2) {
-      const mergedFrame = Polygon.merge(this.mergingFrames[0], this.mergingFrames[1]);
-      this.frames.add(mergedFrame);
+      const mergedFrames = Polygon.merge(this.mergingFrames[0], this.mergingFrames[1]);
+      mergedFrames.forEach(frame => this.frames.add(frame));
       this.frames.delete(this.mergingFrames[0]);
       this.frames.delete(this.mergingFrames[1]);
     }
