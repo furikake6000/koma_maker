@@ -31,19 +31,16 @@
         v-icon mdi-open-in-new
 
     v-main
-      CanvasArea.mb-4
       DrawArea
 </template>
 
 <script>
-import CanvasArea from './components/CanvasArea.vue';
 import DrawArea from './components/DrawArea.vue';
 
 export default {
   name: 'App',
 
   components: {
-    CanvasArea,
     DrawArea
   },
 
