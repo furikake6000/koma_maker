@@ -86,7 +86,20 @@ export default class FrameCanvas {
 
     // コマの描画
     this.ctx.lineWidth = this.lineWidth;
-    this.frames.forEach(frame => this.shrinkedFrame(frame).draw(this.ctx));
+    this.frames.forEach(frame => {
+      const offset = this.frameSpace / 2 + this.lineWidth / 2;
+      const shape = frame.toShape();
+      const offsetShape = shape.offset(-offset, { jointType: 'jtMiter' });
+      const offsetPolys = Polygon.fromShape(offsetShape);
+      offsetPolys.forEach(poly => poly.draw(this.ctx));
+
+      if (offsetPolys.length > 1) {
+        console.log(frame);
+        console.log(shape);
+        console.log(offsetShape);
+        console.log(offsetPolys);
+      }
+    });
   }
 
   // プロパティを変える
