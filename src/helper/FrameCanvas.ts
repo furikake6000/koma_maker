@@ -309,23 +309,4 @@ export default class FrameCanvas {
     // 見つかったコマとlineとの当たり判定を返す
     return collidedFrame.collideWithLine(line)[0];
   }
-
-  // コマのpolygonからframeSpaceだけ縮小した新しいpolygonを作成
-  private shrinkedFrame(frame: Polygon): Polygon {
-    const primaryNodes = this.primaryNodes();
-
-    // shrinkedFrameを各辺のちょっとずらしたやつでひたすら切っていく
-    let shrinkedFrame = new Polygon(frame.points);
-    for(const node of frame.nodes()) {
-      // もしprimary nodeのいずれかの線上にあったら縮小しない
-      if(primaryNodes.find(pNode => node.isOnSameLine(pNode)) != undefined) continue;
-
-      const unitVec = node.unitNormalVector().times(this.frameSpace / 2 + this.lineWidth / 2);
-      const start = node.start.plus(unitVec);
-      const end = node.end.plus(unitVec);
-      shrinkedFrame = shrinkedFrame.divideWithLine(new Line(start, end, false))[0];
-    }
-
-    return shrinkedFrame;
-  }
 }

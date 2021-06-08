@@ -25,11 +25,6 @@ export class Vector {
     return Math.sqrt(this.x * this.x + this.y * this.y);
   }
 
-  // 自分を正規化(長さを1にする)したものを返す
-  public normalized(): Vector {
-    return this.divBy(this.length());
-  }
-
   // 掛け算
   public times(val: number): Vector {
     return new Vector(this.x * val, this.y * val);
@@ -55,19 +50,9 @@ export class Vector {
     return this.x * target.y - this.y * target.x;
   }
 
-  // 2点間の距離
-  public distance(target: Vector): number {
-    return this.minus(target).length();
-  }
-
   // targetと自分が平行かどうかの判定
   public isParallelTo(target: Vector): boolean {
     return this.crossTo(target) == 0;
-  }
-
-  // 単位法線ベクトル
-  public unitNormalVector(): Vector {
-    return new Vector(-this.y, this.x).normalized();
   }
 
   // 上下・左右位置の比較(上下比較が優先)
@@ -137,11 +122,6 @@ export class Line {
     return this.direction().isParallelTo(target.direction());
   }
 
-  // 単位法線ベクトル
-  public unitNormalVector(): Vector {
-    return this.direction().unitNormalVector();
-  }
-
   // 線に対して点がどっち向きにあるかを調べる
   // 1: 法線方向 / -1: 逆方向 / 0: 線上
   public sideOfPoint(point: Vector): number {
@@ -153,11 +133,6 @@ export class Line {
 
     // startからendのベクトルとstartからpointへのベクトルの外積の符号が点の向きを表す
     return Math.sign(cross);
-  }
-
-  // 2つの線分が同じ直線状にあるか調べる
-  public isOnSameLine(target: Line): boolean {
-    return this.sideOfPoint(target.start) == 0 && this.sideOfPoint(target.end) == 0;
   }
 
   // 自分とtargetとの交点を返す
@@ -185,35 +160,6 @@ export class Line {
     if (target.isSegment && (mu < 0.0 || mu >= 1.0)) return null;
 
     return this.start.plus(myDir.times(ramda));
-  }
-
-  // 自分と点targetとの距離を返す
-  public distance(target: Vector): number {
-    // 直線をax+by+c=0の形で表したときのa, b, cを算出
-    const a = this.end.y - this.start.y;
-    const b = this.start.x - this.end.x;
-    const c = this.end.x * this.start.y - this.start.x * this.end.y;
-
-    // 点と直線の距離の公式
-    const lengthToLine = Math.abs(a * target.x + b * target.y + c) / this.length();
-
-    if (this.isSegment) {
-      // targetが2点から引いた垂線の中にあるかを取得
-      const ps = b * this.start.x + a * this.start.y;
-      const pe = b * this.end.x + a * this.end.y;
-      const pt = b * target.x + a * target.y;
-      
-      if (pt >= Math.min(ps, pe) && pt <= Math.max(ps, pe)) {
-        // targetは2点から引いた垂線の中にある
-        return lengthToLine;
-      }
-
-      // targetは垂線の外にある
-      // この場合距離は2点からtargetへの距離のうち小さい方となる
-      return Math.min(target.distance(this.start), target.distance(this.end));
-    } else {
-      return lengthToLine;
-    }
   }
 }
 
