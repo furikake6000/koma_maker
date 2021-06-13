@@ -272,6 +272,7 @@ export default class FrameCanvas {
     this.frames.delete(dividedFrame);
 
     // すべてのコマに対して、分割対象の辺があったら分割する
+    // (Clipperを使った分割なのでここが無くてもある程度は動くが、Clipperのポリゴンは頂点座標が整数値のためこれが無いと丸め誤差により不安定になる恐れがある)
     this.frames.forEach(frame => {
       for(let i = 0; i < frame.points.length; i++) {
         const point = frame.points[i];
