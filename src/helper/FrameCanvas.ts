@@ -86,7 +86,32 @@ export default class FrameCanvas {
 
     // コマの描画
     this.ctx.lineWidth = this.lineWidth;
-    this.frames.forEach(frame => this.shrinkedFrame(frame).draw(this.ctx));
+    this.frames.forEach(frame => {
+      // コマ枠ぶん縮小しても全体の大きさが合うように調整しておく
+      const center = new Vector(
+        this.canvasObject.width / 2,
+        this.canvasObject.height / 2
+      );
+      const scale = new Vector(
+        this.frameWidth / (this.frameWidth - this.frameSpace),
+        this.frameHeight / (this.frameHeight - this.frameSpace)
+      );
+      const scaledFrame = frame.scale(scale, center);
+
+      // コマ枠ぶん縮小する
+      const offset = this.frameSpace / 2 + this.lineWidth / 2;
+      const shape = scaledFrame.toShape();
+      const offsetShape = shape.offset(-offset, { jointType: 'jtMiter' });
+      const offsetPolys = Polygon.fromShape(offsetShape);
+      offsetPolys.forEach(poly => poly.draw(this.ctx));
+
+      if (offsetPolys.length > 1) {
+        console.log(frame);
+        console.log(shape);
+        console.log(offsetShape);
+        console.log(offsetPolys);
+      }
+    });
   }
 
   // プロパティを変える
@@ -176,8 +201,8 @@ export default class FrameCanvas {
   // マージを完了する
   public mergeEnd() {
     if (this.mergingFrames.length == 2) {
-      const mergedFrame = Polygon.merge(this.mergingFrames[0], this.mergingFrames[1]);
-      this.frames.add(mergedFrame);
+      const mergedFrames = Polygon.merge(this.mergingFrames[0], this.mergingFrames[1]);
+      mergedFrames.forEach(frame => this.frames.add(frame));
       this.frames.delete(this.mergingFrames[0]);
       this.frames.delete(this.mergingFrames[1]);
     }
@@ -259,6 +284,7 @@ export default class FrameCanvas {
     this.frames.delete(dividedFrame);
 
     // すべてのコマに対して、分割対象の辺があったら分割する
+    // (Clipperを使った分割なのでここが無くてもある程度は動くが、Clipperのポリゴンは頂点座標が整数値のためこれが無いと丸め誤差により不安定になる恐れがある)
     this.frames.forEach(frame => {
       for(let i = 0; i < frame.points.length; i++) {
         const point = frame.points[i];
@@ -295,24 +321,5 @@ export default class FrameCanvas {
 
     // 見つかったコマとlineとの当たり判定を返す
     return collidedFrame.collideWithLine(line)[0];
-  }
-
-  // コマのpolygonからframeSpaceだけ縮小した新しいpolygonを作成
-  private shrinkedFrame(frame: Polygon): Polygon {
-    const primaryNodes = this.primaryNodes();
-
-    // shrinkedFrameを各辺のちょっとずらしたやつでひたすら切っていく
-    let shrinkedFrame = new Polygon(frame.points);
-    for(const node of frame.nodes()) {
-      // もしprimary nodeのいずれかの線上にあったら縮小しない
-      if(primaryNodes.find(pNode => node.isOnSameLine(pNode)) != undefined) continue;
-
-      const unitVec = node.unitNormalVector().times(this.frameSpace / 2 + this.lineWidth / 2);
-      const start = node.start.plus(unitVec);
-      const end = node.end.plus(unitVec);
-      shrinkedFrame = shrinkedFrame.divideWithLine(new Line(start, end, false))[0];
-    }
-
-    return shrinkedFrame;
   }
 }
