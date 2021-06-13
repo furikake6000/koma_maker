@@ -1,13 +1,26 @@
 <template lang="pug">
   .property-panel.grey.lighten-5
-    v-slider.mt-8(
+
+    .text-caption.mb-1 キャンバスサイズ
+    .d-flex.align-baseline
+      v-text-field(label="幅" dense outlined)
+      v-icon.mx-1 mdi-close
+      v-text-field(label="高さ" dense outlined)
+
+    .text-caption.mb-1 コマ枠サイズ
+    .d-flex.align-baseline
+      v-text-field(label="幅" dense outlined)
+      v-icon.mx-1 mdi-close
+      v-text-field(label="高さ" dense outlined)
+
+    v-slider.mt-6(
       v-model = "properties.lineWidth"
       label = "線の太さ"
       min = "1"
       max = "20"
       thumb-label="always"
     )
-    v-slider.mt-8(
+    v-slider.mt-4(
       v-model = "properties.frameSpace"
       label = "コマ間隔"
       min = "5"
