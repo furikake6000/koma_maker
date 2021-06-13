@@ -3,15 +3,35 @@
 
     .text-caption.mb-1 キャンバスサイズ
     .d-flex.align-baseline
-      v-text-field(label="幅" dense outlined)
+      v-text-field(
+        v-model.number = "properties.canvasWidth"
+        :rules = "widthHeightRules"
+        label="幅"
+        dense outlined
+      )
       v-icon.mx-1 mdi-close
-      v-text-field(label="高さ" dense outlined)
+      v-text-field(
+        v-model.number = "properties.canvasHeight"
+        :rules = "widthHeightRules"
+        label="高さ"
+        dense outlined
+      )
 
     .text-caption.mb-1 コマ枠サイズ
     .d-flex.align-baseline
-      v-text-field(label="幅" dense outlined)
+      v-text-field(
+        v-model.number = "properties.frameWidth"
+        :rules = "frameWidthRules"
+        label="幅"
+        dense outlined
+      )
       v-icon.mx-1 mdi-close
-      v-text-field(label="高さ" dense outlined)
+      v-text-field(
+        v-model.number = "properties.frameHeight"
+        :rules = "frameHeightRules"
+        label="高さ"
+        dense outlined
+      )
 
     v-slider.mt-6(
       v-model = "properties.lineWidth"
@@ -42,7 +62,11 @@ import { Component, Watch, Vue } from 'vue-property-decorator';
 export default class PropertyPanel extends Vue{
   private properties: { [key: string]: number } = {
     lineWidth: 5,
-    frameSpace: 10
+    frameSpace: 10,
+    frameWidth: 600,
+    frameHeight: 880,
+    canvasWidth: 840,
+    canvasHeight: 1188
   }
 
   mounted() {
@@ -50,6 +74,30 @@ export default class PropertyPanel extends Vue{
     this.$nextTick(() => {
       this.onPropertiesChanged();
     });
+  }
+
+  // ---- Computed ----
+  get widthHeightRules(): Array<(value: string | number) => boolean | string> {
+    return [
+      v => typeof v == 'number' ||
+        '数値を入力してください',
+      v => v >= 400 && v <= 2400 ||
+        '400~2400の範囲で入力してください'
+    ];
+  }
+  get frameWidthRules(): Array<(value: string | number) => boolean | string> {
+    const smallerThanCanvasRule: (value: string | number) => boolean | string =
+      v => v <= this.properties.canvasWidth ||
+        'キャンバス幅以下の値を入力してください';
+    
+    return this.widthHeightRules.concat(smallerThanCanvasRule);
+  }
+  get frameHeightRules(): Array<(value: string | number) => boolean | string> {
+    const smallerThanCanvasRule: (value: string | number) => boolean | string =
+      v => v <= this.properties.canvasHeight ||
+        'キャンバス高さ以下の値を入力してください';
+    
+    return this.widthHeightRules.concat(smallerThanCanvasRule);
   }
 
   @Watch('properties', { deep: true })
