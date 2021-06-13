@@ -225,6 +225,20 @@ export class Polygon {
     ctx.fill();
   }
 
+  // ポリゴンをcenterを中心に拡大する
+  public scale(ratio: Vector, center: Vector): Polygon {
+    const newPoints = this.points.map(point => {
+      const centerToPoint = point.minus(center);
+      const centerToNewPoint = new Vector(
+        centerToPoint.x * ratio.x,
+        centerToPoint.y * ratio.y
+      );
+      
+      return center.plus(centerToNewPoint);
+    });
+    return new Polygon(newPoints);
+  }
+
   // Clipperで使用するShapeへ変換する
   public toShape(): Shape {
     // 基本的にPolygonは複数の箇所に分裂することはないため、pathsのサイズは1
