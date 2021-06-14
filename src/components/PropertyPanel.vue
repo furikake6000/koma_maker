@@ -1,37 +1,39 @@
 <template lang="pug">
   .property-panel.grey.lighten-5
 
-    .text-caption.mb-1 キャンバスサイズ
-    .d-flex.align-baseline
-      v-text-field(
-        v-model.number = "properties.canvasWidth"
-        :rules = "widthHeightRules"
-        label="幅"
-        dense outlined
-      )
-      v-icon.mx-1 mdi-close
-      v-text-field(
-        v-model.number = "properties.canvasHeight"
-        :rules = "widthHeightRules"
-        label="高さ"
-        dense outlined
-      )
+    v-form(v-model="canvasFormValidate")
+      .text-caption.mb-1 キャンバスサイズ
+      .d-flex.align-baseline
+        v-text-field(
+          v-model.number = "properties.canvasWidth"
+          :rules = "widthHeightRules"
+          label="幅"
+          dense outlined
+        )
+        v-icon.mx-1 mdi-close
+        v-text-field(
+          v-model.number = "properties.canvasHeight"
+          :rules = "widthHeightRules"
+          label="高さ"
+          dense outlined
+        )
 
-    .text-caption.mb-1 コマ枠サイズ
-    .d-flex.align-baseline
-      v-text-field(
-        v-model.number = "properties.frameWidth"
-        :rules = "frameWidthRules"
-        label="幅"
-        dense outlined
-      )
-      v-icon.mx-1 mdi-close
-      v-text-field(
-        v-model.number = "properties.frameHeight"
-        :rules = "frameHeightRules"
-        label="高さ"
-        dense outlined
-      )
+    v-form(v-model="frameFormValidate")
+      .text-caption.mb-1 コマ枠サイズ
+      .d-flex.align-baseline
+        v-text-field(
+          v-model.number = "properties.frameWidth"
+          :rules = "frameWidthRules"
+          label="幅"
+          dense outlined
+        )
+        v-icon.mx-1 mdi-close
+        v-text-field(
+          v-model.number = "properties.frameHeight"
+          :rules = "frameHeightRules"
+          label="高さ"
+          dense outlined
+        )
 
     v-slider.mt-6(
       v-model = "properties.lineWidth"
@@ -68,6 +70,8 @@ export default class PropertyPanel extends Vue{
     canvasWidth: 840,
     canvasHeight: 1188
   }
+  private canvasFormValidate: boolean = true;
+  private frameFormValidate: boolean = true;
 
   mounted() {
     // CanvasAreaのcanvas読み込みを待つためnextTickで反映する
@@ -102,7 +106,24 @@ export default class PropertyPanel extends Vue{
 
   @Watch('properties', { deep: true })
   onPropertiesChanged() {
-    this.$emit('propertiesChanged', this.properties);
+    // nextTick3個 = 3tick後
+    // v-formのValidationの更新に3フレームかかるらしく、こうしないと値が正確に取れない
+    // 解決法がわかったら修正
+    this.$nextTick(() => { this.$nextTick(() => { this.$nextTick(() => {
+      let props = { ... this.properties }; // コピーを作成
+
+      if (!this.canvasFormValidate) {
+        delete props.canvasWidth;
+        delete props.canvasHeight;
+      }
+
+      if (!this.frameFormValidate) {
+        delete props.frameWidth;
+        delete props.frameHeight;
+      }
+
+      this.$emit('propertiesChanged', props);
+    });});});
   }
 
   download() {
