@@ -34,9 +34,6 @@ import FrameCanvas from '../helper/FrameCanvas';
 import { Vector } from '../helper/Geometry';
 import ClickTouchHelper from '../helper/ClickTouchHelper';
 
-const FRAME_WIDTH: number = 600;
-const FRAME_HEIGHT: number = 880;
-
 @Component({
   components: {
     PropertyPanel
@@ -57,7 +54,7 @@ export default class DrawArea extends Vue{
     if (!(this.$refs.canvasObject instanceof HTMLCanvasElement)) {
       throw new Error('Canvas element not found.');
     }
-    this.canvas = new FrameCanvas(this.$refs.canvasObject, FRAME_WIDTH, FRAME_HEIGHT);
+    this.canvas = new FrameCanvas(this.$refs.canvasObject);
   }
 
   // ---- public methods ----
