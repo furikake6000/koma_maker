@@ -122,8 +122,10 @@ export default class FrameCanvas {
       properties.frameWidth || this.frameWidth,
       properties.frameHeight || this.frameHeight
     );
-    this.canvasWidth = properties.canvasWidth || this.canvasWidth;
-    this.canvasHeight = properties.canvasHeight || this.canvasHeight;
+    this.changeCanvasSize(
+      properties.canvasWidth || this.canvasWidth,
+      properties.canvasHeight || this.canvasHeight
+    );
     this.lineWidth = properties.lineWidth;
     this.frameSpace = properties.frameSpace;
 
@@ -131,7 +133,28 @@ export default class FrameCanvas {
     this.render();
   }
 
-  // コマの縦横比の変更を適用する
+  // キャンバスのサイズ変更を適用する
+  public changeCanvasSize(width: number, height: number) {
+    const oldCenter = new Vector(
+      this.canvasWidth / 2,
+      this.canvasHeight / 2
+    );
+    const newCenter = new Vector(
+      width / 2,
+      height / 2
+    );
+    const moveVec = newCenter.minus(oldCenter);
+
+    // 全てのコマを移動
+    this.frames = new Set(Array.from(this.frames).map(frame => {
+      return frame.move(moveVec);
+    }));
+
+    this.canvasWidth = width;
+    this.canvasHeight = height;
+  }
+
+  // コマのサイズ変更を適用する
   public changeFrameSize(width: number, height: number) {
     const center = new Vector(
       this.canvasWidth / 2,
