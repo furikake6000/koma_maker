@@ -8,6 +8,8 @@ export default class FrameCanvas {
   // プロパティ
   private frameWidth: number = 600;
   private frameHeight: number = 880;
+  private canvasWidth: number;
+  private canvasHeight: number;
   private lineWidth: number = 0;
   private frameSpace: number = 0;
 
@@ -34,6 +36,8 @@ export default class FrameCanvas {
     }
 
     // プロパティの初期化
+    this.canvasWidth = this.canvasObject.width;
+    this.canvasHeight = this.canvasObject.height;
     this.changeProperties(properties);
 
     // framesの初期化
@@ -45,7 +49,7 @@ export default class FrameCanvas {
   public render() {
     // 既存の描画内容のリセット
     this.ctx.fillStyle = 'white';
-    this.ctx.fillRect(0, 0, this.canvasObject.width, this.canvasObject.height);
+    this.ctx.fillRect(0, 0, this.canvasWidth, this.canvasHeight);
 
     // スタイルの設定
     this.ctx.strokeStyle = 'black';
@@ -87,8 +91,8 @@ export default class FrameCanvas {
     this.frames.forEach(frame => {
       // コマ枠ぶん縮小しても全体の大きさが合うように調整しておく
       const center = new Vector(
-        this.canvasObject.width / 2,
-        this.canvasObject.height / 2
+        this.canvasWidth / 2,
+        this.canvasHeight / 2
       );
       const scale = new Vector(
         this.frameWidth / (this.frameWidth - this.frameSpace),
@@ -118,6 +122,8 @@ export default class FrameCanvas {
       properties.frameWidth || this.frameWidth,
       properties.frameHeight || this.frameHeight
     );
+    this.canvasWidth = properties.canvasWidth || this.canvasWidth;
+    this.canvasHeight = properties.canvasHeight || this.canvasHeight;
     this.lineWidth = properties.lineWidth;
     this.frameSpace = properties.frameSpace;
 
@@ -128,8 +134,8 @@ export default class FrameCanvas {
   // コマの縦横比の変更を適用する
   public changeFrameSize(width: number, height: number) {
     const center = new Vector(
-      this.canvasObject.width / 2,
-      this.canvasObject.height / 2
+      this.canvasWidth / 2,
+      this.canvasHeight / 2
     );
     const scale = new Vector(
       width / this.frameWidth,
@@ -150,7 +156,7 @@ export default class FrameCanvas {
   public drawStart(pos: Vector) {
     // 枠外だったら線を引くのはやめる
     if (!pos.isInRect(
-      this.canvasObject.width / 2 - this.frameWidth / 2, this.canvasObject.height / 2 - this.frameHeight / 2,
+      this.canvasWidth / 2 - this.frameWidth / 2, this.canvasHeight / 2 - this.frameHeight / 2,
       this.frameWidth, this.frameHeight
     )) return;
 
@@ -249,7 +255,7 @@ export default class FrameCanvas {
       throw new Error('Canvas element not found.');
     }
 
-    const expandRate: number = this.canvasObject.width / this.canvasObject.clientWidth;
+    const expandRate: number = this.canvasWidth / this.canvasObject.clientWidth;
     return new Vector(Math.floor(offsetPos.x * expandRate), Math.floor(offsetPos.y * expandRate));
   }
 
@@ -258,10 +264,10 @@ export default class FrameCanvas {
   // 最初の4点を返す
   private primaryPoints(): Array<Vector> {
     return [
-      new Vector(this.canvasObject.width / 2 - this.frameWidth / 2, this.canvasObject.height / 2 - this.frameHeight / 2),
-      new Vector(this.canvasObject.width / 2 + this.frameWidth / 2, this.canvasObject.height / 2 - this.frameHeight / 2),
-      new Vector(this.canvasObject.width / 2 + this.frameWidth / 2, this.canvasObject.height / 2 + this.frameHeight / 2),
-      new Vector(this.canvasObject.width / 2 - this.frameWidth / 2, this.canvasObject.height / 2 + this.frameHeight / 2)
+      new Vector(this.canvasWidth / 2 - this.frameWidth / 2, this.canvasHeight / 2 - this.frameHeight / 2),
+      new Vector(this.canvasWidth / 2 + this.frameWidth / 2, this.canvasHeight / 2 - this.frameHeight / 2),
+      new Vector(this.canvasWidth / 2 + this.frameWidth / 2, this.canvasHeight / 2 + this.frameHeight / 2),
+      new Vector(this.canvasWidth / 2 - this.frameWidth / 2, this.canvasHeight / 2 + this.frameHeight / 2)
     ];
   }
   
