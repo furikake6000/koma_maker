@@ -61,6 +61,18 @@ export default class DrawArea extends Vue{
 
   // PropertiesPanelからプロパティの変更を受け取るためのイベント
   public onPropertiesChanged(properties: { [key: string]: number }) {
+    if (!(this.$refs.canvasObject instanceof HTMLCanvasElement)) {
+      throw new Error('Canvas element not found.');
+    }
+
+    // キャンバスサイズの適用
+    if ('canvasWidth' in properties) {
+      this.$refs.canvasObject.width = properties.canvasWidth;
+    }
+    if ('canvasHeight' in properties) {
+      this.$refs.canvasObject.height = properties.canvasHeight;
+    }
+
     this.canvas?.changeProperties(properties);
   }
 
