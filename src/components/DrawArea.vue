@@ -22,7 +22,7 @@
             v-btn
               v-icon mdi-eraser
     PropertyPanel(
-      @propertiesChanged="onPropertiesChanged($event, properties)"
+      @propertiesChanged="onPropertiesChanged($event)"
       @download="download"
     )
 </template>
@@ -46,7 +46,6 @@ export default class DrawArea extends Vue{
   // ---- data ----
 
   private drawTool: number = 0;
-  private properties: { [key: string]: number } = {};
   private canvas: FrameCanvas | null = null;
 
   private currentTouchID: number = 0; // 現在線を引いているTouchのidentifier
@@ -58,7 +57,7 @@ export default class DrawArea extends Vue{
     if (!(this.$refs.canvasObject instanceof HTMLCanvasElement)) {
       throw new Error('Canvas element not found.');
     }
-    this.canvas = new FrameCanvas(this.$refs.canvasObject, FRAME_WIDTH, FRAME_HEIGHT, this.properties);
+    this.canvas = new FrameCanvas(this.$refs.canvasObject, FRAME_WIDTH, FRAME_HEIGHT);
   }
 
   // ---- public methods ----

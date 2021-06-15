@@ -22,7 +22,7 @@ export default class FrameCanvas {
 
   // ---- public methods ----
 
-  constructor(canvasObject: HTMLCanvasElement, frameWidth: number, frameHeight: number, properties: { [key: string]: number }) {
+  constructor(canvasObject: HTMLCanvasElement, frameWidth: number, frameHeight: number, properties: { [key: string]: number } = {}) {
     // キャンバスの初期化
     this.canvasObject = canvasObject;
     const ctx = canvasObject.getContext('2d');
