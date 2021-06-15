@@ -6,8 +6,8 @@ export default class FrameCanvas {
   private ctx: CanvasRenderingContext2D;
 
   // プロパティ
-  private frameWidth: number;
-  private frameHeight: number;
+  private frameWidth: number = 600;
+  private frameHeight: number = 880;
   private lineWidth: number = 0;
   private frameSpace: number = 0;
 
@@ -34,8 +34,6 @@ export default class FrameCanvas {
     }
 
     // プロパティの初期化
-    this.frameWidth = frameWidth;
-    this.frameHeight = frameHeight;
     this.changeProperties(properties);
 
     // framesの初期化
@@ -116,11 +114,35 @@ export default class FrameCanvas {
 
   // プロパティを変える
   public changeProperties(properties: { [key: string]: number }) {
+    this.changeFrameSize(
+      properties.frameWidth || this.frameWidth,
+      properties.frameHeight || this.frameHeight
+    );
     this.lineWidth = properties.lineWidth;
     this.frameSpace = properties.frameSpace;
 
     // 変更後の内容で描画
     this.render();
+  }
+
+  // コマの縦横比の変更を適用する
+  public changeFrameSize(width: number, height: number) {
+    const center = new Vector(
+      this.canvasObject.width / 2,
+      this.canvasObject.height / 2
+    );
+    const scale = new Vector(
+      width / this.frameWidth,
+      height / this.frameHeight
+    );
+
+    // 全てのコマを拡大縮小
+    this.frames = new Set(Array.from(this.frames).map(frame => {
+      return frame.scale(scale, center);
+    }));
+
+    this.frameWidth = width;
+    this.frameHeight = height;
   }
 
   // 線を引く系のメソッド
