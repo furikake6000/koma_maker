@@ -22,7 +22,7 @@
             v-btn
               v-icon mdi-eraser
     PropertyPanel(
-      @propertiesChanged="onPropertiesChanged($event, properties)"
+      @propertiesChanged="onPropertiesChanged($event)"
       @download="download"
     )
 </template>
@@ -34,9 +34,6 @@ import FrameCanvas from '../helper/FrameCanvas';
 import { Vector } from '../helper/Geometry';
 import ClickTouchHelper from '../helper/ClickTouchHelper';
 
-const FRAME_WIDTH: number = 600;
-const FRAME_HEIGHT: number = 880;
-
 @Component({
   components: {
     PropertyPanel
@@ -46,7 +43,6 @@ export default class DrawArea extends Vue{
   // ---- data ----
 
   private drawTool: number = 0;
-  private properties: { [key: string]: number } = {};
   private canvas: FrameCanvas | null = null;
 
   private currentTouchID: number = 0; // 現在線を引いているTouchのidentifier
@@ -58,13 +54,25 @@ export default class DrawArea extends Vue{
     if (!(this.$refs.canvasObject instanceof HTMLCanvasElement)) {
       throw new Error('Canvas element not found.');
     }
-    this.canvas = new FrameCanvas(this.$refs.canvasObject, FRAME_WIDTH, FRAME_HEIGHT, this.properties);
+    this.canvas = new FrameCanvas(this.$refs.canvasObject);
   }
 
   // ---- public methods ----
 
   // PropertiesPanelからプロパティの変更を受け取るためのイベント
   public onPropertiesChanged(properties: { [key: string]: number }) {
+    if (!(this.$refs.canvasObject instanceof HTMLCanvasElement)) {
+      throw new Error('Canvas element not found.');
+    }
+
+    // キャンバスサイズの適用
+    if ('canvasWidth' in properties) {
+      this.$refs.canvasObject.width = properties.canvasWidth;
+    }
+    if ('canvasHeight' in properties) {
+      this.$refs.canvasObject.height = properties.canvasHeight;
+    }
+
     this.canvas?.changeProperties(properties);
   }
 

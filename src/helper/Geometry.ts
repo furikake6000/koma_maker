@@ -225,6 +225,12 @@ export class Polygon {
     ctx.fill();
   }
 
+  // ポリゴンを平行移動する
+  public move(dir: Vector): Polygon {
+    const newPoints = this.points.map(point => point.plus(dir));
+    return new Polygon(newPoints);
+  }
+
   // ポリゴンをcenterを中心に拡大する
   public scale(ratio: Vector, center: Vector): Polygon {
     const newPoints = this.points.map(point => {
