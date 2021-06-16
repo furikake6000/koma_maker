@@ -104,25 +104,32 @@ export default class PropertyPanel extends Vue{
     return this.widthHeightRules.concat(smallerThanCanvasRule);
   }
 
+  get propertiesValidated(): { [key: string]: number } {
+    // コピーを作成
+    let props = { ... this.properties };
+
+    // バリデーションに通らなかったパラメータを消していく
+    if (!this.canvasFormValidate) {
+      delete props.canvasWidth;
+      delete props.canvasHeight;
+    }
+    if (!this.frameFormValidate) {
+      delete props.frameWidth;
+      delete props.frameHeight;
+    }
+
+    return props;
+  }
+
+  // ---- Watchers ----
+
   @Watch('properties', { deep: true })
   onPropertiesChanged() {
     // nextTick3個 = 3tick後
     // v-formのValidationの更新に3フレームかかるらしく、こうしないと値が正確に取れない
     // 解決法がわかったら修正
     this.$nextTick(() => { this.$nextTick(() => { this.$nextTick(() => {
-      let props = { ... this.properties }; // コピーを作成
-
-      if (!this.canvasFormValidate) {
-        delete props.canvasWidth;
-        delete props.canvasHeight;
-      }
-
-      if (!this.frameFormValidate) {
-        delete props.frameWidth;
-        delete props.frameHeight;
-      }
-
-      this.$emit('propertiesChanged', props);
+      this.$emit('propertiesChanged', this.propertiesValidated);
     });});});
   }
 
