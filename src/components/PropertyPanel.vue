@@ -23,14 +23,14 @@
       .d-flex.align-baseline
         v-text-field(
           v-model.number = "properties.frameWidth"
-          :rules = "frameWidthRules"
+          :rules = "widthHeightRules"
           label="幅"
           dense outlined
         )
         v-icon.mx-1 mdi-close
         v-text-field(
           v-model.number = "properties.frameHeight"
-          :rules = "frameHeightRules"
+          :rules = "widthHeightRules"
           label="高さ"
           dense outlined
         )
@@ -88,20 +88,6 @@ export default class PropertyPanel extends Vue{
       v => v >= 400 && v <= 2400 ||
         '400~2400の範囲で入力してください'
     ];
-  }
-  get frameWidthRules(): Array<(value: string | number) => boolean | string> {
-    const smallerThanCanvasRule: (value: string | number) => boolean | string =
-      v => v <= this.properties.canvasWidth ||
-        'キャンバス幅以下の値を入力してください';
-    
-    return this.widthHeightRules.concat(smallerThanCanvasRule);
-  }
-  get frameHeightRules(): Array<(value: string | number) => boolean | string> {
-    const smallerThanCanvasRule: (value: string | number) => boolean | string =
-      v => v <= this.properties.canvasHeight ||
-        'キャンバス高さ以下の値を入力してください';
-    
-    return this.widthHeightRules.concat(smallerThanCanvasRule);
   }
 
   get propertiesValidated(): { [key: string]: number } {
