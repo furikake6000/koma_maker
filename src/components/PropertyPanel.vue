@@ -1,57 +1,61 @@
 <template lang="pug">
   .property-panel.grey.lighten-5
     
-    .ma-4
-      v-form(v-model="canvasFormValidate")
-        .text-caption.mb-1 キャンバスサイズ
-        .d-flex.align-baseline
-          v-text-field(
-            v-model.number = "properties.canvasWidth"
-            :rules = "widthHeightRules"
-            label="幅"
-            dense outlined
+    v-list(expand)
+      v-list-group(:value="true" prepend-icon="mdi-move-resize")
+        template(v-slot:activator)
+          v-list-item-title ページ設定
+        v-list-item
+          v-form(v-model="canvasFormValidate")
+            .text-caption.mb-1 キャンバスサイズ
+            .d-flex.align-baseline
+              v-text-field(
+                v-model.number = "properties.canvasWidth"
+                :rules = "widthHeightRules"
+                label="幅"
+                dense outlined
+              )
+              v-icon.mx-1 mdi-close
+              v-text-field(
+                v-model.number = "properties.canvasHeight"
+                :rules = "widthHeightRules"
+                label="高さ"
+                dense outlined
+              )
+        v-list-item
+          v-form(v-model="frameFormValidate")
+            .text-caption.mb-1 コマ枠サイズ
+            .d-flex.align-baseline
+              v-text-field(
+                v-model.number = "properties.frameWidth"
+                :rules = "widthHeightRules"
+                label="幅"
+                dense outlined
+              )
+              v-icon.mx-1 mdi-close
+              v-text-field(
+                v-model.number = "properties.frameHeight"
+                :rules = "widthHeightRules"
+                label="高さ"
+                dense outlined
+              )
+        v-list-item
+          v-slider.mt-9(
+            v-model = "properties.lineWidth"
+            label = "線の太さ"
+            min = "1"
+            max = "20"
+            thumb-label="always"
           )
-          v-icon.mx-1 mdi-close
-          v-text-field(
-            v-model.number = "properties.canvasHeight"
-            :rules = "widthHeightRules"
-            label="高さ"
-            dense outlined
+        v-list-item
+          v-slider.mt-9(
+            v-model = "properties.frameSpace"
+            label = "コマ間隔"
+            min = "5"
+            max = "50"
+            thumb-label="always"
           )
 
-      v-form(v-model="frameFormValidate")
-        .text-caption.mb-1 コマ枠サイズ
-        .d-flex.align-baseline
-          v-text-field(
-            v-model.number = "properties.frameWidth"
-            :rules = "widthHeightRules"
-            label="幅"
-            dense outlined
-          )
-          v-icon.mx-1 mdi-close
-          v-text-field(
-            v-model.number = "properties.frameHeight"
-            :rules = "widthHeightRules"
-            label="高さ"
-            dense outlined
-          )
-
-      v-slider.mt-6(
-        v-model = "properties.lineWidth"
-        label = "線の太さ"
-        min = "1"
-        max = "20"
-        thumb-label="always"
-      )
-      v-slider.mt-4(
-        v-model = "properties.frameSpace"
-        label = "コマ間隔"
-        min = "5"
-        max = "50"
-        thumb-label="always"
-      )
-
-    v-list
       v-list-group(:value="true" prepend-icon="mdi-grid")
         template(v-slot:activator)
           v-list-item-title グリッド
@@ -72,13 +76,14 @@
                 label="縦"
                 dense outlined
               )
-    
-    .ma-4
-      v-btn(
-        @click = "download"
-        x-large rounded block
-        color = "primary"
-      ) ダウンロード
+      
+      v-list-item
+        v-btn(
+          @click = "download"
+          x-large rounded block
+          color = "primary"
+        ) ダウンロード
+      
 </template>
 
 <script lang="ts">
