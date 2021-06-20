@@ -21,22 +21,32 @@
               v-icon mdi-pencil
             v-btn
               v-icon mdi-eraser
-    PropertyPanel(
-      @propertiesChanged="onPropertiesChanged($event)"
-      @download="download"
-    )
+    .property-panel
+      v-list(expand)
+        PagePropertiesMenu(
+          @propertiesChanged="onPropertiesChanged($event)"
+        )
+        GridsMenu
+        v-list-item
+          v-btn(
+            @click = "download"
+            x-large rounded block
+            color = "primary"
+          ) ダウンロード
 </template>
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
-import PropertyPanel from './PropertyPanel.vue';
 import FrameCanvas from '../helper/FrameCanvas';
 import { Vector } from '../helper/Geometry';
 import ClickTouchHelper from '../helper/ClickTouchHelper';
+import PagePropertiesMenu from './PagePropertiesMenu.vue';
+import GridsMenu from './GridsMenu.vue';
 
 @Component({
   components: {
-    PropertyPanel
+    PagePropertiesMenu,
+    GridsMenu
   }
 })
 export default class DrawArea extends Vue{
@@ -212,4 +222,7 @@ export default class DrawArea extends Vue{
     max-width: 80%
     max-height: 90vh
     background-color: white
+  .property-panel
+    @media (min-width: 600px)
+      width: 300px
 </style>
