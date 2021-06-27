@@ -7,14 +7,14 @@ v-list-group(:value="true" prepend-icon="mdi-move-resize")
       .text-caption.mb-1 キャンバスサイズ
       .d-flex.align-baseline
         v-text-field(
-          v-model.number = "properties.canvasWidth"
+          v-model.number = "properties.canvas.width"
           :rules = "widthHeightRules"
           label="幅"
           dense outlined
         )
         v-icon.mx-1 mdi-close
         v-text-field(
-          v-model.number = "properties.canvasHeight"
+          v-model.number = "properties.canvas.height"
           :rules = "widthHeightRules"
           label="高さ"
           dense outlined
@@ -24,14 +24,14 @@ v-list-group(:value="true" prepend-icon="mdi-move-resize")
       .text-caption.mb-1 コマ枠サイズ
       .d-flex.align-baseline
         v-text-field(
-          v-model.number = "properties.frameWidth"
+          v-model.number = "properties.frame.width"
           :rules = "widthHeightRules"
           label="幅"
           dense outlined
         )
         v-icon.mx-1 mdi-close
         v-text-field(
-          v-model.number = "properties.frameHeight"
+          v-model.number = "properties.frame.height"
           :rules = "widthHeightRules"
           label="高さ"
           dense outlined
@@ -56,16 +56,21 @@ v-list-group(:value="true" prepend-icon="mdi-move-resize")
 
 <script lang="ts">
 import { Component, Watch, Vue } from 'vue-property-decorator';
+import { PropsPatch } from '../helper/Props';
 
 @Component
 export default class PagePropertiesMenu extends Vue{
-  private properties: { [key: string]: number } = {
+  private properties: PropsPatch = {
     lineWidth: 5,
     frameSpace: 10,
-    frameWidth: 600,
-    frameHeight: 880,
-    canvasWidth: 840,
-    canvasHeight: 1188
+    frame: {
+      width: 600,
+      height: 800,
+    },
+    canvas: {
+      width: 840,
+      height: 1188,
+    },
   }
   private canvasFormValidate: boolean = true;
   private frameFormValidate: boolean = true;
@@ -87,18 +92,16 @@ export default class PagePropertiesMenu extends Vue{
     ];
   }
 
-  get propertiesValidated(): { [key: string]: number } {
+  get propertiesValidated(): PropsPatch {
     // コピーを作成
     let props = { ... this.properties };
 
     // バリデーションに通らなかったパラメータを消していく
     if (!this.canvasFormValidate) {
-      delete props.canvasWidth;
-      delete props.canvasHeight;
+      delete props.canvas;
     }
     if (!this.frameFormValidate) {
-      delete props.frameWidth;
-      delete props.frameHeight;
+      delete props.frame;
     }
 
     return props;

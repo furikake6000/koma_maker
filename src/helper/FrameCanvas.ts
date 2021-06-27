@@ -1,4 +1,5 @@
 import { Line, Polygon, Vector } from './Geometry';
+import { PropsPatch, Props } from '../helper/Props';
 
 export default class FrameCanvas {
   // キャンバス関係
@@ -6,12 +7,7 @@ export default class FrameCanvas {
   private ctx: CanvasRenderingContext2D;
 
   // プロパティ
-  private frameWidth: number = 600;
-  private frameHeight: number = 880;
-  private canvasWidth: number;
-  private canvasHeight: number;
-  private lineWidth: number = 0;
-  private frameSpace: number = 0;
+  private props: Props = new Props();
 
   // マンガコマ枠
   private frames: Set<Polygon> = new Set<Polygon>();
@@ -24,7 +20,7 @@ export default class FrameCanvas {
 
   // ---- public methods ----
 
-  constructor(canvasObject: HTMLCanvasElement, properties: { [key: string]: number } = {}) {
+  constructor(canvasObject: HTMLCanvasElement) {
     // キャンバスの初期化
     this.canvasObject = canvasObject;
     const ctx = canvasObject.getContext('2d');
@@ -34,12 +30,6 @@ export default class FrameCanvas {
       this.ctx = new CanvasRenderingContext2D();
       throw new Error('Could not get the context of canvas object.');
     }
-
-    // プロパティの初期化
-    this.canvasWidth = this.canvasObject.width;
-    this.canvasHeight = this.canvasObject.height;
-    this.changeProperties(properties);
-
     // framesの初期化
     this.frames.clear();
     this.frames.add(this.primaryPolygon());
@@ -49,7 +39,7 @@ export default class FrameCanvas {
   public render() {
     // 既存の描画内容のリセット
     this.ctx.fillStyle = 'white';
-    this.ctx.fillRect(0, 0, this.canvasWidth, this.canvasHeight);
+    this.ctx.fillRect(0, 0, this.props.canvas.width, this.props.canvas.height);
 
     // スタイルの設定
     this.ctx.strokeStyle = 'black';
@@ -87,21 +77,21 @@ export default class FrameCanvas {
     }
 
     // コマの描画
-    this.ctx.lineWidth = this.lineWidth;
+    this.ctx.lineWidth = this.props.lineWidth;
     this.frames.forEach(frame => {
       // コマ枠ぶん縮小しても全体の大きさが合うように調整しておく
       const center = new Vector(
-        this.canvasWidth / 2,
-        this.canvasHeight / 2
+        this.props.canvas.width / 2,
+        this.props.canvas.height / 2
       );
       const scale = new Vector(
-        this.frameWidth / (this.frameWidth - this.frameSpace),
-        this.frameHeight / (this.frameHeight - this.frameSpace)
+        this.props.frame.width / (this.props.frame.width - this.props.frameSpace),
+        this.props.frame.height / (this.props.frame.height - this.props.frameSpace)
       );
       const scaledFrame = frame.scale(scale, center);
 
       // コマ枠ぶん縮小する
-      const offset = this.frameSpace / 2 + this.lineWidth / 2;
+      const offset = this.props.frameSpace / 2 + this.props.lineWidth / 2;
       const shape = scaledFrame.toShape();
       const offsetShape = shape.offset(-offset, { jointType: 'jtMiter' });
       const offsetPolys = Polygon.fromShape(offsetShape);
@@ -117,17 +107,17 @@ export default class FrameCanvas {
   }
 
   // プロパティを変える
-  public changeProperties(properties: { [key: string]: number }) {
-    this.changeFrameSize(
-      properties.frameWidth || this.frameWidth,
-      properties.frameHeight || this.frameHeight
-    );
-    this.changeCanvasSize(
-      properties.canvasWidth || this.canvasWidth,
-      properties.canvasHeight || this.canvasHeight
-    );
-    this.lineWidth = properties.lineWidth;
-    this.frameSpace = properties.frameSpace;
+  public changeProperties(props: PropsPatch) {
+    if (props.frame) {
+      this.changeFrameSize(props.frame.width, props.frame.height);
+    }
+    
+    if (props.canvas) {
+      this.changeCanvasSize(props.canvas.width, props.canvas.height);
+    }
+
+    this.props.lineWidth = props.lineWidth || this.props.lineWidth;
+    this.props.frameSpace = props.frameSpace || this.props.frameSpace;
 
     // 変更後の内容で描画
     this.render();
@@ -136,8 +126,8 @@ export default class FrameCanvas {
   // キャンバスのサイズ変更を適用する
   public changeCanvasSize(width: number, height: number) {
     const oldCenter = new Vector(
-      this.canvasWidth / 2,
-      this.canvasHeight / 2
+      this.props.canvas.width / 2,
+      this.props.canvas.height / 2
     );
     const newCenter = new Vector(
       width / 2,
@@ -150,19 +140,19 @@ export default class FrameCanvas {
       return frame.move(moveVec);
     }));
 
-    this.canvasWidth = width;
-    this.canvasHeight = height;
+    this.props.canvas.width = width;
+    this.props.canvas.height = height;
   }
 
   // コマのサイズ変更を適用する
   public changeFrameSize(width: number, height: number) {
     const center = new Vector(
-      this.canvasWidth / 2,
-      this.canvasHeight / 2
+      this.props.canvas.width / 2,
+      this.props.canvas.height / 2
     );
     const scale = new Vector(
-      width / this.frameWidth,
-      height / this.frameHeight
+      width / this.props.frame.width,
+      height / this.props.frame.height
     );
 
     // 全てのコマを拡大縮小
@@ -170,8 +160,8 @@ export default class FrameCanvas {
       return frame.scale(scale, center);
     }));
 
-    this.frameWidth = width;
-    this.frameHeight = height;
+    this.props.frame.width = width;
+    this.props.frame.height = height;
   }
 
   // 線を引く系のメソッド
@@ -179,8 +169,8 @@ export default class FrameCanvas {
   public drawStart(pos: Vector) {
     // 枠外だったら線を引くのはやめる
     if (!pos.isInRect(
-      this.canvasWidth / 2 - this.frameWidth / 2, this.canvasHeight / 2 - this.frameHeight / 2,
-      this.frameWidth, this.frameHeight
+      this.props.canvas.width / 2 - this.props.frame.width / 2, this.props.canvas.height / 2 - this.props.frame.height / 2,
+      this.props.frame.width, this.props.frame.height
     )) return;
 
     // 既に描画中だったらreturn
@@ -278,7 +268,7 @@ export default class FrameCanvas {
       throw new Error('Canvas element not found.');
     }
 
-    const expandRate: number = this.canvasWidth / this.canvasObject.clientWidth;
+    const expandRate: number = this.props.canvas.width / this.canvasObject.clientWidth;
     return new Vector(Math.floor(offsetPos.x * expandRate), Math.floor(offsetPos.y * expandRate));
   }
 
@@ -287,10 +277,10 @@ export default class FrameCanvas {
   // 最初の4点を返す
   private primaryPoints(): Array<Vector> {
     return [
-      new Vector(this.canvasWidth / 2 - this.frameWidth / 2, this.canvasHeight / 2 - this.frameHeight / 2),
-      new Vector(this.canvasWidth / 2 + this.frameWidth / 2, this.canvasHeight / 2 - this.frameHeight / 2),
-      new Vector(this.canvasWidth / 2 + this.frameWidth / 2, this.canvasHeight / 2 + this.frameHeight / 2),
-      new Vector(this.canvasWidth / 2 - this.frameWidth / 2, this.canvasHeight / 2 + this.frameHeight / 2)
+      new Vector(this.props.canvas.width / 2 - this.props.frame.width / 2, this.props.canvas.height / 2 - this.props.frame.height / 2),
+      new Vector(this.props.canvas.width / 2 + this.props.frame.width / 2, this.props.canvas.height / 2 - this.props.frame.height / 2),
+      new Vector(this.props.canvas.width / 2 + this.props.frame.width / 2, this.props.canvas.height / 2 + this.props.frame.height / 2),
+      new Vector(this.props.canvas.width / 2 - this.props.frame.width / 2, this.props.canvas.height / 2 + this.props.frame.height / 2)
     ];
   }
   

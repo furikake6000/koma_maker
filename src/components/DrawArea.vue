@@ -37,8 +37,9 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
-import FrameCanvas from '../helper/FrameCanvas';
 import { Vector } from '../helper/Geometry';
+import { PropsPatch } from '../helper/Props';
+import FrameCanvas from '../helper/FrameCanvas';
 import ClickTouchHelper from '../helper/ClickTouchHelper';
 import PagePropertiesMenu from './PagePropertiesMenu.vue';
 import GridsMenu from './GridsMenu.vue';
@@ -70,20 +71,18 @@ export default class DrawArea extends Vue{
   // ---- public methods ----
 
   // PropertiesPanelからプロパティの変更を受け取るためのイベント
-  public onPropertiesChanged(properties: { [key: string]: number }) {
+  public onPropertiesChanged(props: PropsPatch) {
     if (!(this.$refs.canvasObject instanceof HTMLCanvasElement)) {
       throw new Error('Canvas element not found.');
     }
 
     // キャンバスサイズの適用
-    if ('canvasWidth' in properties) {
-      this.$refs.canvasObject.width = properties.canvasWidth;
-    }
-    if ('canvasHeight' in properties) {
-      this.$refs.canvasObject.height = properties.canvasHeight;
+    if (props.canvas != undefined) {
+      this.$refs.canvasObject.width = props.canvas.width;
+      this.$refs.canvasObject.height = props.canvas.height;
     }
 
-    this.canvas?.changeProperties(properties);
+    this.canvas?.changeProperties(props);
   }
 
   // PropertiesPanelのダウンロードボタンが押されたときのイベント
