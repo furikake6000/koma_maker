@@ -42,8 +42,8 @@ export default class GridsMenu extends Vue{
     return [
       v => typeof v == 'number' ||
         '数値を入力してください',
-      v => v >= 2 && v <= 32 ||
-        '2~32の範囲で入力してください'
+      v => v >= 1 && v <= 32 ||
+        '1~32の範囲で入力してください'
     ];
   }
 }
