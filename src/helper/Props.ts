@@ -10,6 +10,14 @@ export class Props{
     width: number,
     height: number,
   };
+  grid: {
+    visible: boolean,
+    snap: boolean,
+    size: {
+      x: number,
+      y: Number
+    }
+  };
 
   constructor() {
     this.lineWidth = 5;
@@ -21,6 +29,11 @@ export class Props{
     this.canvas = {
       width: 840,
       height: 1188,
+    };
+    this.grid = {
+      visible: false,
+      snap: false,
+      size: { x: 1, y: 1 }
     };
   }
 }
@@ -36,5 +49,13 @@ export class PropsPatch{
   canvas?: {
     width: number,
     height: number,
+  };
+  grid?: {
+    visible: boolean,
+    snap: boolean,
+    size?: {
+      x: number,
+      y: Number
+    }
   };
 }
