@@ -3,22 +3,22 @@ v-list-group(:value="true" prepend-icon="mdi-grid")
   template(v-slot:activator)
     v-list-item-title グリッド
   v-list-item
-    v-checkbox(v-model="gridVisible" label="グリッドを表示する")
+    v-checkbox(v-model="props.grid.visible" label="グリッドを表示する")
   v-list-item
-    v-checkbox(v-model="gridSnap" label="グリッドにスナップする")
+    v-checkbox(v-model="props.grid.snap" label="グリッドにスナップする")
   v-list-item
     v-form
       .text-caption.mb-1 分割数
       .d-flex.align-baseline
         v-text-field(
-          v-model.number="gridSize.x"
+          v-model.number="props.grid.size.x"
           :rules = "gridSizeRules"
           label="横"
           dense outlined
         )
         v-icon.mx-1 mdi-close
         v-text-field(
-          v-model.number="gridSize.y"
+          v-model.number="props.grid.size.y"
           :rules = "gridSizeRules"
           label="縦"
           dense outlined
@@ -27,15 +27,17 @@ v-list-group(:value="true" prepend-icon="mdi-grid")
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
+import { PropsPatch } from '../helper/Props';
 
 @Component
 export default class GridsMenu extends Vue{
-  private gridVisible: boolean = false;
-  private gridSnap: boolean = false;
-  private gridSize: {
-    x: number,
-    y: number
-  } = { x: 12, y: 12 };
+  private props: PropsPatch = {
+    grid: {
+      visible: false,
+      snap: false,
+      size: { x: 12, y: 12 }
+    }
+  };
 
   // ---- Computed ----
   get gridSizeRules(): Array<(value: string | number) => boolean | string> {
