@@ -26,7 +26,9 @@
         PagePropertiesMenu(
           @propertiesChanged="onPropertiesChanged($event)"
         )
-        GridsMenu
+        GridsMenu(
+          @propertiesChanged="onPropertiesChanged($event)"
+        )
         v-list-item
           v-btn(
             @click = "download"

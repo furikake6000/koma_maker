@@ -53,9 +53,10 @@ export class PropsPatch{
   grid?: {
     visible: boolean,
     snap: boolean,
-    size?: {
+    size: {
       x: number,
-      y: Number
+      y: number,
+      validated: boolean
     }
   };
 }

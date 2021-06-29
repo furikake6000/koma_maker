@@ -96,13 +96,6 @@ export default class FrameCanvas {
       const offsetShape = shape.offset(-offset, { jointType: 'jtMiter' });
       const offsetPolys = Polygon.fromShape(offsetShape);
       offsetPolys.forEach(poly => poly.draw(this.ctx));
-
-      if (offsetPolys.length > 1) {
-        console.log(frame);
-        console.log(shape);
-        console.log(offsetShape);
-        console.log(offsetPolys);
-      }
     });
   }
 
@@ -118,6 +111,15 @@ export default class FrameCanvas {
 
     this.props.lineWidth = props.lineWidth || this.props.lineWidth;
     this.props.frameSpace = props.frameSpace || this.props.frameSpace;
+
+    if (props.grid) {
+      if (props.grid.size.validated) {
+        this.props.grid.size.x = props.grid.size.x;
+        this.props.grid.size.y = props.grid.size.y;
+      }
+      this.props.grid.snap = props.grid.snap;
+      this.props.grid.visible = props.grid.visible;
+    }
 
     // 変更後の内容で描画
     this.render();

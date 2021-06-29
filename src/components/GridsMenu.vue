@@ -7,7 +7,7 @@ v-list-group(:value="true" prepend-icon="mdi-grid")
   v-list-item
     v-checkbox(v-model="props.grid.snap" label="グリッドにスナップする")
   v-list-item
-    v-form
+    v-form(v-model="props.grid.size.validated")
       .text-caption.mb-1 分割数
       .d-flex.align-baseline
         v-text-field(
@@ -26,7 +26,7 @@ v-list-group(:value="true" prepend-icon="mdi-grid")
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator';
+import { Component, Vue, Watch } from 'vue-property-decorator';
 import { PropsPatch } from '../helper/Props';
 
 @Component
@@ -35,9 +35,17 @@ export default class GridsMenu extends Vue{
     grid: {
       visible: false,
       snap: false,
-      size: { x: 12, y: 12 }
+      size: { x: 12, y: 12, validated: true }
     }
   };
+  private formValidate: boolean = true;
+
+  mounted() {
+    // CanvasAreaのcanvas読み込みを待つためnextTickで反映する
+    this.$nextTick(() => {
+      this.onPropsChanged();
+    });
+  }
 
   // ---- Computed ----
   get gridSizeRules(): Array<(value: string | number) => boolean | string> {
@@ -47,6 +55,18 @@ export default class GridsMenu extends Vue{
       v => v >= 1 && v <= 32 ||
         '1~32の範囲で入力してください'
     ];
+  }
+
+  // ---- Watchers ----
+
+  @Watch('props', { deep: true })
+  onPropsChanged() {
+    // nextTick3個 = 3tick後
+    // v-formのValidationの更新に3フレームかかるらしく、こうしないと値が正確に取れない
+    // 解決法がわかったら修正
+    this.$nextTick(() => { this.$nextTick(() => { this.$nextTick(() => {
+      this.$emit('propertiesChanged', this.props);
+    });});});
   }
 }
 </script>
