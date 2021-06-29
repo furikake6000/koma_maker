@@ -41,6 +41,31 @@ export default class FrameCanvas {
     this.ctx.fillStyle = 'white';
     this.ctx.fillRect(0, 0, this.props.canvas.width, this.props.canvas.height);
 
+    // グリッドの描画
+    if (this.props.grid.visible) {
+      // スタイルの設定
+      this.ctx.strokeStyle = '#dce5f5';
+      this.ctx.lineWidth = 1.0;
+
+      // 縦
+      for (let x = 0; x <= this.props.grid.size.x; x++) {
+        const posX = (this.props.canvas.width - this.props.frame.width) / 2 + (this.props.frame.width * x / this.props.grid.size.x);
+        this.ctx.beginPath();
+        this.ctx.moveTo(posX, 0);
+        this.ctx.lineTo(posX, this.props.canvas.height);
+        this.ctx.stroke();
+      }
+      
+      // 横
+      for (let y = 0; y <= this.props.grid.size.y; y++) {
+        const posY = (this.props.canvas.height - this.props.frame.height) / 2 + (this.props.frame.height * y / this.props.grid.size.y);
+        this.ctx.beginPath();
+        this.ctx.moveTo(0, posY);
+        this.ctx.lineTo(this.props.canvas.width, posY);
+        this.ctx.stroke();
+      }
+    }
+
     // スタイルの設定
     this.ctx.strokeStyle = 'black';
     this.ctx.lineJoin = 'miter';

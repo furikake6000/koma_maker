@@ -15,7 +15,7 @@ export class Props{
     snap: boolean,
     size: {
       x: number,
-      y: Number
+      y: number
     }
   };
 
