@@ -289,16 +289,6 @@ export default class FrameCanvas {
     this.render();
   }
 
-  // offsetX, offsetY -> canvas上の座標の変換
-  public offsetPosToCanvasPos(offsetPos: Vector): Vector {
-    if (!(this.canvasObject instanceof HTMLCanvasElement)) {
-      throw new Error('Canvas element not found.');
-    }
-
-    const expandRate: number = this.props.canvas.width / this.canvasObject.clientWidth;
-    return new Vector(Math.floor(offsetPos.x * expandRate), Math.floor(offsetPos.y * expandRate));
-  }
-
   // ---- private methods ----
 
   // 最初の4点を返す

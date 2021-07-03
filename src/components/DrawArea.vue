@@ -106,7 +106,7 @@ export default class DrawArea extends Vue{
   public onMouseDown(e: MouseEvent) {
     if (this.canvas == null) throw new Error('Canvas not found.');
 
-    const mousePosOfCanvas = this.canvas.offsetPosToCanvasPos(new Vector(e.offsetX, e.offsetY));
+    const mousePosOfCanvas = this.offsetPosToCanvasPos(new Vector(e.offsetX, e.offsetY));
 
     switch (this.drawTool) {
       case 0:
@@ -120,7 +120,7 @@ export default class DrawArea extends Vue{
   public onMouseMove(e: MouseEvent) {
     if (this.canvas == null) throw new Error('Canvas not found.');
 
-    const mousePosOfCanvas = this.canvas.offsetPosToCanvasPos(new Vector(e.offsetX, e.offsetY));
+    const mousePosOfCanvas = this.offsetPosToCanvasPos(new Vector(e.offsetX, e.offsetY));
     switch (this.drawTool) {
       case 0:
         this.canvas.drawMove(mousePosOfCanvas);
@@ -149,7 +149,7 @@ export default class DrawArea extends Vue{
 
     const touch = e.changedTouches[0];
     this.currentTouchID = touch.identifier;
-    const touchPosOfCanvas = this.canvas.offsetPosToCanvasPos(ClickTouchHelper.touchOffsetPos(e, touch));
+    const touchPosOfCanvas = this.offsetPosToCanvasPos(ClickTouchHelper.touchOffsetPos(e, touch));
 
     switch (this.drawTool) {
       case 0:
@@ -168,7 +168,7 @@ export default class DrawArea extends Vue{
 
     const touch = this.currentTouch(e.changedTouches);
     if (touch == null) return;
-    const touchPosOfCanvas = this.canvas.offsetPosToCanvasPos(ClickTouchHelper.touchOffsetPos(e, touch));
+    const touchPosOfCanvas = this.offsetPosToCanvasPos(ClickTouchHelper.touchOffsetPos(e, touch));
 
     switch (this.drawTool) {
       case 0:
@@ -214,6 +214,18 @@ export default class DrawArea extends Vue{
     const touch = Array.from(touches).find(touch => touch.identifier == this.currentTouchID);
     if (touch == undefined) return null;
     return touch;
+  }
+  
+  // offsetX, offsetY -> canvas上の座標の変換
+  public offsetPosToCanvasPos(offsetPos: Vector): Vector {
+    const canvas = this.$refs.canvasObject;
+
+    if (!(canvas instanceof HTMLCanvasElement)) {
+      throw new Error('Canvas element not found.');
+    }
+
+    const expandRate: number = canvas.width / canvas.clientWidth;
+    return new Vector(Math.floor(offsetPos.x * expandRate), Math.floor(offsetPos.y * expandRate));
   }
 }
 </script>
