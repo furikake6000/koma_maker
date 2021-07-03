@@ -3,7 +3,6 @@ import { PropsPatch, Props } from '../helper/Props';
 
 export default class FrameCanvas {
   // キャンバス関係
-  private canvasObject: HTMLCanvasElement;
   private ctx: CanvasRenderingContext2D;
 
   // プロパティ
@@ -20,16 +19,9 @@ export default class FrameCanvas {
 
   // ---- public methods ----
 
-  constructor(canvasObject: HTMLCanvasElement) {
+  constructor(ctx: CanvasRenderingContext2D) {
     // キャンバスの初期化
-    this.canvasObject = canvasObject;
-    const ctx = canvasObject.getContext('2d');
-    if (ctx != null) {
-      this.ctx = ctx;
-    } else {
-      this.ctx = new CanvasRenderingContext2D();
-      throw new Error('Could not get the context of canvas object.');
-    }
+    this.ctx = ctx;
     // framesの初期化
     this.frames.clear();
     this.frames.add(this.primaryPolygon());

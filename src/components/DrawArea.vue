@@ -64,10 +64,17 @@ export default class DrawArea extends Vue{
 
   mounted() {
     // canvasの初期化
-    if (!(this.$refs.canvasObject instanceof HTMLCanvasElement)) {
+    const canvasObject = this.$refs.canvasObject;
+    if (!(canvasObject instanceof HTMLCanvasElement)) {
       throw new Error('Canvas element not found.');
     }
-    this.canvas = new FrameCanvas(this.$refs.canvasObject);
+
+    const ctx = canvasObject.getContext('2d');
+    if (ctx == null) {
+      throw new Error('Could not get the context of canvas object.');
+    }
+
+    this.canvas = new FrameCanvas(ctx);
   }
 
   // ---- public methods ----
