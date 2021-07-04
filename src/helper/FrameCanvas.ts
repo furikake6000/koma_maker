@@ -186,8 +186,10 @@ export default class FrameCanvas {
   // 線を引く系のメソッド
   // posから新しい境界線を引き始める
   public drawStart(pos: Vector) {
+    const snappedPos = this.snappedPos(pos);
+
     // 枠外だったら線を引くのはやめる
-    if (!pos.isInRect(
+    if (!snappedPos.isInRect(
       this.props.canvas.width / 2 - this.props.frame.width / 2, this.props.canvas.height / 2 - this.props.frame.height / 2,
       this.props.frame.width, this.props.frame.height
     )) return;
@@ -195,16 +197,18 @@ export default class FrameCanvas {
     // 既に描画中だったらreturn
     if (this.drawingLine != null) return;
 
-    this.drawingLine = new Line(pos, pos, false);
+    this.drawingLine = new Line(snappedPos, snappedPos, false);
   }
 
   // 現在引いている新しい境界線がposを通るように修正する
   public drawMove(pos: Vector) {
+    const snappedPos = this.snappedPos(pos);
+
     // 描画中でなかったらreturn
     if (this.drawingLine == null) return;
 
     // drawingLineを更新
-    this.drawingLine = new Line(this.drawingLine.start, pos, false);
+    this.drawingLine = new Line(this.drawingLine.start, snappedPos, false);
 
     // 描画を更新
     this.render();
@@ -371,5 +375,30 @@ export default class FrameCanvas {
 
     // 見つかったコマとlineとの当たり判定を返す
     return collidedFrame.collideWithLine(line)[0];
+  }
+
+  // スナップを考慮したマウス座標
+  private snappedPos(pos: Vector): Vector {
+    if (this.props.grid.snap) {
+      // 1グリッドごとの長さを取得
+      const gridSizeX = this.props.frame.width / this.props.grid.size.x;
+      const gridSizeY = this.props.frame.height / this.props.grid.size.y;
+      // コマ枠の左上座標を取得
+      const frameOriginX = (this.props.canvas.width - this.props.frame.width) / 2;
+      const frameOriginY = (this.props.canvas.height - this.props.frame.height) / 2;
+      // グリッドの何個目にスナップするか取得
+      const snapX = Math.round((pos.x - frameOriginX) / gridSizeX);
+      const snapY = Math.round((pos.y - frameOriginY) / gridSizeY);
+      // 0 ~ グリッド数の範囲を超えないように
+      const limitedSnapX = Math.max(0, Math.min(snapX, this.props.grid.size.x));
+      const limitedSnapY = Math.max(0, Math.min(snapY, this.props.grid.size.y));
+
+      return new Vector(
+        frameOriginX + gridSizeX * limitedSnapX,
+        frameOriginY + gridSizeY * limitedSnapY
+      );
+    }
+
+    return pos;
   }
 }
