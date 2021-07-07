@@ -265,9 +265,14 @@ export class Polygon {
   }
 
   // 点がポリゴンの中にあるか判定する
-  public containsPoint(target: Vector): boolean {
+  public hasPointInPolygon(target: Vector): boolean {
     const shape = this.toShape();
-    return shape.pointInShape(target, true) || this.hasPointOnEdge(target);
+    return shape.pointInShape(target, true);
+  }
+
+  // 点がポリゴンの中、もしくは辺上にあるか判定する
+  public containsPoint(target: Vector): boolean {
+    return this.hasPointInPolygon(target) || this.hasPointOnEdge(target);
   }
 
   // ポリゴンとLineの当たり判定メソッド
