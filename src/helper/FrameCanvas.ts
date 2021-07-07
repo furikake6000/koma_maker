@@ -64,21 +64,24 @@ export default class FrameCanvas {
 
     // drawingLine（現在引いている線）の描画
     if (this.drawingLine) {
-      // 破線を引くように設定
-      this.ctx.lineWidth = 3.0;
-      this.ctx.setLineDash([6.0, 6.0]);
-
       // 描画する線を算出
-      const dLineExt = this.dividingFrame(this.drawingLine).collideWithLine(this.drawingLine)[0];
-      
-      // 描画
-      this.ctx.beginPath();
-      this.ctx.moveTo(dLineExt.start.x, dLineExt.start.y);
-      this.ctx.lineTo(dLineExt.end.x, dLineExt.end.y);
-      this.ctx.stroke();
+      const dividedFrame = this.dividingFrame(this.drawingLine);
+      if (dividedFrame) {
+        const dLineExt = dividedFrame.collideWithLine(this.drawingLine)[0];
 
-      // 破線の設定をもとに戻す
-      this.ctx.setLineDash([]);
+        // 破線を引くように設定
+        this.ctx.lineWidth = 3.0;
+        this.ctx.setLineDash([6.0, 6.0]);
+
+        // 描画
+        this.ctx.beginPath();
+        this.ctx.moveTo(dLineExt.start.x, dLineExt.start.y);
+        this.ctx.lineTo(dLineExt.end.x, dLineExt.end.y);
+        this.ctx.stroke();
+  
+        // 破線の設定をもとに戻す
+        this.ctx.setLineDash([]);
+      }
     }
 
     // mergedPolygons（現在結合しようとしているポリゴン）の描画
@@ -321,10 +324,10 @@ export default class FrameCanvas {
   }
 
   // 分割対象のコマを返す
-  private dividingFrame(line: Line): Polygon {
+  private dividingFrame(line: Line): Polygon | null {
     const lineCenter = line.start.plus(line.end).divBy(2); // 線の中央
     const frame = this.frameOfPos(lineCenter);
-    if (frame == undefined) throw new Error('Failed to divide frame: frame not found.');
+    if (frame == undefined) return null;
 
     return frame;
   }
@@ -332,6 +335,7 @@ export default class FrameCanvas {
   // コマを指定されたLineで分割する
   private divideFrame(divideLine: Line) {
     const dividedFrame = this.dividingFrame(divideLine);
+    if (dividedFrame == null) return;
 
     // コマを分割する線と分割される線を求める
     const [partition, startCrossLine, endCrossLine] = dividedFrame.collideWithLine(divideLine);
