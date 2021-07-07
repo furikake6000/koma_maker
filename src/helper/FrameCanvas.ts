@@ -69,7 +69,7 @@ export default class FrameCanvas {
       this.ctx.setLineDash([6.0, 6.0]);
 
       // 描画する線を算出
-      const dLineExt = this.extendedLine(this.drawingLine);
+      const dLineExt = this.dividingFrame(this.drawingLine).collideWithLine(this.drawingLine)[0];
       
       // 描画
       this.ctx.beginPath();
@@ -316,15 +316,22 @@ export default class FrameCanvas {
   // 指定の点にあるコマを返す
   private frameOfPos(pos: Vector): Polygon | undefined {
     return Array.from(this.frames).find(frame => {
-      return frame.containsPoint(pos);
+      return frame.hasPointInPolygon(pos);
     });
+  }
+
+  // 分割対象のコマを返す
+  private dividingFrame(line: Line): Polygon {
+    const lineCenter = line.start.plus(line.end).divBy(2); // 線の中央
+    const frame = this.frameOfPos(lineCenter);
+    if (frame == undefined) throw new Error('Failed to divide frame: frame not found.');
+
+    return frame;
   }
 
   // コマを指定されたLineで分割する
   private divideFrame(divideLine: Line) {
-    // 分割対象のコマを探す
-    const dividedFrame = this.frameOfPos(divideLine.start);
-    if (dividedFrame == undefined) throw new Error('Failed to divide frame: frame not found.');
+    const dividedFrame = this.dividingFrame(divideLine);
 
     // コマを分割する線と分割される線を求める
     const [partition, startCrossLine, endCrossLine] = dividedFrame.collideWithLine(divideLine);
@@ -360,21 +367,6 @@ export default class FrameCanvas {
         }
       }
     });
-  }
-
-  // 引いた線が既にあるいずれかのnodesに交わるまで伸ばす
-  // 返り値は伸ばしたLine
-  private extendedLine(line: Line): Line {
-    // line.startが含まれてるコマを探す
-    const collidedFrame = Array.from(this.frames).find(frame => {
-      return frame.containsPoint(line.start);
-    });
-
-    // なかったらlineをそのまま返す
-    if (collidedFrame == undefined) return line;
-
-    // 見つかったコマとlineとの当たり判定を返す
-    return collidedFrame.collideWithLine(line)[0];
   }
 
   // スナップを考慮したマウス座標
