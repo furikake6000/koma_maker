@@ -68,6 +68,20 @@ export default class GridsMenu extends Vue{
       this.$emit('propertiesChanged', this.props);
     });});});
   }
+
+  @Watch('props.grid.visible')
+  onVisibleChanged(value: boolean) {
+    if (this.props.grid && !value) {
+      this.props.grid.snap = false;
+    }
+  }
+
+  @Watch('props.grid.snap')
+  onSnapChanged(value: boolean) {
+    if (this.props.grid && value) {
+      this.props.grid.visible = true;
+    }
+  }
 }
 </script>
 
