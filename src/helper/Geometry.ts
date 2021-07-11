@@ -45,6 +45,16 @@ export class Vector {
     return new Vector(this.x - target.x, this.y - target.y);
   }
 
+  // 法線ベクトル(反時計回り向き)
+  public normVector(): Vector {
+    return new Vector(this.y, -this.x);
+  }
+
+  // 単位ベクトル
+  public normalized(): Vector {
+    return this.divBy(this.length());
+  }
+
   // 外積の算出
   public crossTo(target: Vector): number {
     return this.x * target.y - this.y * target.x;
@@ -115,6 +125,25 @@ export class Line {
   // 長さ
   public length(): number {
     return this.direction().length();
+  }
+
+  // 法線ベクトル
+  public normVector(): Vector {
+    return this.direction().normVector();
+  }
+
+  // 線分→直線化
+  public unlimited() : Line {
+    return new Line(this.start, this.end, false);
+  }
+
+  // 平行移動
+  public move(dir: Vector): Line {
+    return new Line(
+      this.start.plus(dir),
+      this.end.plus(dir),
+      this.isSegment
+    );
   }
 
   // targetと自分が平行かどうかの判定
@@ -197,6 +226,7 @@ export class Polygon {
   // ---- public methods ----
 
   // ポリゴンを構成している辺のArrayを返してくれるメソッド
+  // Polygon.nodes()[0].start == Polygon.points[0]である
   public nodes(): Array<Line> {
     const nodes = [];
     for(let i=0; i<this.points.length; i++) {
@@ -349,6 +379,37 @@ export class Polygon {
     }
 
     return [new Polygon(normPoly), new Polygon(otherPoly)];
+  }
+
+  // ポリゴンの各辺を指定されたrangeぶん広げる
+  public expand(range: number): Polygon {
+    const nodeMoveVecs = this.nodes().map(node => node.normVector().normalized().times(range));
+
+    const movedNodes = this.nodes().map((node, i) => node.unlimited().move(nodeMoveVecs[i]));
+
+    const newPoints = this.points.map((point, i) => {
+      const movedPrevNode = movedNodes[i == 0 ? this.points.length - 1 : i - 1];
+      const movedNextNode = movedNodes[i];
+
+      if (movedPrevNode.isParallelTo(movedNextNode)) {
+        // 2つのノードが同一直線上にある場合、交点が存在しないのでpointから直接移動後の点を求める
+        return point.plus(nodeMoveVecs[i]);
+      }
+
+      // movedPrevNodeとmovedNextNodeの交点を新しい点として返す
+      const crossPoint = movedPrevNode.crossPoint(movedNextNode);
+      if (crossPoint == null) {
+        throw new Error('Failed to make expanded polygon.');
+      }
+      return crossPoint;
+    });
+
+    return new Polygon(newPoints);
+  }
+
+  // ポリゴンの各辺を指定されたrangeぶん縮める
+  public shrink(range: number): Polygon {
+    return this.expand(-range);
   }
 
   // ---- private methods ----
