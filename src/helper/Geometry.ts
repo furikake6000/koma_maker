@@ -62,7 +62,7 @@ export class Vector {
 
   // targetと自分が平行かどうかの判定
   public isParallelTo(target: Vector): boolean {
-    return this.crossTo(target) == 0;
+    return Math.abs(this.crossTo(target)) < ZERO_MARGIN;
   }
 
   // 上下・左右位置の比較(上下比較が優先)
