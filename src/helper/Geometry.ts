@@ -60,6 +60,11 @@ export class Vector {
     return this.x * target.y - this.y * target.x;
   }
 
+  // 文字列化
+  public toString(): string {
+    return `(${this.x}, ${this.y})`;
+  }
+
   // targetと自分が平行かどうかの判定
   public isParallelTo(target: Vector): boolean {
     return Math.abs(this.crossTo(target)) < ZERO_MARGIN;
@@ -135,6 +140,11 @@ export class Line {
   // 線分→直線化
   public unlimited() : Line {
     return new Line(this.start, this.end, false);
+  }
+  
+  // 文字列化
+  public toString(): string {
+    return `[${this.start.toString()}, ${this.end.toString()}]`;
   }
 
   // 平行移動
@@ -387,6 +397,39 @@ export class Polygon {
     const shape = this.toShape();
     const offsetShape = shape.offset(range, { jointType: 'jtMiter' });
     return Polygon.fromShape(offsetShape);
+  }
+
+  // ポリゴンの指定された辺を指定されたrangeぶん広げる
+  // nodeRangesのkeyはnode.toString()
+  public expandNodes(nodeRanges: { [key: string]: number; }): Polygon {
+    const nodeMoveVecs = this.nodes().map(node => {
+      if (node.toString() in nodeRanges) {
+        return node.normVector().normalized().times(nodeRanges[node.toString()]);
+      } else {
+        return new Vector(0, 0);
+      }
+    });
+
+    const movedNodes = this.nodes().map((node, i) => node.unlimited().move(nodeMoveVecs[i]));
+
+    const newPoints = this.points.map((point, i) => {
+      const movedPrevNode = movedNodes[i == 0 ? this.points.length - 1 : i - 1];
+      const movedNextNode = movedNodes[i];
+
+      if (movedPrevNode.isParallelTo(movedNextNode)) {
+        // 2つのノードが同一直線上にある場合、交点が存在しないのでpointから直接移動後の点を求める
+        return point.plus(nodeMoveVecs[i]);
+      }
+
+      // movedPrevNodeとmovedNextNodeの交点を新しい点として返す
+      const crossPoint = movedPrevNode.crossPoint(movedNextNode);
+      if (crossPoint == null) {
+        throw new Error('Failed to make expanded polygon.');
+      }
+      return crossPoint;
+    });
+
+    return new Polygon(newPoints);
   }
 
   // ---- private methods ----
