@@ -112,10 +112,7 @@ export default class FrameCanvas {
 
       // コマ枠ぶん縮小する
       const offset = this.props.frameSpace / 2 + this.props.lineWidth / 2;
-      const shape = scaledFrame.toShape();
-      const offsetShape = shape.offset(-offset, { jointType: 'jtMiter' });
-      const offsetPolys = Polygon.fromShape(offsetShape);
-      offsetPolys.forEach(poly => poly.draw(this.ctx));
+      scaledFrame.offset(-offset).forEach(poly => poly.draw(this.ctx));
     });
   }
 

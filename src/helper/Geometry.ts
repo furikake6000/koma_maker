@@ -381,35 +381,12 @@ export class Polygon {
     return [new Polygon(normPoly), new Polygon(otherPoly)];
   }
 
-  // ポリゴンの各辺を指定されたrangeぶん広げる
-  public expand(range: number): Polygon {
-    const nodeMoveVecs = this.nodes().map(node => node.normVector().normalized().times(range));
-
-    const movedNodes = this.nodes().map((node, i) => node.unlimited().move(nodeMoveVecs[i]));
-
-    const newPoints = this.points.map((point, i) => {
-      const movedPrevNode = movedNodes[i == 0 ? this.points.length - 1 : i - 1];
-      const movedNextNode = movedNodes[i];
-
-      if (movedPrevNode.isParallelTo(movedNextNode)) {
-        // 2つのノードが同一直線上にある場合、交点が存在しないのでpointから直接移動後の点を求める
-        return point.plus(nodeMoveVecs[i]);
-      }
-
-      // movedPrevNodeとmovedNextNodeの交点を新しい点として返す
-      const crossPoint = movedPrevNode.crossPoint(movedNextNode);
-      if (crossPoint == null) {
-        throw new Error('Failed to make expanded polygon.');
-      }
-      return crossPoint;
-    });
-
-    return new Polygon(newPoints);
-  }
-
-  // ポリゴンの各辺を指定されたrangeぶん縮める
-  public shrink(range: number): Polygon {
-    return this.expand(-range);
+  // ポリゴンの各辺を指定されたrangeぶん広げる(負なら縮める)
+  // Clipper.jsの機能を使用している
+  public offset(range: number): Array<Polygon> {
+    const shape = this.toShape();
+    const offsetShape = shape.offset(range, { jointType: 'jtMiter' });
+    return Polygon.fromShape(offsetShape);
   }
 
   // ---- private methods ----
