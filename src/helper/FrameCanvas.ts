@@ -99,20 +99,22 @@ export default class FrameCanvas {
     // コマの描画
     this.ctx.lineWidth = this.props.lineWidth;
     this.frames.forEach(frame => {
-      // コマ枠ぶん縮小しても全体の大きさが合うように調整しておく
-      const center = new Vector(
-        this.props.canvas.width / 2,
-        this.props.canvas.height / 2
-      );
-      const scale = new Vector(
-        this.props.frame.width / (this.props.frame.width - this.props.frameSpace),
-        this.props.frame.height / (this.props.frame.height - this.props.frameSpace)
-      );
-      const scaledFrame = frame.scale(scale, center);
-
-      // コマ枠ぶん縮小する
+      // 各コマをコマ枠ぶん縮小する
       const offset = this.props.frameSpace / 2 + this.props.lineWidth / 2;
-      scaledFrame.offset(-offset).forEach(poly => poly.draw(this.ctx));
+
+      // 外側に接するコマは縮小してはいけないため、あらかじめ同じだけ拡大しておく
+      const nodeRanges: { [key: string]: number; } = {};
+
+      for(const node of frame.nodes()) {
+        // コマの外枠のいずれかの上に存在するかを確認
+        if (this.primaryNodes().some(pNode => node.isOnSameLine(pNode))) {
+          nodeRanges[node.toString()] = offset;
+        }
+      }
+
+      const expandedFrame = frame.expandNodes(nodeRanges);
+
+      expandedFrame.offset(-offset).forEach(poly => poly.draw(this.ctx));
     });
   }
 

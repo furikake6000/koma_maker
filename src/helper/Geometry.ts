@@ -161,6 +161,11 @@ export class Line {
     return this.direction().isParallelTo(target.direction());
   }
 
+  // targetと自分が同じ直線状にあるかの判定
+  public isOnSameLine(target: Line): boolean {
+    return Math.abs(this.sideOfPoint(target.start)) == 0 && Math.abs(this.sideOfPoint(target.end)) == 0;
+  }
+
   // 線に対して点がどっち向きにあるかを調べる
   // 1: 法線方向 / -1: 逆方向 / 0: 線上
   public sideOfPoint(point: Vector): number {
