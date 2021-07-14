@@ -255,20 +255,24 @@ export class Polygon {
     ]);
   }
 
-  // Vectorで表された点がポリゴンの中にあるか判定するメソッド
-  // (参考: https://www.nttpc.co.jp/technology/number_algorithm.html)
+  // 点がポリゴンの辺上にあるか判定する
+  public hasPointOnEdge(target: Vector): boolean {
+    for (const edge of this.nodes()) {
+      if (edge.sideOfPoint(target) == 0) return true;
+    }
+
+    return false;
+  }
+
+  // 点がポリゴンの中にあるか判定する
+  public hasPointInPolygon(target: Vector): boolean {
+    const shape = this.toShape();
+    return shape.pointInShape(target, true);
+  }
+
+  // 点がポリゴンの中、もしくは辺上にあるか判定する
   public containsPoint(target: Vector): boolean {
-    const crossLines = this.nodes().filter(node => {
-      // targetから伸ばしたx軸と平行な線がnodeと交わるか否か
-      if((node.start.y <= target.y && node.end.y > target.y) || (node.start.y > target.y && node.end.y <= target.y)) {
-        // 交わる点はtargetよりも右側にあるか
-        const crossX = node.start.x + (target.y - node.start.y) / (node.end.y - node.start.y) * (node.end.x - node.start.x);
-        if (crossX > target.x) return true;
-      }
-      return false;
-    });
-    // 交点の数が奇数ならポリゴンの中
-    return crossLines.length % 2 == 1;
+    return this.hasPointInPolygon(target) || this.hasPointOnEdge(target);
   }
 
   // ポリゴンとLineの当たり判定メソッド

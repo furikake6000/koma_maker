@@ -21,22 +21,35 @@
               v-icon mdi-pencil
             v-btn
               v-icon mdi-eraser
-    PropertyPanel(
-      @propertiesChanged="onPropertiesChanged($event)"
-      @download="download"
-    )
+    .property-panel
+      v-list(expand)
+        PagePropertiesMenu(
+          @propertiesChanged="onPropertiesChanged($event)"
+        )
+        GridsMenu(
+          @propertiesChanged="onPropertiesChanged($event)"
+        )
+        v-list-item
+          v-btn(
+            @click = "download"
+            x-large rounded block
+            color = "primary"
+          ) ダウンロード
 </template>
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
-import PropertyPanel from './PropertyPanel.vue';
-import FrameCanvas from '../helper/FrameCanvas';
 import { Vector } from '../helper/Geometry';
+import { PropsPatch } from '../helper/Props';
+import FrameCanvas from '../helper/FrameCanvas';
 import ClickTouchHelper from '../helper/ClickTouchHelper';
+import PagePropertiesMenu from './PagePropertiesMenu.vue';
+import GridsMenu from './GridsMenu.vue';
 
 @Component({
   components: {
-    PropertyPanel
+    PagePropertiesMenu,
+    GridsMenu
   }
 })
 export default class DrawArea extends Vue{
@@ -51,29 +64,34 @@ export default class DrawArea extends Vue{
 
   mounted() {
     // canvasの初期化
-    if (!(this.$refs.canvasObject instanceof HTMLCanvasElement)) {
+    const canvasObject = this.$refs.canvasObject;
+    if (!(canvasObject instanceof HTMLCanvasElement)) {
       throw new Error('Canvas element not found.');
     }
-    this.canvas = new FrameCanvas(this.$refs.canvasObject);
+
+    const ctx = canvasObject.getContext('2d');
+    if (ctx == null) {
+      throw new Error('Could not get the context of canvas object.');
+    }
+
+    this.canvas = new FrameCanvas(ctx);
   }
 
   // ---- public methods ----
 
   // PropertiesPanelからプロパティの変更を受け取るためのイベント
-  public onPropertiesChanged(properties: { [key: string]: number }) {
+  public onPropertiesChanged(props: PropsPatch) {
     if (!(this.$refs.canvasObject instanceof HTMLCanvasElement)) {
       throw new Error('Canvas element not found.');
     }
 
     // キャンバスサイズの適用
-    if ('canvasWidth' in properties) {
-      this.$refs.canvasObject.width = properties.canvasWidth;
-    }
-    if ('canvasHeight' in properties) {
-      this.$refs.canvasObject.height = properties.canvasHeight;
+    if (props.canvas != undefined) {
+      this.$refs.canvasObject.width = props.canvas.width;
+      this.$refs.canvasObject.height = props.canvas.height;
     }
 
-    this.canvas?.changeProperties(properties);
+    this.canvas?.changeProperties(props);
   }
 
   // PropertiesPanelのダウンロードボタンが押されたときのイベント
@@ -95,7 +113,7 @@ export default class DrawArea extends Vue{
   public onMouseDown(e: MouseEvent) {
     if (this.canvas == null) throw new Error('Canvas not found.');
 
-    const mousePosOfCanvas = this.canvas.offsetPosToCanvasPos(new Vector(e.offsetX, e.offsetY));
+    const mousePosOfCanvas = this.offsetPosToCanvasPos(new Vector(e.offsetX, e.offsetY));
 
     switch (this.drawTool) {
       case 0:
@@ -109,7 +127,7 @@ export default class DrawArea extends Vue{
   public onMouseMove(e: MouseEvent) {
     if (this.canvas == null) throw new Error('Canvas not found.');
 
-    const mousePosOfCanvas = this.canvas.offsetPosToCanvasPos(new Vector(e.offsetX, e.offsetY));
+    const mousePosOfCanvas = this.offsetPosToCanvasPos(new Vector(e.offsetX, e.offsetY));
     switch (this.drawTool) {
       case 0:
         this.canvas.drawMove(mousePosOfCanvas);
@@ -138,7 +156,7 @@ export default class DrawArea extends Vue{
 
     const touch = e.changedTouches[0];
     this.currentTouchID = touch.identifier;
-    const touchPosOfCanvas = this.canvas.offsetPosToCanvasPos(ClickTouchHelper.touchOffsetPos(e, touch));
+    const touchPosOfCanvas = this.offsetPosToCanvasPos(ClickTouchHelper.touchOffsetPos(e, touch));
 
     switch (this.drawTool) {
       case 0:
@@ -157,7 +175,7 @@ export default class DrawArea extends Vue{
 
     const touch = this.currentTouch(e.changedTouches);
     if (touch == null) return;
-    const touchPosOfCanvas = this.canvas.offsetPosToCanvasPos(ClickTouchHelper.touchOffsetPos(e, touch));
+    const touchPosOfCanvas = this.offsetPosToCanvasPos(ClickTouchHelper.touchOffsetPos(e, touch));
 
     switch (this.drawTool) {
       case 0:
@@ -204,6 +222,18 @@ export default class DrawArea extends Vue{
     if (touch == undefined) return null;
     return touch;
   }
+  
+  // offsetX, offsetY -> canvas上の座標の変換
+  public offsetPosToCanvasPos(offsetPos: Vector): Vector {
+    const canvas = this.$refs.canvasObject;
+
+    if (!(canvas instanceof HTMLCanvasElement)) {
+      throw new Error('Canvas element not found.');
+    }
+
+    const expandRate: number = canvas.width / canvas.clientWidth;
+    return new Vector(Math.floor(offsetPos.x * expandRate), Math.floor(offsetPos.y * expandRate));
+  }
 }
 </script>
 
@@ -212,4 +242,7 @@ export default class DrawArea extends Vue{
     max-width: 80%
     max-height: 90vh
     background-color: white
+  .property-panel
+    @media (min-width: 600px)
+      width: 300px
 </style>

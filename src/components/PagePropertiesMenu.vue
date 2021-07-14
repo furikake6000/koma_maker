@@ -1,74 +1,76 @@
 <template lang="pug">
-  .property-panel.grey.lighten-5
-
+v-list-group(:value="true" prepend-icon="mdi-move-resize")
+  template(v-slot:activator)
+    v-list-item-title ページ設定
+  v-list-item
     v-form(v-model="canvasFormValidate")
       .text-caption.mb-1 キャンバスサイズ
       .d-flex.align-baseline
         v-text-field(
-          v-model.number = "properties.canvasWidth"
+          v-model.number = "properties.canvas.width"
           :rules = "widthHeightRules"
           label="幅"
           dense outlined
         )
         v-icon.mx-1 mdi-close
         v-text-field(
-          v-model.number = "properties.canvasHeight"
+          v-model.number = "properties.canvas.height"
           :rules = "widthHeightRules"
           label="高さ"
           dense outlined
         )
-
+  v-list-item
     v-form(v-model="frameFormValidate")
       .text-caption.mb-1 コマ枠サイズ
       .d-flex.align-baseline
         v-text-field(
-          v-model.number = "properties.frameWidth"
+          v-model.number = "properties.frame.width"
           :rules = "widthHeightRules"
           label="幅"
           dense outlined
         )
         v-icon.mx-1 mdi-close
         v-text-field(
-          v-model.number = "properties.frameHeight"
+          v-model.number = "properties.frame.height"
           :rules = "widthHeightRules"
           label="高さ"
           dense outlined
         )
-
-    v-slider.mt-6(
+  v-list-item
+    v-slider.mt-9(
       v-model = "properties.lineWidth"
       label = "線の太さ"
       min = "1"
       max = "20"
       thumb-label="always"
     )
-    v-slider.mt-4(
+  v-list-item
+    v-slider.mt-9(
       v-model = "properties.frameSpace"
       label = "コマ間隔"
       min = "5"
       max = "50"
       thumb-label="always"
     )
-
-    v-btn.mt-4(
-      @click = "download"
-      x-large rounded block
-      color = "primary"
-    ) ダウンロード
 </template>
 
 <script lang="ts">
 import { Component, Watch, Vue } from 'vue-property-decorator';
+import { PropsPatch } from '../helper/Props';
 
 @Component
-export default class PropertyPanel extends Vue{
-  private properties: { [key: string]: number } = {
+export default class PagePropertiesMenu extends Vue{
+  private properties: PropsPatch = {
     lineWidth: 5,
     frameSpace: 10,
-    frameWidth: 600,
-    frameHeight: 880,
-    canvasWidth: 840,
-    canvasHeight: 1188
+    frame: {
+      width: 600,
+      height: 800,
+    },
+    canvas: {
+      width: 840,
+      height: 1188,
+    },
   }
   private canvasFormValidate: boolean = true;
   private frameFormValidate: boolean = true;
@@ -90,18 +92,16 @@ export default class PropertyPanel extends Vue{
     ];
   }
 
-  get propertiesValidated(): { [key: string]: number } {
+  get propertiesValidated(): PropsPatch {
     // コピーを作成
     let props = { ... this.properties };
 
     // バリデーションに通らなかったパラメータを消していく
     if (!this.canvasFormValidate) {
-      delete props.canvasWidth;
-      delete props.canvasHeight;
+      delete props.canvas;
     }
     if (!this.frameFormValidate) {
-      delete props.frameWidth;
-      delete props.frameHeight;
+      delete props.frame;
     }
 
     return props;
@@ -118,16 +118,8 @@ export default class PropertyPanel extends Vue{
       this.$emit('propertiesChanged', this.propertiesValidated);
     });});});
   }
-
-  download() {
-    this.$emit('download');
-  }
 }
 </script>
 
 <style lang="sass" scoped>
-  .property-panel
-    padding: 20px
-    @media (min-width: 600px)
-      width: 300px
 </style>
