@@ -362,11 +362,11 @@ export class Polygon {
       const nextPoint = dividedPolygon.points[(i == dividedPolygon.points.length - 1 ? 0 : i + 1)];
       const node = new Line(point, nextPoint);
 
-      if (startCrossLine?.equals(node)) {
+      if (startCrossLine?.equals(node) && !partition.start.equals(point) && !partition.start.equals(nextPoint)) {
         dividedPolygon.points.splice(i + 1, 0, partition.start); // 分割された点を挿入
         i += 1;
       }
-      if (endCrossLine?.equals(node)) {
+      if (endCrossLine?.equals(node) && !partition.end.equals(point) && !partition.end.equals(nextPoint)) {
         dividedPolygon.points.splice(i + 1, 0, partition.end); // 分割された点を挿入
         i += 1;
       }

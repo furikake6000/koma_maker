@@ -353,18 +353,13 @@ export default class FrameCanvas {
       for(let i = 0; i < frame.points.length; i++) {
         const point = frame.points[i];
         const nextPoint = frame.points[(i == frame.points.length - 1 ? 0 : i + 1)];
+        const node = new Line(point, nextPoint);
 
-        if (
-            point.equals(startCrossLine.start) && nextPoint.equals(startCrossLine.end) ||
-            point.equals(startCrossLine.end) && nextPoint.equals(startCrossLine.start)
-        ) {
+        if (startCrossLine?.equals(node) && !partition.start.equals(point) && !partition.start.equals(nextPoint)) {
           frame.points.splice(i + 1, 0, partition.start); // 分割された点を挿入
           i += 1;
         }
-        if (
-          point.equals(endCrossLine.start) && nextPoint.equals(endCrossLine.end) ||
-          point.equals(endCrossLine.end) && nextPoint.equals(endCrossLine.start)
-        ) {
+        if (endCrossLine?.equals(node) && !partition.end.equals(point) && !partition.end.equals(nextPoint)) {
           frame.points.splice(i + 1, 0, partition.end); // 分割された点を挿入
           i += 1;
         }
