@@ -234,7 +234,7 @@ export class Polygon {
   public static merge(poly1: Polygon, poly2: Polygon, margin: number = ZERO_MARGIN): Array<Polygon> {
     const shape1 = poly1.toShape().offset(margin, { jointType: 'jtMiter' });
     const shape2 = poly2.toShape().offset(margin, { jointType: 'jtMiter' });
-    const mergedShape = shape1.union(shape2).offset(-margin, { jointType: 'jtMiter' });
+    const mergedShape = shape1.union(shape2).clean(margin).offset(-margin, { jointType: 'jtMiter' });
     return Polygon.fromShape(mergedShape);
   }
 
