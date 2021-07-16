@@ -337,40 +337,10 @@ export default class FrameCanvas {
     const dividedFrame = this.dividingFrame(divideLine);
     if (dividedFrame == null) return;
 
-    // コマを分割する線と分割される線を求める
-    const [partition, startCrossLine, endCrossLine] = dividedFrame.collideWithLine(divideLine);
-    if (startCrossLine == null || endCrossLine == null) {
-      throw new Error('Failed to divide frame: given line is invalid.');
-    }
-
     // 分割対象のコマを分割する
     const newFrames = dividedFrame.divideWithLine(divideLine);
     for (const newFrame of newFrames) this.frames.add(newFrame);
     this.frames.delete(dividedFrame);
-
-    // すべてのコマに対して、分割対象の辺があったら分割する
-    // (Clipperを使った分割なのでここが無くてもある程度は動くが、Clipperのポリゴンは頂点座標が整数値のためこれが無いと丸め誤差により不安定になる恐れがある)
-    this.frames.forEach(frame => {
-      for(let i = 0; i < frame.points.length; i++) {
-        const point = frame.points[i];
-        const nextPoint = frame.points[(i == frame.points.length - 1 ? 0 : i + 1)];
-
-        if (
-            point.equals(startCrossLine.start) && nextPoint.equals(startCrossLine.end) ||
-            point.equals(startCrossLine.end) && nextPoint.equals(startCrossLine.start)
-        ) {
-          frame.points.splice(i + 1, 0, partition.start); // 分割された点を挿入
-          i += 1;
-        }
-        if (
-          point.equals(endCrossLine.start) && nextPoint.equals(endCrossLine.end) ||
-          point.equals(endCrossLine.end) && nextPoint.equals(endCrossLine.start)
-        ) {
-          frame.points.splice(i + 1, 0, partition.end); // 分割された点を挿入
-          i += 1;
-        }
-      }
-    });
   }
 
   // スナップを考慮したマウス座標
