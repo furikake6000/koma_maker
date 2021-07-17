@@ -1,7 +1,7 @@
 <template lang="pug">
   .draw-area.d-sm-flex
     .flex-grow-1
-      .blue-grey.darken-4.pt-8.pb-6
+      .blue-grey.darken-4.py-8
         .text-center
           canvas(
             ref="canvasObject"
@@ -15,8 +15,8 @@
             width="840"
             height="1188"
           )
-        .text-right.pt-4.px-6
-          v-btn-toggle(v-model="drawTool" mandatory rounded)
+        .canvas-bottom-toolbar.pr-6.pb-6.d-flex.justify-end
+          v-btn-toggle(v-model="drawTool" mandatory rounded).drawtool-selector          
             v-btn
               v-icon mdi-pencil
             v-btn
@@ -242,7 +242,12 @@ export default class DrawArea extends Vue{
     max-width: 80%
     max-height: 90vh
     background-color: white
+
   .property-panel
     @media (min-width: 600px)
       width: 300px
+  
+  .canvas-bottom-toolbar
+    position: sticky
+    bottom: 0
 </style>
