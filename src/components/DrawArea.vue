@@ -15,12 +15,13 @@
             width="840"
             height="1188"
           )
-        .canvas-bottom-toolbar.pr-6.pb-6.d-flex.justify-end
-          v-btn-toggle(v-model="drawTool" mandatory rounded).drawtool-selector          
-            v-btn
-              v-icon mdi-pencil
-            v-btn
-              v-icon mdi-eraser
+        .canvas-bottom-toolbar.pt-2.pr-6.d-flex.justify-end
+          v-select.drawtool-selector(
+            v-model="drawTool"
+            :items="drawTools"
+            solo
+            rounded
+          )
     .property-panel
       v-list(expand)
         PagePropertiesMenu(
@@ -55,7 +56,12 @@ import GridsMenu from './GridsMenu.vue';
 export default class DrawArea extends Vue{
   // ---- data ----
 
-  private drawTool: number = 0;
+  private drawTools = [
+    'コマ分割モード',
+    'コマ結合モード',
+    'タチキリ切替モード'
+  ];
+  private drawTool: string = this.drawTools[0];
   private canvas: FrameCanvas | null = null;
 
   private currentTouchID: number = 0; // 現在線を引いているTouchのidentifier
@@ -116,10 +122,12 @@ export default class DrawArea extends Vue{
     const mousePosOfCanvas = this.offsetPosToCanvasPos(new Vector(e.offsetX, e.offsetY));
 
     switch (this.drawTool) {
-      case 0:
+      case this.drawTools[0]:
+        // コマ分割
         this.canvas.drawStart(mousePosOfCanvas);
         break;
-      case 1:
+      case this.drawTools[1]:
+        // コマ結合
         this.canvas.mergeStart(mousePosOfCanvas);
         break;
     }
@@ -129,10 +137,12 @@ export default class DrawArea extends Vue{
 
     const mousePosOfCanvas = this.offsetPosToCanvasPos(new Vector(e.offsetX, e.offsetY));
     switch (this.drawTool) {
-      case 0:
+      case this.drawTools[0]:
+        // コマ分割
         this.canvas.drawMove(mousePosOfCanvas);
         break;
-      case 1:
+      case this.drawTools[1]:
+        // コマ結合
         this.canvas.mergeMove(mousePosOfCanvas);
         break;
     }
@@ -141,10 +151,12 @@ export default class DrawArea extends Vue{
     if (this.canvas == null) throw new Error('Canvas not found.');
 
     switch (this.drawTool) {
-      case 0:
+      case this.drawTools[0]:
+        // コマ分割
         this.canvas.drawEnd();
         break;
-      case 1:
+      case this.drawTools[1]:
+        // コマ結合
         this.canvas.mergeEnd();
         break;
     }
@@ -159,10 +171,12 @@ export default class DrawArea extends Vue{
     const touchPosOfCanvas = this.offsetPosToCanvasPos(ClickTouchHelper.touchOffsetPos(e, touch));
 
     switch (this.drawTool) {
-      case 0:
+      case this.drawTools[0]:
+        // コマ分割
         this.canvas.drawStart(touchPosOfCanvas);
         break;
-      case 1:
+      case this.drawTools[1]:
+        // コマ結合
         this.canvas.mergeStart(touchPosOfCanvas);
         break;
     }
@@ -178,10 +192,12 @@ export default class DrawArea extends Vue{
     const touchPosOfCanvas = this.offsetPosToCanvasPos(ClickTouchHelper.touchOffsetPos(e, touch));
 
     switch (this.drawTool) {
-      case 0:
+      case this.drawTools[0]:
+        // コマ分割
         this.canvas.drawMove(touchPosOfCanvas);
         break;
-      case 1:
+      case this.drawTools[1]:
+        // コマ結合
         this.canvas.mergeMove(touchPosOfCanvas);
         break;
     }
@@ -191,10 +207,12 @@ export default class DrawArea extends Vue{
 
     if (this.currentTouch(e.changedTouches) != null) {
       switch (this.drawTool) {
-        case 0:
+      case this.drawTools[0]:
+        // コマ分割
           this.canvas.drawEnd();
           break;
-        case 1:
+      case this.drawTools[1]:
+        // コマ結合
           this.canvas.mergeEnd();
           break;
       }
@@ -204,10 +222,12 @@ export default class DrawArea extends Vue{
     if (this.canvas == null) throw new Error('Canvas not found.');
 
     switch (this.drawTool) {
-      case 0:
+      case this.drawTools[0]:
+        // コマ分割
         this.canvas.drawCancel();
         break;
-      case 1:
+      case this.drawTools[1]:
+        // コマ結合
         this.canvas.mergeCancel();
         break;
     }
@@ -250,4 +270,8 @@ export default class DrawArea extends Vue{
   .canvas-bottom-toolbar
     position: sticky
     bottom: 0
+
+  .drawtool-selector
+    font-weight: bold
+    max-width: 250px
 </style>
