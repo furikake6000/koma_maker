@@ -287,6 +287,22 @@ export default class FrameCanvas {
     this.render();
   }
 
+  // タチキリ(trimming)系メソッド
+  // タチキリする線を選ぶ
+  public trimmingSelectLine(pos: Vector) {
+
+  }
+
+  // タチキリを実行する
+  public trimmingApply() {
+
+  }
+
+  // タチキリをキャンセルする
+  public trimmingCancel() {
+
+  }
+
   // ---- private methods ----
 
   // 最初の4点を返す

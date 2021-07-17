@@ -130,6 +130,10 @@ export default class DrawArea extends Vue{
         // コマ結合
         this.canvas.mergeStart(mousePosOfCanvas);
         break;
+      case this.drawTools[2]:
+        // タチキリ
+        this.canvas.trimmingSelectLine(mousePosOfCanvas);
+        break;
     }
   }
   public onMouseMove(e: MouseEvent) {
@@ -145,6 +149,10 @@ export default class DrawArea extends Vue{
         // コマ結合
         this.canvas.mergeMove(mousePosOfCanvas);
         break;
+      case this.drawTools[2]:
+        // タチキリ
+        this.canvas.trimmingSelectLine(mousePosOfCanvas);
+        break;
     }
   }
   public onMouseUp() {
@@ -158,6 +166,10 @@ export default class DrawArea extends Vue{
       case this.drawTools[1]:
         // コマ結合
         this.canvas.mergeEnd();
+        break;
+      case this.drawTools[2]:
+        // タチキリ
+        this.canvas.trimmingApply();
         break;
     }
   }
@@ -178,6 +190,10 @@ export default class DrawArea extends Vue{
       case this.drawTools[1]:
         // コマ結合
         this.canvas.mergeStart(touchPosOfCanvas);
+        break;
+      case this.drawTools[2]:
+        // タチキリ
+        this.canvas.trimmingSelectLine(touchPosOfCanvas);
         break;
     }
   }
@@ -200,6 +216,10 @@ export default class DrawArea extends Vue{
         // コマ結合
         this.canvas.mergeMove(touchPosOfCanvas);
         break;
+      case this.drawTools[2]:
+        // タチキリ
+        this.canvas.trimmingSelectLine(touchPosOfCanvas);
+        break;
     }
   }
   public onTouchEnd(e: TouchEvent) {
@@ -215,6 +235,10 @@ export default class DrawArea extends Vue{
         // コマ結合
           this.canvas.mergeEnd();
           break;
+      case this.drawTools[2]:
+        // タチキリ
+        this.canvas.trimmingApply();
+        break;
       }
     }
   }
@@ -229,6 +253,10 @@ export default class DrawArea extends Vue{
       case this.drawTools[1]:
         // コマ結合
         this.canvas.mergeCancel();
+        break;
+      case this.drawTools[2]:
+        // タチキリ
+        this.canvas.trimmingCancel();
         break;
     }
   }
