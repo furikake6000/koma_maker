@@ -94,12 +94,14 @@ export default class FrameCanvas {
       // 描画の設定
       this.ctx.lineWidth = 20.0;
       this.ctx.strokeStyle = '#81D4FA';
+      this.ctx.lineCap = 'round';
 
       for (const node of this.trimmingNodes) {
         node.draw(this.ctx);
       }
 
       this.ctx.strokeStyle = 'black';
+      this.ctx.lineCap = 'butt';
     }
 
     // コマの描画
