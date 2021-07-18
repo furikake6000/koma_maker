@@ -130,10 +130,6 @@ export default class DrawArea extends Vue{
         // コマ結合
         this.canvas.mergeStart(mousePosOfCanvas);
         break;
-      case this.drawTools[2]:
-        // タチキリ
-        this.canvas.trimmingSelectNodes(mousePosOfCanvas);
-        break;
     }
   }
   public onMouseMove(e: MouseEvent) {
