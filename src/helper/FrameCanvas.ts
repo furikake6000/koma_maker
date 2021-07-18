@@ -19,6 +19,7 @@ export default class FrameCanvas {
 
   // タチキリモードで使う変数
   private trimmingNodes: Array<Line> = [];
+  private trimmedNodes: Array<string> = [];
 
   // ---- public methods ----
 
@@ -106,10 +107,18 @@ export default class FrameCanvas {
 
     // コマの描画
     this.ctx.lineWidth = this.props.lineWidth;
-    this.frames.forEach(frame => {
-      // 各コマをコマ枠ぶん縮小する
-      const offset = this.props.frameSpace / 2 + this.props.lineWidth / 2;
+    const offset = this.props.frameSpace / 2 + this.props.lineWidth / 2;
 
+    const trimmedNodeRanges: { [key: string]: number; } = {};
+    const trimmedRange = Math.max(
+      (this.props.canvas.width - this.props.frame.width) / 2,
+      (this.props.canvas.height - this.props.frame.height) / 2
+    ) + this.props.lineWidth;
+    for (const node of this.trimmedNodes) {
+      trimmedNodeRanges[node.toString()] = offset + trimmedRange;
+    }
+
+    this.frames.forEach(frame => {
       // 外側に接するコマは縮小してはいけないため、あらかじめ同じだけ拡大しておく
       const nodeRanges: { [key: string]: number; } = {};
 
@@ -120,7 +129,7 @@ export default class FrameCanvas {
         }
       }
 
-      const expandedFrame = frame.expandNodes(nodeRanges);
+      const expandedFrame = frame.expandNodes(Object.assign(nodeRanges, trimmedNodeRanges));
 
       expandedFrame.offset(-offset).forEach(poly => poly.draw(this.ctx));
     });
@@ -308,6 +317,19 @@ export default class FrameCanvas {
 
   // タチキリを実行する
   public trimmingApply() {
+    for(const node of this.trimmingNodes) {
+      const nodeStr = node.toString();
+      const index = this.trimmedNodes.indexOf(nodeStr);
+
+      if (index == -1) {
+        // 指定されたnodeが存在しなかったら追加
+        this.trimmedNodes.push(nodeStr);
+      } else {
+        // 指定されたnodeが存在してたら削除
+        this.trimmedNodes.splice(index);
+      }
+    }
+
     this.trimmingNodes = [];
     
     // 描画を更新
