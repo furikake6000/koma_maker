@@ -45,6 +45,11 @@ export class Vector {
     return new Vector(this.x - target.x, this.y - target.y);
   }
 
+  // 2点間の距離
+  public distance(target: Vector): number {
+    return this.minus(target).length();
+  }
+
   // 法線ベクトル(反時計回り向き)
   public normVector(): Vector {
     return new Vector(this.y, -this.x);
@@ -204,6 +209,35 @@ export class Line {
     if (target.isSegment && (mu < 0.0 || mu >= 1.0)) return null;
 
     return this.start.plus(myDir.times(ramda));
+  }
+
+  // 自分と点targetとの距離を返す
+  public distance(target: Vector): number {
+    // 直線をax+by+c=0の形で表したときのa, b, cを算出
+    const a = this.end.y - this.start.y;
+    const b = this.start.x - this.end.x;
+    const c = this.end.x * this.start.y - this.start.x * this.end.y;
+
+    // 点と直線の距離の公式
+    const lengthToLine = Math.abs(a * target.x + b * target.y + c) / this.length();
+
+    if (this.isSegment) {
+      // targetが2点から引いた垂線の中にあるかを取得
+      const ps = b * this.start.x + a * this.start.y;
+      const pe = b * this.end.x + a * this.end.y;
+      const pt = b * target.x + a * target.y;
+
+      if (pt >= Math.min(ps, pe) && pt <= Math.max(ps, pe)) {
+        // targetは2点から引いた垂線の中にある
+        return lengthToLine;
+      }
+
+      // targetは垂線の外にある
+      // この場合距離は2点からtargetへの距離のうち小さい方となる
+      return Math.min(target.distance(this.start), target.distance(this.end));
+    } else {
+      return lengthToLine;
+    }
   }
 }
 
