@@ -45,19 +45,15 @@ export default class FrameCanvas {
       // 縦
       for (let x = 0; x <= this.props.grid.size.x; x++) {
         const posX = (this.props.canvas.width - this.props.frame.width) / 2 + (this.props.frame.width * x / this.props.grid.size.x);
-        this.ctx.beginPath();
-        this.ctx.moveTo(posX, 0);
-        this.ctx.lineTo(posX, this.props.canvas.height);
-        this.ctx.stroke();
+        const l = new Line(new Vector(posX, 0), new Vector(posX, this.props.canvas.height));
+        l.draw(this.ctx);
       }
       
       // 横
       for (let y = 0; y <= this.props.grid.size.y; y++) {
         const posY = (this.props.canvas.height - this.props.frame.height) / 2 + (this.props.frame.height * y / this.props.grid.size.y);
-        this.ctx.beginPath();
-        this.ctx.moveTo(0, posY);
-        this.ctx.lineTo(this.props.canvas.width, posY);
-        this.ctx.stroke();
+        const l = new Line(new Vector(0, posY), new Vector(this.props.canvas.width, posY));
+        l.draw(this.ctx);
       }
     }
 
@@ -70,17 +66,11 @@ export default class FrameCanvas {
       // 描画する線を算出
       const dividedFrame = this.dividingFrame(this.drawingLine);
       if (dividedFrame) {
-        const dLineExt = dividedFrame.collideWithLine(this.drawingLine)[0];
-
-        // 破線を引くように設定
+        // 破線を引く
         this.ctx.lineWidth = 3.0;
         this.ctx.setLineDash([6.0, 6.0]);
-
-        // 描画
-        this.ctx.beginPath();
-        this.ctx.moveTo(dLineExt.start.x, dLineExt.start.y);
-        this.ctx.lineTo(dLineExt.end.x, dLineExt.end.y);
-        this.ctx.stroke();
+        const dLineExt = dividedFrame.collideWithLine(this.drawingLine)[0];
+        dLineExt.draw(this.ctx);
   
         // 破線の設定をもとに戻す
         this.ctx.setLineDash([]);
@@ -106,10 +96,7 @@ export default class FrameCanvas {
       this.ctx.strokeStyle = '#81D4FA';
 
       for (const node of this.trimmingNodes) {
-        this.ctx.beginPath();
-        this.ctx.moveTo(node.start.x, node.start.y);
-        this.ctx.lineTo(node.end.x, node.end.y);
-        this.ctx.stroke();
+        node.draw(this.ctx);
       }
 
       this.ctx.strokeStyle = 'black';

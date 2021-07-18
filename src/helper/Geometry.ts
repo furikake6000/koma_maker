@@ -239,6 +239,14 @@ export class Line {
       return lengthToLine;
     }
   }
+
+  // Contextを渡したらポリゴンをstrokeしてくれるメソッド
+  public draw(ctx: CanvasRenderingContext2D) {
+    ctx.beginPath();
+    ctx.moveTo(this.start.x, this.start.y);
+    ctx.lineTo(this.end.x, this.end.y);
+    ctx.stroke();
+  }
 }
 
 export class Polygon {
