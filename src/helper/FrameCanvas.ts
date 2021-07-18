@@ -326,7 +326,7 @@ export default class FrameCanvas {
         this.trimmedNodes.push(nodeStr);
       } else {
         // 指定されたnodeが存在してたら削除
-        this.trimmedNodes.splice(index);
+        this.trimmedNodes.splice(index, 1);
       }
     }
 
