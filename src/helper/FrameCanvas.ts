@@ -17,6 +17,9 @@ export default class FrameCanvas {
   // 線を消すときに使う変数
   private mergingFrames: Array<Polygon> = [];  // 結合するコマ
 
+  // タチキリモードで使う変数
+  private trimmingNodes: Array<Line> = [];
+
   // ---- public methods ----
 
   constructor(ctx: CanvasRenderingContext2D) {
@@ -94,6 +97,22 @@ export default class FrameCanvas {
       // 色を設定し描画
       this.ctx.fillStyle = '#81D4FA';
       this.mergingFrames[1].fill(this.ctx);
+    }
+
+    // trimmingNodes（現在タチキリしようとしているノード）の描画
+    if (this.trimmingNodes.length >= 1) {
+      // 描画の設定
+      this.ctx.lineWidth = 20.0;
+      this.ctx.strokeStyle = '#81D4FA';
+
+      for (const node of this.trimmingNodes) {
+        this.ctx.beginPath();
+        this.ctx.moveTo(node.start.x, node.start.y);
+        this.ctx.lineTo(node.end.x, node.end.y);
+        this.ctx.stroke();
+      }
+
+      this.ctx.strokeStyle = 'black';
     }
 
     // コマの描画
@@ -289,18 +308,27 @@ export default class FrameCanvas {
 
   // タチキリ(trimming)系メソッド
   // タチキリする線を選ぶ
-  public trimmingSelectLine(pos: Vector) {
-
+  public trimmingSelectNodes(pos: Vector) {
+    this.trimmingNodes = this.nodesOfPos(pos, 10.0);
+    
+    // 描画を更新
+    this.render();
   }
 
   // タチキリを実行する
   public trimmingApply() {
-
+    this.trimmingNodes = [];
+    
+    // 描画を更新
+    this.render();
   }
 
   // タチキリをキャンセルする
   public trimmingCancel() {
-
+    this.trimmingNodes = [];
+    
+    // 描画を更新
+    this.render();
   }
 
   // ---- private methods ----
@@ -336,6 +364,16 @@ export default class FrameCanvas {
     return Array.from(this.frames).find(frame => {
       return frame.hasPointInPolygon(pos);
     });
+  }
+
+  // 指定の点にあるノードの集合を返す
+  private nodesOfPos(pos: Vector, margin: number): Array<Line> {
+    // すべてのコマのすべてのノードのうち、posとの距離がmargin以下のものを返す
+    return Array.from(this.frames).map(frame => {
+      return frame.nodes().filter(node => {
+        return node.distance(pos) <= margin;
+      });
+    }).flat(1);
   }
 
   // 分割対象のコマを返す

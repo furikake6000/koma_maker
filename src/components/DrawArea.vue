@@ -132,7 +132,7 @@ export default class DrawArea extends Vue{
         break;
       case this.drawTools[2]:
         // タチキリ
-        this.canvas.trimmingSelectLine(mousePosOfCanvas);
+        this.canvas.trimmingSelectNodes(mousePosOfCanvas);
         break;
     }
   }
@@ -151,7 +151,7 @@ export default class DrawArea extends Vue{
         break;
       case this.drawTools[2]:
         // タチキリ
-        this.canvas.trimmingSelectLine(mousePosOfCanvas);
+        this.canvas.trimmingSelectNodes(mousePosOfCanvas);
         break;
     }
   }
@@ -193,7 +193,7 @@ export default class DrawArea extends Vue{
         break;
       case this.drawTools[2]:
         // タチキリ
-        this.canvas.trimmingSelectLine(touchPosOfCanvas);
+        this.canvas.trimmingSelectNodes(touchPosOfCanvas);
         break;
     }
   }
@@ -218,7 +218,7 @@ export default class DrawArea extends Vue{
         break;
       case this.drawTools[2]:
         // タチキリ
-        this.canvas.trimmingSelectLine(touchPosOfCanvas);
+        this.canvas.trimmingSelectNodes(touchPosOfCanvas);
         break;
     }
   }
