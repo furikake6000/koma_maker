@@ -298,7 +298,9 @@ export default class FrameCanvas {
   // タチキリ(trimming)系メソッド
   // タチキリする線を選ぶ
   public trimmingSelectNodes(pos: Vector) {
-    this.trimmingNodes = this.nodesOfPos(pos, 10.0);
+    const nodes = this.nodesOfPos(pos, 10.0);
+    // 外枠にある線のみをフィルター
+    this.trimmingNodes = nodes.filter(node => this.primaryNodes().some(pNode => node.isOnSameLine(pNode)));
     
     // 描画を更新
     this.render();
