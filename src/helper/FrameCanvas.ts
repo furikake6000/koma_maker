@@ -37,10 +37,16 @@ export default class FrameCanvas {
     this.ctx.fillStyle = 'white';
     this.ctx.fillRect(0, 0, this.props.canvas.width, this.props.canvas.height);
 
+    // コマ枠線の描画
+    this.ctx.strokeStyle = '#dce5f5';
+    this.ctx.lineWidth = this.props.lineWidth;
+    for(const node of this.primaryNodes()) {
+      node.draw(this.ctx);
+    }
+
     // グリッドの描画
     if (this.props.grid.visible) {
       // スタイルの設定
-      this.ctx.strokeStyle = '#dce5f5';
       this.ctx.lineWidth = 1.0;
 
       // 縦
