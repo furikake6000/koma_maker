@@ -39,7 +39,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator';
+import { Component, Watch, Vue } from 'vue-property-decorator';
 import { Vector } from '../helper/Geometry';
 import { PropsPatch } from '../helper/Props';
 import FrameCanvas from '../helper/FrameCanvas';
@@ -81,6 +81,13 @@ export default class DrawArea extends Vue{
     }
 
     this.canvas = new FrameCanvas(ctx);
+  }
+
+  // ---- watchers ----
+
+  @Watch('drawTool', { deep: true })
+  onDrawToolChanged() {
+    this.canvas?.initializeToolValues();
   }
 
   // ---- public methods ----

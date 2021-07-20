@@ -10,6 +10,9 @@ export default class FrameCanvas {
 
   // マンガコマ枠
   private frames: Set<Polygon> = new Set<Polygon>();
+
+  // タチキリしている辺のリスト
+  private trimmedNodes: Array<Line> = [];
   
   // 新しい線を引くときに使う変数
   private drawingLine: Line | null = null; // 現在引いている線の始点
@@ -19,7 +22,6 @@ export default class FrameCanvas {
 
   // タチキリモードで使う変数
   private trimmingNodes: Array<Line> = [];
-  private trimmedNodes: Array<Line> = [];
 
   // ---- public methods ----
 
@@ -210,6 +212,13 @@ export default class FrameCanvas {
 
     this.props.frame.width = width;
     this.props.frame.height = height;
+  }
+
+  // draw/merge/trimmingなどの各モードで扱う変数を全てリセットする
+  public initializeToolValues() {
+    this.drawingLine = null;
+    this.mergingFrames = [];
+    this.trimmingNodes = [];
   }
 
   // 線を引く系のメソッド
