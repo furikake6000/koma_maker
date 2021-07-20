@@ -75,6 +75,17 @@ export class Vector {
     return Math.abs(this.crossTo(target)) < ZERO_MARGIN;
   }
 
+  // centerを中心に拡大する
+  public scale(ratio: Vector, center: Vector): Vector {
+    const centerToPoint = this.minus(center);
+    const centerToNewPoint = new Vector(
+      centerToPoint.x * ratio.x,
+      centerToPoint.y * ratio.y
+    );
+    
+    return center.plus(centerToNewPoint);
+  }
+
   // 上下・左右位置の比較(上下比較が優先)
   // Vectorが同じでない限り0にはならない
   public comparedTo(target: Vector): number {
@@ -158,6 +169,14 @@ export class Line {
       this.start.plus(dir),
       this.end.plus(dir),
       this.isSegment
+    );
+  }
+
+  // centerを中心に拡大する
+  public scale(ratio: Vector, center: Vector): Line {
+    return new Line(
+      this.start.scale(ratio, center),
+      this.end.scale(ratio, center)
     );
   }
 
@@ -318,17 +337,9 @@ export class Polygon {
     return new Polygon(newPoints);
   }
 
-  // ポリゴンをcenterを中心に拡大する
+  // centerを中心に拡大する
   public scale(ratio: Vector, center: Vector): Polygon {
-    const newPoints = this.points.map(point => {
-      const centerToPoint = point.minus(center);
-      const centerToNewPoint = new Vector(
-        centerToPoint.x * ratio.x,
-        centerToPoint.y * ratio.y
-      );
-      
-      return center.plus(centerToNewPoint);
-    });
+    const newPoints = this.points.map(point => point.scale(ratio, center));
     return new Polygon(newPoints);
   }
 
