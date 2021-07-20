@@ -19,7 +19,7 @@ export default class FrameCanvas {
 
   // タチキリモードで使う変数
   private trimmingNodes: Array<Line> = [];
-  private trimmedNodes: Array<string> = [];
+  private trimmedNodes: Array<Line> = [];
 
   // ---- public methods ----
 
@@ -180,9 +180,10 @@ export default class FrameCanvas {
     const moveVec = newCenter.minus(oldCenter);
 
     // 全てのコマを移動
-    this.frames = new Set(Array.from(this.frames).map(frame => {
-      return frame.move(moveVec);
-    }));
+    this.frames = new Set(Array.from(this.frames).map(frame => frame.move(moveVec)));
+
+    // trimmedNodesもあわせて移動する
+    this.trimmedNodes = this.trimmedNodes.map(node => node.move(moveVec));
 
     this.props.canvas.width = width;
     this.props.canvas.height = height;
@@ -203,6 +204,9 @@ export default class FrameCanvas {
     this.frames = new Set(Array.from(this.frames).map(frame => {
       return frame.scale(scale, center);
     }));
+
+    // trimmedNodesもあわせて拡大縮小する
+    this.trimmedNodes = this.trimmedNodes.map(node => node.scale(scale, center));
 
     this.props.frame.width = width;
     this.props.frame.height = height;
@@ -324,12 +328,11 @@ export default class FrameCanvas {
   // タチキリを実行する
   public trimmingApply() {
     for(const node of this.trimmingNodes) {
-      const nodeStr = node.toString();
-      const index = this.trimmedNodes.indexOf(nodeStr);
+      const index = this.trimmedNodes.findIndex(tNode => node.equals(tNode));
 
       if (index == -1) {
         // 指定されたnodeが存在しなかったら追加
-        this.trimmedNodes.push(nodeStr);
+        this.trimmedNodes.push(node);
       } else {
         // 指定されたnodeが存在してたら削除
         this.trimmedNodes.splice(index, 1);
