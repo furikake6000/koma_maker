@@ -10,12 +10,18 @@ export default class FrameCanvas {
 
   // マンガコマ枠
   private frames: Set<Polygon> = new Set<Polygon>();
+
+  // タチキリしている辺のリスト
+  private trimmedNodes: Array<Line> = [];
   
   // 新しい線を引くときに使う変数
   private drawingLine: Line | null = null; // 現在引いている線の始点
 
   // 線を消すときに使う変数
   private mergingFrames: Array<Polygon> = [];  // 結合するコマ
+
+  // タチキリモードで使う変数
+  private trimmingNodes: Array<Line> = [];
 
   // ---- public methods ----
 
@@ -33,28 +39,30 @@ export default class FrameCanvas {
     this.ctx.fillStyle = 'white';
     this.ctx.fillRect(0, 0, this.props.canvas.width, this.props.canvas.height);
 
+    // コマ枠線の描画
+    this.ctx.strokeStyle = '#dce5f5';
+    this.ctx.lineWidth = this.props.lineWidth;
+    for(const node of this.primaryNodes()) {
+      node.draw(this.ctx);
+    }
+
     // グリッドの描画
     if (this.props.grid.visible) {
       // スタイルの設定
-      this.ctx.strokeStyle = '#dce5f5';
       this.ctx.lineWidth = 1.0;
 
       // 縦
       for (let x = 0; x <= this.props.grid.size.x; x++) {
         const posX = (this.props.canvas.width - this.props.frame.width) / 2 + (this.props.frame.width * x / this.props.grid.size.x);
-        this.ctx.beginPath();
-        this.ctx.moveTo(posX, 0);
-        this.ctx.lineTo(posX, this.props.canvas.height);
-        this.ctx.stroke();
+        const l = new Line(new Vector(posX, 0), new Vector(posX, this.props.canvas.height));
+        l.draw(this.ctx);
       }
       
       // 横
       for (let y = 0; y <= this.props.grid.size.y; y++) {
         const posY = (this.props.canvas.height - this.props.frame.height) / 2 + (this.props.frame.height * y / this.props.grid.size.y);
-        this.ctx.beginPath();
-        this.ctx.moveTo(0, posY);
-        this.ctx.lineTo(this.props.canvas.width, posY);
-        this.ctx.stroke();
+        const l = new Line(new Vector(0, posY), new Vector(this.props.canvas.width, posY));
+        l.draw(this.ctx);
       }
     }
 
@@ -67,17 +75,11 @@ export default class FrameCanvas {
       // 描画する線を算出
       const dividedFrame = this.dividingFrame(this.drawingLine);
       if (dividedFrame) {
-        const dLineExt = dividedFrame.collideWithLine(this.drawingLine)[0];
-
-        // 破線を引くように設定
+        // 破線を引く
         this.ctx.lineWidth = 3.0;
         this.ctx.setLineDash([6.0, 6.0]);
-
-        // 描画
-        this.ctx.beginPath();
-        this.ctx.moveTo(dLineExt.start.x, dLineExt.start.y);
-        this.ctx.lineTo(dLineExt.end.x, dLineExt.end.y);
-        this.ctx.stroke();
+        const dLineExt = dividedFrame.collideWithLine(this.drawingLine)[0];
+        dLineExt.draw(this.ctx);
   
         // 破線の設定をもとに戻す
         this.ctx.setLineDash([]);
@@ -96,26 +98,48 @@ export default class FrameCanvas {
       this.mergingFrames[1].fill(this.ctx);
     }
 
+    // trimmingNodes（現在タチキリしようとしているノード）の描画
+    if (this.trimmingNodes.length >= 1) {
+      // 描画の設定
+      this.ctx.lineWidth = 20.0;
+      this.ctx.strokeStyle = '#81D4FA';
+      this.ctx.lineCap = 'round';
+
+      for (const node of this.trimmingNodes) {
+        node.draw(this.ctx);
+      }
+
+      this.ctx.strokeStyle = 'black';
+      this.ctx.lineCap = 'butt';
+    }
+
     // コマの描画
     this.ctx.lineWidth = this.props.lineWidth;
-    this.frames.forEach(frame => {
-      // コマ枠ぶん縮小しても全体の大きさが合うように調整しておく
-      const center = new Vector(
-        this.props.canvas.width / 2,
-        this.props.canvas.height / 2
-      );
-      const scale = new Vector(
-        this.props.frame.width / (this.props.frame.width - this.props.frameSpace),
-        this.props.frame.height / (this.props.frame.height - this.props.frameSpace)
-      );
-      const scaledFrame = frame.scale(scale, center);
+    const offset = this.props.frameSpace / 2 + this.props.lineWidth / 2;
 
-      // コマ枠ぶん縮小する
-      const offset = this.props.frameSpace / 2 + this.props.lineWidth / 2;
-      const shape = scaledFrame.toShape();
-      const offsetShape = shape.offset(-offset, { jointType: 'jtMiter' });
-      const offsetPolys = Polygon.fromShape(offsetShape);
-      offsetPolys.forEach(poly => poly.draw(this.ctx));
+    const trimmedNodeRanges: { [key: string]: number; } = {};
+    const trimmedRange = Math.max(
+      (this.props.canvas.width - this.props.frame.width) / 2,
+      (this.props.canvas.height - this.props.frame.height) / 2
+    ) + this.props.lineWidth;
+    for (const node of this.trimmedNodes) {
+      trimmedNodeRanges[node.toString()] = offset + trimmedRange;
+    }
+
+    this.frames.forEach(frame => {
+      // 外側に接するコマは縮小してはいけないため、あらかじめ同じだけ拡大しておく
+      const nodeRanges: { [key: string]: number; } = {};
+
+      for(const node of frame.nodes()) {
+        // コマの外枠のいずれかの上に存在するかを確認
+        if (this.primaryNodes().some(pNode => node.isOnSameLine(pNode))) {
+          nodeRanges[node.toString()] = offset;
+        }
+      }
+
+      const expandedFrame = frame.expandNodes(Object.assign(nodeRanges, trimmedNodeRanges));
+
+      expandedFrame.offset(-offset).forEach(poly => poly.draw(this.ctx));
     });
   }
 
@@ -158,9 +182,10 @@ export default class FrameCanvas {
     const moveVec = newCenter.minus(oldCenter);
 
     // 全てのコマを移動
-    this.frames = new Set(Array.from(this.frames).map(frame => {
-      return frame.move(moveVec);
-    }));
+    this.frames = new Set(Array.from(this.frames).map(frame => frame.move(moveVec)));
+
+    // trimmedNodesもあわせて移動する
+    this.trimmedNodes = this.trimmedNodes.map(node => node.move(moveVec));
 
     this.props.canvas.width = width;
     this.props.canvas.height = height;
@@ -182,8 +207,18 @@ export default class FrameCanvas {
       return frame.scale(scale, center);
     }));
 
+    // trimmedNodesもあわせて拡大縮小する
+    this.trimmedNodes = this.trimmedNodes.map(node => node.scale(scale, center));
+
     this.props.frame.width = width;
     this.props.frame.height = height;
+  }
+
+  // draw/merge/trimmingなどの各モードで扱う変数を全てリセットする
+  public initializeToolValues() {
+    this.drawingLine = null;
+    this.mergingFrames = [];
+    this.trimmingNodes = [];
   }
 
   // 線を引く系のメソッド
@@ -288,6 +323,45 @@ export default class FrameCanvas {
     this.render();
   }
 
+  // タチキリ(trimming)系メソッド
+  // タチキリする線を選ぶ
+  public trimmingSelectNodes(pos: Vector) {
+    const nodes = this.nodesOfPos(pos, 10.0);
+    // 外枠にある線のみをフィルター
+    this.trimmingNodes = nodes.filter(node => this.primaryNodes().some(pNode => node.isOnSameLine(pNode)));
+    
+    // 描画を更新
+    this.render();
+  }
+
+  // タチキリを実行する
+  public trimmingApply() {
+    for(const node of this.trimmingNodes) {
+      const index = this.trimmedNodes.findIndex(tNode => node.equals(tNode));
+
+      if (index == -1) {
+        // 指定されたnodeが存在しなかったら追加
+        this.trimmedNodes.push(node);
+      } else {
+        // 指定されたnodeが存在してたら削除
+        this.trimmedNodes.splice(index, 1);
+      }
+    }
+
+    this.trimmingNodes = [];
+    
+    // 描画を更新
+    this.render();
+  }
+
+  // タチキリをキャンセルする
+  public trimmingCancel() {
+    this.trimmingNodes = [];
+    
+    // 描画を更新
+    this.render();
+  }
+
   // ---- private methods ----
 
   // 最初の4点を返す
@@ -321,6 +395,16 @@ export default class FrameCanvas {
     return Array.from(this.frames).find(frame => {
       return frame.hasPointInPolygon(pos);
     });
+  }
+
+  // 指定の点にあるノードの集合を返す
+  private nodesOfPos(pos: Vector, margin: number): Array<Line> {
+    // すべてのコマのすべてのノードのうち、posとの距離がmargin以下のものを返す
+    return Array.from(this.frames).map(frame => {
+      return frame.nodes().filter(node => {
+        return node.distance(pos) <= margin;
+      });
+    }).flat(1);
   }
 
   // 分割対象のコマを返す

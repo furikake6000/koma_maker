@@ -45,14 +45,45 @@ export class Vector {
     return new Vector(this.x - target.x, this.y - target.y);
   }
 
+  // 2点間の距離
+  public distance(target: Vector): number {
+    return this.minus(target).length();
+  }
+
+  // 法線ベクトル(反時計回り向き)
+  public normVector(): Vector {
+    return new Vector(this.y, -this.x);
+  }
+
+  // 単位ベクトル
+  public normalized(): Vector {
+    return this.divBy(this.length());
+  }
+
   // 外積の算出
   public crossTo(target: Vector): number {
     return this.x * target.y - this.y * target.x;
   }
 
+  // 文字列化
+  public toString(): string {
+    return `(${this.x}, ${this.y})`;
+  }
+
   // targetと自分が平行かどうかの判定
   public isParallelTo(target: Vector): boolean {
-    return this.crossTo(target) == 0;
+    return Math.abs(this.crossTo(target)) < ZERO_MARGIN;
+  }
+
+  // centerを中心に拡大する
+  public scale(ratio: Vector, center: Vector): Vector {
+    const centerToPoint = this.minus(center);
+    const centerToNewPoint = new Vector(
+      centerToPoint.x * ratio.x,
+      centerToPoint.y * ratio.y
+    );
+    
+    return center.plus(centerToNewPoint);
   }
 
   // 上下・左右位置の比較(上下比較が優先)
@@ -117,9 +148,46 @@ export class Line {
     return this.direction().length();
   }
 
+  // 法線ベクトル
+  public normVector(): Vector {
+    return this.direction().normVector();
+  }
+
+  // 線分→直線化
+  public unlimited() : Line {
+    return new Line(this.start, this.end, false);
+  }
+  
+  // 文字列化
+  public toString(): string {
+    return `[${this.start.toString()}, ${this.end.toString()}]`;
+  }
+
+  // 平行移動
+  public move(dir: Vector): Line {
+    return new Line(
+      this.start.plus(dir),
+      this.end.plus(dir),
+      this.isSegment
+    );
+  }
+
+  // centerを中心に拡大する
+  public scale(ratio: Vector, center: Vector): Line {
+    return new Line(
+      this.start.scale(ratio, center),
+      this.end.scale(ratio, center)
+    );
+  }
+
   // targetと自分が平行かどうかの判定
   public isParallelTo(target: Line): boolean {
     return this.direction().isParallelTo(target.direction());
+  }
+
+  // targetと自分が同じ直線状にあるかの判定
+  public isOnSameLine(target: Line): boolean {
+    return Math.abs(this.sideOfPoint(target.start)) == 0 && Math.abs(this.sideOfPoint(target.end)) == 0;
   }
 
   // 線に対して点がどっち向きにあるかを調べる
@@ -161,6 +229,43 @@ export class Line {
 
     return this.start.plus(myDir.times(ramda));
   }
+
+  // 自分と点targetとの距離を返す
+  public distance(target: Vector): number {
+    // 直線をax+by+c=0の形で表したときのa, b, cを算出
+    const a = this.end.y - this.start.y;
+    const b = this.start.x - this.end.x;
+    const c = this.end.x * this.start.y - this.start.x * this.end.y;
+
+    // 点と直線の距離の公式
+    const lengthToLine = Math.abs(a * target.x + b * target.y + c) / this.length();
+
+    if (this.isSegment) {
+      // targetが2点から引いた垂線の中にあるかを取得
+      const ps = b * this.start.x + a * this.start.y;
+      const pe = b * this.end.x + a * this.end.y;
+      const pt = b * target.x + a * target.y;
+
+      if (pt >= Math.min(ps, pe) && pt <= Math.max(ps, pe)) {
+        // targetは2点から引いた垂線の中にある
+        return lengthToLine;
+      }
+
+      // targetは垂線の外にある
+      // この場合距離は2点からtargetへの距離のうち小さい方となる
+      return Math.min(target.distance(this.start), target.distance(this.end));
+    } else {
+      return lengthToLine;
+    }
+  }
+
+  // Contextを渡したらポリゴンをstrokeしてくれるメソッド
+  public draw(ctx: CanvasRenderingContext2D) {
+    ctx.beginPath();
+    ctx.moveTo(this.start.x, this.start.y);
+    ctx.lineTo(this.end.x, this.end.y);
+    ctx.stroke();
+  }
 }
 
 export class Polygon {
@@ -197,6 +302,7 @@ export class Polygon {
   // ---- public methods ----
 
   // ポリゴンを構成している辺のArrayを返してくれるメソッド
+  // Polygon.nodes()[0].start == Polygon.points[0]である
   public nodes(): Array<Line> {
     const nodes = [];
     for(let i=0; i<this.points.length; i++) {
@@ -231,17 +337,9 @@ export class Polygon {
     return new Polygon(newPoints);
   }
 
-  // ポリゴンをcenterを中心に拡大する
+  // centerを中心に拡大する
   public scale(ratio: Vector, center: Vector): Polygon {
-    const newPoints = this.points.map(point => {
-      const centerToPoint = point.minus(center);
-      const centerToNewPoint = new Vector(
-        centerToPoint.x * ratio.x,
-        centerToPoint.y * ratio.y
-      );
-      
-      return center.plus(centerToNewPoint);
-    });
+    const newPoints = this.points.map(point => point.scale(ratio, center));
     return new Polygon(newPoints);
   }
 
@@ -317,11 +415,11 @@ export class Polygon {
       const nextPoint = dividedPolygon.points[(i == dividedPolygon.points.length - 1 ? 0 : i + 1)];
       const node = new Line(point, nextPoint);
 
-      if (startCrossLine?.equals(node)) {
+      if (startCrossLine?.equals(node) && !partition.start.equals(point) && !partition.start.equals(nextPoint)) {
         dividedPolygon.points.splice(i + 1, 0, partition.start); // 分割された点を挿入
         i += 1;
       }
-      if (endCrossLine?.equals(node)) {
+      if (endCrossLine?.equals(node) && !partition.end.equals(point) && !partition.end.equals(nextPoint)) {
         dividedPolygon.points.splice(i + 1, 0, partition.end); // 分割された点を挿入
         i += 1;
       }
@@ -349,6 +447,47 @@ export class Polygon {
     }
 
     return [new Polygon(normPoly), new Polygon(otherPoly)];
+  }
+
+  // ポリゴンの各辺を指定されたrangeぶん広げる(負なら縮める)
+  // Clipper.jsの機能を使用している
+  public offset(range: number): Array<Polygon> {
+    const shape = this.toShape();
+    const offsetShape = shape.offset(range, { jointType: 'jtMiter' });
+    return Polygon.fromShape(offsetShape);
+  }
+
+  // ポリゴンの指定された辺を指定されたrangeぶん広げる
+  // nodeRangesのkeyはnode.toString()
+  public expandNodes(nodeRanges: { [key: string]: number; }): Polygon {
+    const nodeMoveVecs = this.nodes().map(node => {
+      if (node.toString() in nodeRanges) {
+        return node.normVector().normalized().times(nodeRanges[node.toString()]);
+      } else {
+        return new Vector(0, 0);
+      }
+    });
+
+    const movedNodes = this.nodes().map((node, i) => node.unlimited().move(nodeMoveVecs[i]));
+
+    const newPoints = this.points.map((point, i) => {
+      const movedPrevNode = movedNodes[i == 0 ? this.points.length - 1 : i - 1];
+      const movedNextNode = movedNodes[i];
+
+      if (movedPrevNode.isParallelTo(movedNextNode)) {
+        // 2つのノードが同一直線上にある場合、交点が存在しないのでpointから直接移動後の点を求める
+        return point.plus(nodeMoveVecs[i]);
+      }
+
+      // movedPrevNodeとmovedNextNodeの交点を新しい点として返す
+      const crossPoint = movedPrevNode.crossPoint(movedNextNode);
+      if (crossPoint == null) {
+        throw new Error('Failed to make expanded polygon.');
+      }
+      return crossPoint;
+    });
+
+    return new Polygon(newPoints);
   }
 
   // ---- private methods ----

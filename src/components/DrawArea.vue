@@ -1,7 +1,7 @@
 <template lang="pug">
   .draw-area.d-sm-flex
     .flex-grow-1
-      .blue-grey.darken-4.pt-8.pb-6
+      .blue-grey.darken-4.py-8
         .text-center
           canvas(
             ref="canvasObject"
@@ -15,12 +15,13 @@
             width="840"
             height="1188"
           )
-        .text-right.pt-4.px-6
-          v-btn-toggle(v-model="drawTool" mandatory rounded)
-            v-btn
-              v-icon mdi-pencil
-            v-btn
-              v-icon mdi-eraser
+        .canvas-bottom-toolbar.pt-2.pr-6.d-flex.justify-end
+          v-select.drawtool-selector(
+            v-model="drawTool"
+            :items="drawTools"
+            solo
+            rounded
+          )
     .property-panel
       v-list(expand)
         PagePropertiesMenu(
@@ -38,7 +39,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator';
+import { Component, Watch, Vue } from 'vue-property-decorator';
 import { Vector } from '../helper/Geometry';
 import { PropsPatch } from '../helper/Props';
 import FrameCanvas from '../helper/FrameCanvas';
@@ -55,7 +56,12 @@ import GridsMenu from './GridsMenu.vue';
 export default class DrawArea extends Vue{
   // ---- data ----
 
-  private drawTool: number = 0;
+  private drawTools = [
+    'コマ分割モード',
+    'コマ結合モード',
+    'タチキリ切替モード'
+  ];
+  private drawTool: string = this.drawTools[0];
   private canvas: FrameCanvas | null = null;
 
   private currentTouchID: number = 0; // 現在線を引いているTouchのidentifier
@@ -75,6 +81,13 @@ export default class DrawArea extends Vue{
     }
 
     this.canvas = new FrameCanvas(ctx);
+  }
+
+  // ---- watchers ----
+
+  @Watch('drawTool', { deep: true })
+  onDrawToolChanged() {
+    this.canvas?.initializeToolValues();
   }
 
   // ---- public methods ----
@@ -116,10 +129,12 @@ export default class DrawArea extends Vue{
     const mousePosOfCanvas = this.offsetPosToCanvasPos(new Vector(e.offsetX, e.offsetY));
 
     switch (this.drawTool) {
-      case 0:
+      case this.drawTools[0]:
+        // コマ分割
         this.canvas.drawStart(mousePosOfCanvas);
         break;
-      case 1:
+      case this.drawTools[1]:
+        // コマ結合
         this.canvas.mergeStart(mousePosOfCanvas);
         break;
     }
@@ -129,11 +144,17 @@ export default class DrawArea extends Vue{
 
     const mousePosOfCanvas = this.offsetPosToCanvasPos(new Vector(e.offsetX, e.offsetY));
     switch (this.drawTool) {
-      case 0:
+      case this.drawTools[0]:
+        // コマ分割
         this.canvas.drawMove(mousePosOfCanvas);
         break;
-      case 1:
+      case this.drawTools[1]:
+        // コマ結合
         this.canvas.mergeMove(mousePosOfCanvas);
+        break;
+      case this.drawTools[2]:
+        // タチキリ
+        this.canvas.trimmingSelectNodes(mousePosOfCanvas);
         break;
     }
   }
@@ -141,11 +162,17 @@ export default class DrawArea extends Vue{
     if (this.canvas == null) throw new Error('Canvas not found.');
 
     switch (this.drawTool) {
-      case 0:
+      case this.drawTools[0]:
+        // コマ分割
         this.canvas.drawEnd();
         break;
-      case 1:
+      case this.drawTools[1]:
+        // コマ結合
         this.canvas.mergeEnd();
+        break;
+      case this.drawTools[2]:
+        // タチキリ
+        this.canvas.trimmingApply();
         break;
     }
   }
@@ -159,11 +186,17 @@ export default class DrawArea extends Vue{
     const touchPosOfCanvas = this.offsetPosToCanvasPos(ClickTouchHelper.touchOffsetPos(e, touch));
 
     switch (this.drawTool) {
-      case 0:
+      case this.drawTools[0]:
+        // コマ分割
         this.canvas.drawStart(touchPosOfCanvas);
         break;
-      case 1:
+      case this.drawTools[1]:
+        // コマ結合
         this.canvas.mergeStart(touchPosOfCanvas);
+        break;
+      case this.drawTools[2]:
+        // タチキリ
+        this.canvas.trimmingSelectNodes(touchPosOfCanvas);
         break;
     }
   }
@@ -178,11 +211,17 @@ export default class DrawArea extends Vue{
     const touchPosOfCanvas = this.offsetPosToCanvasPos(ClickTouchHelper.touchOffsetPos(e, touch));
 
     switch (this.drawTool) {
-      case 0:
+      case this.drawTools[0]:
+        // コマ分割
         this.canvas.drawMove(touchPosOfCanvas);
         break;
-      case 1:
+      case this.drawTools[1]:
+        // コマ結合
         this.canvas.mergeMove(touchPosOfCanvas);
+        break;
+      case this.drawTools[2]:
+        // タチキリ
+        this.canvas.trimmingSelectNodes(touchPosOfCanvas);
         break;
     }
   }
@@ -191,12 +230,18 @@ export default class DrawArea extends Vue{
 
     if (this.currentTouch(e.changedTouches) != null) {
       switch (this.drawTool) {
-        case 0:
+      case this.drawTools[0]:
+        // コマ分割
           this.canvas.drawEnd();
           break;
-        case 1:
+      case this.drawTools[1]:
+        // コマ結合
           this.canvas.mergeEnd();
           break;
+      case this.drawTools[2]:
+        // タチキリ
+        this.canvas.trimmingApply();
+        break;
       }
     }
   }
@@ -204,11 +249,17 @@ export default class DrawArea extends Vue{
     if (this.canvas == null) throw new Error('Canvas not found.');
 
     switch (this.drawTool) {
-      case 0:
+      case this.drawTools[0]:
+        // コマ分割
         this.canvas.drawCancel();
         break;
-      case 1:
+      case this.drawTools[1]:
+        // コマ結合
         this.canvas.mergeCancel();
+        break;
+      case this.drawTools[2]:
+        // タチキリ
+        this.canvas.trimmingCancel();
         break;
     }
   }
@@ -242,7 +293,16 @@ export default class DrawArea extends Vue{
     max-width: 80%
     max-height: 90vh
     background-color: white
+
   .property-panel
     @media (min-width: 600px)
       width: 300px
+  
+  .canvas-bottom-toolbar
+    position: sticky
+    bottom: 0
+
+  .drawtool-selector
+    font-weight: bold
+    max-width: 250px
 </style>
