@@ -112,6 +112,14 @@ export default class DrawArea extends Vue{
     if (!(this.$refs.canvasObject instanceof HTMLCanvasElement)) {
       throw new Error('Canvas element not found.');
     }
+    if (this.canvas == null) {
+      throw new Error('Canvas not found.');
+    }
+
+    const canvas = this.canvas;
+
+    // outputModeで描画
+    canvas.render(true);
 
     this.$refs.canvasObject.toBlob(blob => {
       const dataURI: string = window.URL.createObjectURL(blob);
@@ -119,6 +127,9 @@ export default class DrawArea extends Vue{
       dlElement.href = dataURI;
       dlElement.download = 'image.png';
       dlElement.click();
+
+      // 非outputModeで再描画
+      canvas.render(false);
     });
   }
 
@@ -193,10 +204,6 @@ export default class DrawArea extends Vue{
       case this.drawTools[1]:
         // コマ結合
         this.canvas.mergeStart(touchPosOfCanvas);
-        break;
-      case this.drawTools[2]:
-        // タチキリ
-        this.canvas.trimmingSelectNodes(touchPosOfCanvas);
         break;
     }
   }

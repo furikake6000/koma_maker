@@ -34,86 +34,94 @@ export default class FrameCanvas {
   }
 
   // キャンバスにコマを描画する
-  public render() {
+  public render(outputMode: boolean = false) {
     // 既存の描画内容のリセット
     this.ctx.fillStyle = 'white';
     this.ctx.fillRect(0, 0, this.props.canvas.width, this.props.canvas.height);
 
-    // コマ枠線の描画
-    this.ctx.strokeStyle = '#dce5f5';
-    this.ctx.lineWidth = this.props.lineWidth;
-    for(const node of this.primaryNodes()) {
-      node.draw(this.ctx);
+    if (!outputMode) {
+      // outputModeは出力用画像のためグリッド・分割線などは描画されない
+
+      // コマ枠補助線の描画
+      this.ctx.strokeStyle = '#dce5f5';
+      this.ctx.lineWidth = this.props.lineWidth;
+      for(const node of this.primaryNodes()) {
+        node.draw(this.ctx);
+      }
+
+      // グリッドの描画
+      if (this.props.grid.visible) {
+        // スタイルの設定
+        this.ctx.lineWidth = 1.0;
+
+        // 縦
+        for (let x = 0; x <= this.props.grid.size.x; x++) {
+          const posX = (this.props.canvas.width - this.props.frame.width) / 2 + (this.props.frame.width * x / this.props.grid.size.x);
+          const l = new Line(new Vector(posX, 0), new Vector(posX, this.props.canvas.height));
+          l.draw(this.ctx);
+        }
+        
+        // 横
+        for (let y = 0; y <= this.props.grid.size.y; y++) {
+          const posY = (this.props.canvas.height - this.props.frame.height) / 2 + (this.props.frame.height * y / this.props.grid.size.y);
+          const l = new Line(new Vector(0, posY), new Vector(this.props.canvas.width, posY));
+          l.draw(this.ctx);
+        }
+      }
+
+      // drawingLine（現在引いている線）の描画
+      if (this.drawingLine) {
+        // スタイルの設定
+        this.ctx.strokeStyle = 'black';
+        this.ctx.lineJoin = 'miter';
+
+        // 描画する線を算出
+        const dividedFrame = this.dividingFrame(this.drawingLine);
+        if (dividedFrame) {
+          // 破線を引く
+          this.ctx.lineWidth = 3.0;
+          this.ctx.setLineDash([6.0, 6.0]);
+          const dLineExt = dividedFrame.collideWithLine(this.drawingLine)[0];
+          dLineExt.draw(this.ctx);
+
+          // 破線の設定をもとに戻す
+          this.ctx.setLineDash([]);
+        }
+      }
+
+      // mergedPolygons（現在結合しようとしているポリゴン）の描画
+      if (this.mergingFrames.length >= 1) {
+        // 色を設定し描画
+        this.ctx.fillStyle = '#FFCDD2';
+        this.mergingFrames[0].fill(this.ctx);
+      }
+      if (this.mergingFrames.length >= 2) {
+        // 色を設定し描画
+        this.ctx.fillStyle = '#81D4FA';
+        this.mergingFrames[1].fill(this.ctx);
+      }
+
+      // trimmingNodes（現在タチキリしようとしているノード）の描画
+      if (this.trimmingNodes.length >= 1) {
+        // 描画の設定
+        this.ctx.lineWidth = 20.0;
+        this.ctx.strokeStyle = '#81D4FA';
+        this.ctx.lineCap = 'round';
+
+        for (const node of this.trimmingNodes) {
+          node.draw(this.ctx);
+        }
+
+        this.ctx.strokeStyle = 'black';
+        this.ctx.lineCap = 'butt';
+      }
     }
 
-    // グリッドの描画
-    if (this.props.grid.visible) {
-      // スタイルの設定
-      this.ctx.lineWidth = 1.0;
-
-      // 縦
-      for (let x = 0; x <= this.props.grid.size.x; x++) {
-        const posX = (this.props.canvas.width - this.props.frame.width) / 2 + (this.props.frame.width * x / this.props.grid.size.x);
-        const l = new Line(new Vector(posX, 0), new Vector(posX, this.props.canvas.height));
-        l.draw(this.ctx);
-      }
-      
-      // 横
-      for (let y = 0; y <= this.props.grid.size.y; y++) {
-        const posY = (this.props.canvas.height - this.props.frame.height) / 2 + (this.props.frame.height * y / this.props.grid.size.y);
-        const l = new Line(new Vector(0, posY), new Vector(this.props.canvas.width, posY));
-        l.draw(this.ctx);
-      }
-    }
+    // コマの描画
 
     // スタイルの設定
     this.ctx.strokeStyle = 'black';
     this.ctx.lineJoin = 'miter';
-
-    // drawingLine（現在引いている線）の描画
-    if (this.drawingLine) {
-      // 描画する線を算出
-      const dividedFrame = this.dividingFrame(this.drawingLine);
-      if (dividedFrame) {
-        // 破線を引く
-        this.ctx.lineWidth = 3.0;
-        this.ctx.setLineDash([6.0, 6.0]);
-        const dLineExt = dividedFrame.collideWithLine(this.drawingLine)[0];
-        dLineExt.draw(this.ctx);
-  
-        // 破線の設定をもとに戻す
-        this.ctx.setLineDash([]);
-      }
-    }
-
-    // mergedPolygons（現在結合しようとしているポリゴン）の描画
-    if (this.mergingFrames.length >= 1) {
-      // 色を設定し描画
-      this.ctx.fillStyle = '#FFCDD2';
-      this.mergingFrames[0].fill(this.ctx);
-    }
-    if (this.mergingFrames.length >= 2) {
-      // 色を設定し描画
-      this.ctx.fillStyle = '#81D4FA';
-      this.mergingFrames[1].fill(this.ctx);
-    }
-
-    // trimmingNodes（現在タチキリしようとしているノード）の描画
-    if (this.trimmingNodes.length >= 1) {
-      // 描画の設定
-      this.ctx.lineWidth = 20.0;
-      this.ctx.strokeStyle = '#81D4FA';
-      this.ctx.lineCap = 'round';
-
-      for (const node of this.trimmingNodes) {
-        node.draw(this.ctx);
-      }
-
-      this.ctx.strokeStyle = 'black';
-      this.ctx.lineCap = 'butt';
-    }
-
-    // コマの描画
     this.ctx.lineWidth = this.props.lineWidth;
     const offset = this.props.frameSpace / 2 + this.props.lineWidth / 2;
 
