@@ -205,10 +205,6 @@ export default class DrawArea extends Vue{
         // コマ結合
         this.canvas.mergeStart(touchPosOfCanvas);
         break;
-      case this.drawTools[2]:
-        // タチキリ
-        this.canvas.trimmingSelectNodes(touchPosOfCanvas);
-        break;
     }
   }
   public onTouchMove(e: TouchEvent) {
