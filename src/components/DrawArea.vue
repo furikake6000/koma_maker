@@ -30,6 +30,8 @@
         GridsMenu(
           @propertiesChanged="onPropertiesChanged($event)"
         )
+        v-list-item.mt-4
+          v-checkbox.mx-auto(v-model="transparentMode" label="背景を透明にする")
         v-list-item
           v-btn(
             @click = "download"
@@ -63,6 +65,7 @@ export default class DrawArea extends Vue{
   ];
   private drawTool: string = this.drawTools[0];
   private canvas: FrameCanvas | null = null;
+  private transparentMode: boolean = true;
 
   private currentTouchID: number = 0; // 現在線を引いているTouchのidentifier
 
@@ -119,7 +122,7 @@ export default class DrawArea extends Vue{
     const canvas = this.canvas;
 
     // outputModeで描画
-    canvas.render(true);
+    canvas.render(true, this.transparentMode);
 
     this.$refs.canvasObject.toBlob(blob => {
       const dataURI: string = window.URL.createObjectURL(blob);
