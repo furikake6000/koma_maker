@@ -34,10 +34,16 @@ export default class FrameCanvas {
   }
 
   // キャンバスにコマを描画する
-  public render(outputMode: boolean = false) {
+  public render(outputMode: boolean = false, transparentMode: boolean = false) {
     // 既存の描画内容のリセット
-    this.ctx.fillStyle = 'white';
-    this.ctx.fillRect(0, 0, this.props.canvas.width, this.props.canvas.height);
+    if (transparentMode) {
+      // 透明モードがオンの場合、描画内容のクリア
+      this.ctx.clearRect(0, 0, this.props.canvas.width, this.props.canvas.height);
+    } else {
+      // 透明モードがオフの場合、白地の描画
+      this.ctx.fillStyle = 'white';
+      this.ctx.fillRect(0, 0, this.props.canvas.width, this.props.canvas.height);
+    }
 
     if (!outputMode) {
       // outputModeは出力用画像のためグリッド・分割線などは描画されない
