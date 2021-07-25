@@ -29,5 +29,10 @@ export default {
   data: () => ({
     //
   }),
+
+  mounted: function() {
+    // titleの設定
+    document.title = 'コマメーカー';
+  }
 };
 </script>
