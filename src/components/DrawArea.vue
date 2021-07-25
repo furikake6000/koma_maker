@@ -1,7 +1,7 @@
 <template lang="pug">
   .draw-area.d-sm-flex
-    .flex-grow-1
-      .blue-grey.darken-4.py-8
+    .flex-grow-1.grey.darken-4
+      .py-8
         .text-center
           canvas(
             ref="canvasObject"
@@ -33,11 +33,11 @@
         v-list-item.mt-4
           v-checkbox.mx-auto(v-model="transparentMode" label="背景を透明にする")
         v-list-item
-          v-btn(
+          v-btn#download-button(
             @click = "download"
             x-large rounded block
-            color = "primary"
-          ) ダウンロード
+            color = "accent"
+          ) ダウンロード(PNG)
 </template>
 
 <script lang="ts">
@@ -315,4 +315,8 @@ export default class DrawArea extends Vue{
   .drawtool-selector
     font-weight: bold
     max-width: 250px
+  
+  #download-button
+    color: black
+    font-weight: bold
 </style>
