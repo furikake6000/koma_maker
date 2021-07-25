@@ -35,6 +35,9 @@ export default class FrameCanvas {
 
   // キャンバスにコマを描画する
   public render(outputMode: boolean = false, transparentMode: boolean = false) {
+    const gridColor = '#A6C3F5';
+    const selectionColor = '#F0CA2E';
+
     // 既存の描画内容のリセット
     if (transparentMode) {
       // 透明モードがオンの場合、描画内容のクリア
@@ -49,7 +52,7 @@ export default class FrameCanvas {
       // outputModeは出力用画像のためグリッド・分割線などは描画されない
 
       // コマ枠補助線の描画
-      this.ctx.strokeStyle = '#dce5f5';
+      this.ctx.strokeStyle = gridColor;
       this.ctx.lineWidth = this.props.lineWidth;
       for(const node of this.primaryNodes()) {
         node.draw(this.ctx);
@@ -98,12 +101,12 @@ export default class FrameCanvas {
       // mergedPolygons（現在結合しようとしているポリゴン）の描画
       if (this.mergingFrames.length >= 1) {
         // 色を設定し描画
-        this.ctx.fillStyle = '#FFCDD2';
+        this.ctx.fillStyle = selectionColor;
         this.mergingFrames[0].fill(this.ctx);
       }
       if (this.mergingFrames.length >= 2) {
         // 色を設定し描画
-        this.ctx.fillStyle = '#81D4FA';
+        this.ctx.fillStyle = selectionColor;
         this.mergingFrames[1].fill(this.ctx);
       }
 
@@ -111,7 +114,7 @@ export default class FrameCanvas {
       if (this.trimmingNodes.length >= 1) {
         // 描画の設定
         this.ctx.lineWidth = 20.0;
-        this.ctx.strokeStyle = '#81D4FA';
+        this.ctx.strokeStyle = selectionColor;
         this.ctx.lineCap = 'round';
 
         for (const node of this.trimmingNodes) {
