@@ -1,6 +1,6 @@
 <template lang="pug">
   v-app
-    v-app-bar(app color="primary" dark)
+    v-app-bar(app hide-on-scroll color="accent")
       v-img(
         alt="koma maker logo"
         contain
