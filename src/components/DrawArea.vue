@@ -33,11 +33,13 @@
         v-list-item.mt-4
           v-checkbox.mx-auto(v-model="transparentMode" label="背景を透明にする")
         v-list-item
-          v-btn#download-button(
+          v-btn.bold-button(
             @click = "download"
             x-large rounded block
             color = "accent"
           ) ダウンロード(PNG)
+        v-list-item.mt-3
+          v-btn.bold-button(x-large rounded block color="secondary lighten-3") リセット
 </template>
 
 <script lang="ts">
@@ -316,7 +318,7 @@ export default class DrawArea extends Vue{
     font-weight: bold
     max-width: 250px
   
-  #download-button
+  button.v-btn.bold-button
     color: black
     font-weight: bold
 </style>
