@@ -22,7 +22,7 @@
             solo
             rounded
           )
-    .property-panel
+    .property-panel.mb-4
       v-list(expand)
         PagePropertiesMenu(
           @propertiesChanged="onPropertiesChanged($event)"
