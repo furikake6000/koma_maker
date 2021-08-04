@@ -58,9 +58,14 @@
                 span この操作は取り消せません。
               v-card-actions
                 v-spacer
-                // TODO: アクションの実装
-                v-btn(text color="secondary") キャンセル
-                v-btn(text color="warning") はい(リセット)
+                v-btn(
+                  @click="resetDialog = false"
+                  text color="secondary"
+                ) キャンセル
+                v-btn(
+                  @click="resetCanvas"
+                  text color="warning"
+                ) はい(リセット)
 </template>
 
 <script lang="ts">
@@ -158,6 +163,16 @@ export default class DrawArea extends Vue{
       // 非outputModeで再描画
       canvas.render(false);
     });
+  }
+
+  // キャンバスの初期化
+  public resetCanvas() {
+    if (this.canvas == null) {
+      throw new Error('Canvas not found.');
+    }
+    this.canvas.clear();
+
+    this.resetDialog = false;
   }
 
   // マウスイベント群
