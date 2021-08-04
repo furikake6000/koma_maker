@@ -238,6 +238,21 @@ export default class FrameCanvas {
     this.trimmingNodes = [];
   }
 
+  // キャンバスを初期化する
+  public clear() {
+    // コマの初期化
+    this.frames = new Set<Polygon>();
+    this.frames.add(this.primaryPolygon());
+
+    // タチキリの初期化
+    this.trimmedNodes = [];
+
+    // コマサイズ、線の太さなどは初期化しない
+
+    // 初期化したコマを描画しておく
+    this.render();
+  }
+
   // 線を引く系のメソッド
   // posから新しい境界線を引き始める
   public drawStart(pos: Vector) {

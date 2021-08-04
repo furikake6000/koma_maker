@@ -22,22 +22,50 @@
             solo
             rounded
           )
-    .property-panel
+    .property-panel.mb-4
       v-list(expand)
         PagePropertiesMenu(
           @propertiesChanged="onPropertiesChanged($event)"
         )
+
         GridsMenu(
           @propertiesChanged="onPropertiesChanged($event)"
         )
+
         v-list-item.mt-4
           v-checkbox.mx-auto(v-model="transparentMode" label="背景を透明にする")
+
         v-list-item
-          v-btn#download-button(
+          v-btn.bold-button(
             @click = "download"
             x-large rounded block
             color = "accent"
           ) ダウンロード(PNG)
+
+        v-list-item.mt-3
+          v-dialog(v-model="resetDialog" width="400")
+            template(v-slot:activator="{ on, attrs }")
+              v-btn.bold-button(
+                v-bind="attrs"
+                v-on="on"
+                x-large rounded block color="secondary lighten-3"
+              ) リセット
+            v-card
+              v-card-title リセット
+              v-card-text
+                span キャンバスをリセットしてもよろしいですか？
+                br
+                span この操作は取り消せません。
+              v-card-actions
+                v-spacer
+                v-btn(
+                  @click="resetDialog = false"
+                  text color="secondary"
+                ) キャンセル
+                v-btn(
+                  @click="resetCanvas"
+                  text color="warning"
+                ) はい(リセット)
 </template>
 
 <script lang="ts">
@@ -66,6 +94,7 @@ export default class DrawArea extends Vue{
   private drawTool: string = this.drawTools[0];
   private canvas: FrameCanvas | null = null;
   private transparentMode: boolean = true;
+  private resetDialog: boolean = false;
 
   private currentTouchID: number = 0; // 現在線を引いているTouchのidentifier
 
@@ -134,6 +163,16 @@ export default class DrawArea extends Vue{
       // 非outputModeで再描画
       canvas.render(false);
     });
+  }
+
+  // キャンバスの初期化
+  public resetCanvas() {
+    if (this.canvas == null) {
+      throw new Error('Canvas not found.');
+    }
+    this.canvas.clear();
+
+    this.resetDialog = false;
   }
 
   // マウスイベント群
@@ -316,7 +355,7 @@ export default class DrawArea extends Vue{
     font-weight: bold
     max-width: 250px
   
-  #download-button
+  button.v-btn.bold-button
     color: black
     font-weight: bold
 </style>
