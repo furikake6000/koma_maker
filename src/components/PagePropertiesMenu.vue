@@ -60,14 +60,6 @@ v-list-group(:value="true" prepend-icon="mdi-move-resize")
       max = "50"
       thumb-label="always"
     )
-  v-list-item
-    v-slider.mt-9(
-      v-model = "properties.frameSpace"
-      label = "コマ間隔"
-      min = "5"
-      max = "50"
-      thumb-label="always"
-    )
 </template>
 
 <script lang="ts">
@@ -82,7 +74,6 @@ export default class PagePropertiesMenu extends Vue{
       horizontal: 20,
       vertical: 10,
     },
-    frameSpace: 10,
     frame: {
       width: 600,
       height: 800,

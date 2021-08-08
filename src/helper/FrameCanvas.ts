@@ -177,7 +177,6 @@ export default class FrameCanvas {
     }
 
     this.props.lineWidth = props.lineWidth || this.props.lineWidth;
-    this.props.frameSpace = props.frameSpace || this.props.frameSpace;
 
     if (props.thickness) {
       this.props.thickness.horizontal = props.thickness.horizontal;

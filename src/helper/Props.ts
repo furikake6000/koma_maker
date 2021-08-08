@@ -5,7 +5,6 @@ export class Props{
     horizontal: number;
     vertical: number;
   };
-  frameSpace: number;
   frame: {
     width: number,
     height: number,
@@ -29,7 +28,6 @@ export class Props{
       horizontal: 20,
       vertical: 10,
     };
-    this.frameSpace = 10;
     this.frame = {
       width: 600,
       height: 800,
@@ -53,7 +51,6 @@ export class PropsPatch{
     horizontal: number;
     vertical: number;
   };
-  frameSpace?: number;
   frame?: {
     width: number,
     height: number,
