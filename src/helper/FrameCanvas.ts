@@ -132,7 +132,9 @@ export default class FrameCanvas {
     this.ctx.strokeStyle = 'black';
     this.ctx.lineJoin = 'miter';
     this.ctx.lineWidth = this.props.lineWidth;
-    const offset = this.props.frameSpace / 2 + this.props.lineWidth / 2;
+    const offsetVertical = this.props.thickness.vertical / 2 + this.props.lineWidth / 2;
+    const offsetHorizontal = this.props.thickness.horizontal / 2 + this.props.lineWidth / 2;
+    const maxOffset = Math.max(offsetVertical, offsetHorizontal);
 
     const trimmedNodeRanges: { [key: string]: number; } = {};
     const trimmedRange = Math.max(
@@ -140,7 +142,7 @@ export default class FrameCanvas {
       (this.props.canvas.height - this.props.frame.height) / 2
     ) + this.props.lineWidth;
     for (const node of this.trimmedNodes) {
-      trimmedNodeRanges[node.toString()] = offset + trimmedRange;
+      trimmedNodeRanges[node.toString()] = (node.isHorizontal() ? offsetHorizontal : offsetVertical) + trimmedRange;
     }
 
     this.frames.forEach(frame => {
@@ -150,13 +152,17 @@ export default class FrameCanvas {
       for(const node of frame.nodes()) {
         // コマの外枠のいずれかの上に存在するかを確認
         if (this.primaryNodes().some(pNode => node.isOnSameLine(pNode))) {
-          nodeRanges[node.toString()] = offset;
+          nodeRanges[node.toString()] = maxOffset;
+          continue;
         }
+
+        // 線がhorizontalかverticalかによってoffsetを変更
+        nodeRanges[node.toString()] = maxOffset - (node.isHorizontal() ? offsetHorizontal : offsetVertical);
       }
 
       const expandedFrame = frame.expandNodes(Object.assign(nodeRanges, trimmedNodeRanges));
 
-      expandedFrame.offset(-offset).forEach(poly => poly.draw(this.ctx));
+      expandedFrame.offset(-maxOffset).forEach(poly => poly.draw(this.ctx));
     });
   }
 
@@ -172,6 +178,11 @@ export default class FrameCanvas {
 
     this.props.lineWidth = props.lineWidth || this.props.lineWidth;
     this.props.frameSpace = props.frameSpace || this.props.frameSpace;
+
+    if (props.thickness) {
+      this.props.thickness.horizontal = props.thickness.horizontal;
+      this.props.thickness.vertical = props.thickness.vertical;
+    }
 
     if (props.grid) {
       if (props.grid.size.validated) {
