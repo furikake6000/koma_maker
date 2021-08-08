@@ -37,9 +37,9 @@ export class Props{
       height: 1188,
     };
     this.grid = {
-      visible: false,
-      snap: false,
-      size: { x: 1, y: 1 }
+      visible: true,
+      snap: true,
+      size: { x: 12, y: 12 }
     };
   }
 }
