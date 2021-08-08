@@ -190,6 +190,12 @@ export class Line {
     return Math.abs(this.sideOfPoint(target.start)) == 0 && Math.abs(this.sideOfPoint(target.end)) == 0;
   }
 
+  // 自分がverticalかhorizontalかの判定
+  // 斜め45°を境界にして判定される。45°丁度はverticalになる
+  public isHorizontal(): boolean {
+    return Math.abs(this.direction().x) > Math.abs(this.direction().y);
+  }
+
   // 線に対して点がどっち向きにあるかを調べる
   // 1: 法線方向 / -1: 逆方向 / 0: 線上
   public sideOfPoint(point: Vector): number {
