@@ -33,8 +33,8 @@ import { PropsPatch } from '../helper/Props';
 export default class GridsMenu extends Vue{
   private props: PropsPatch = {
     grid: {
-      visible: false,
-      snap: false,
+      visible: true,
+      snap: true,
       size: { x: 12, y: 12, validated: true }
     }
   };
