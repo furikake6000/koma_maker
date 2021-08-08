@@ -1,6 +1,10 @@
 // プロパティ
 export class Props{
   lineWidth: number;
+  thickness: {
+    horizontal: number;
+    vertical: number;
+  };
   frameSpace: number;
   frame: {
     width: number,
@@ -21,6 +25,10 @@ export class Props{
 
   constructor() {
     this.lineWidth = 5;
+    this.thickness = {
+      horizontal: 20,
+      vertical: 10,
+    };
     this.frameSpace = 10;
     this.frame = {
       width: 600,
@@ -41,6 +49,10 @@ export class Props{
 // プロパティに対する変更
 export class PropsPatch{
   lineWidth?: number;
+  thickness?: {
+    horizontal: number;
+    vertical: number;
+  };
   frameSpace?: number;
   frame?: {
     width: number,

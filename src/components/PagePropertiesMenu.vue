@@ -46,6 +46,22 @@ v-list-group(:value="true" prepend-icon="mdi-move-resize")
     )
   v-list-item
     v-slider.mt-9(
+      v-model = "properties.thickness.vertical"
+      label = "コマ間隔(縦)"
+      min = "5"
+      max = "50"
+      thumb-label="always"
+    )
+  v-list-item
+    v-slider.mt-9(
+      v-model = "properties.thickness.horizontal"
+      label = "コマ間隔(横)"
+      min = "5"
+      max = "50"
+      thumb-label="always"
+    )
+  v-list-item
+    v-slider.mt-9(
       v-model = "properties.frameSpace"
       label = "コマ間隔"
       min = "5"
@@ -62,6 +78,10 @@ import { PropsPatch } from '../helper/Props';
 export default class PagePropertiesMenu extends Vue{
   private properties: PropsPatch = {
     lineWidth: 5,
+    thickness: {
+      horizontal: 20,
+      vertical: 10,
+    },
     frameSpace: 10,
     frame: {
       width: 600,
