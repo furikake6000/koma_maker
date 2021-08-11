@@ -6,6 +6,7 @@ Vue.use(VueRouter);
 
 const routes = [
   { path: '/', component: Top },
+  { path: '/*', redirect: '/' },
 ];
 
 const router = new VueRouter({
