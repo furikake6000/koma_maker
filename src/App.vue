@@ -9,20 +9,18 @@
       )
 
     v-main
-      DrawArea
+      router-view
     
     Footer
 </template>
 
 <script>
-import DrawArea from './components/DrawArea.vue';
 import Footer from './components/Footer.vue';
 
 export default {
   name: 'App',
 
   components: {
-    DrawArea,
     Footer
   },
 

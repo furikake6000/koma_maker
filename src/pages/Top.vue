@@ -74,8 +74,8 @@ import { Vector } from '../helper/Geometry';
 import { PropsPatch } from '../helper/Props';
 import FrameCanvas from '../helper/FrameCanvas';
 import ClickTouchHelper from '../helper/ClickTouchHelper';
-import PagePropertiesMenu from './PagePropertiesMenu.vue';
-import GridsMenu from './GridsMenu.vue';
+import PagePropertiesMenu from '../components/PagePropertiesMenu.vue';
+import GridsMenu from '../components/GridsMenu.vue';
 
 @Component({
   components: {
@@ -83,7 +83,7 @@ import GridsMenu from './GridsMenu.vue';
     GridsMenu
   }
 })
-export default class DrawArea extends Vue{
+export default class Top extends Vue{
   // ---- data ----
 
   private drawTools = [
