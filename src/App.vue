@@ -1,12 +1,6 @@
 <template lang="pug">
   v-app
-    v-app-bar(app hide-on-scroll color="accent")
-      v-img(
-        alt="koma maker logo"
-        contain
-        src="@/assets/koma_maker_logo.svg"
-        height="40"
-      )
+    Header
 
     v-main
       router-view
@@ -15,13 +9,15 @@
 </template>
 
 <script>
+import Header from './components/Header.vue';
 import Footer from './components/Footer.vue';
 
 export default {
   name: 'App',
 
   components: {
-    Footer
+    Header,
+    Footer,
   },
 
   data: () => ({
