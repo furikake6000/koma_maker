@@ -19,14 +19,5 @@ export default {
     Header,
     Footer,
   },
-
-  data: () => ({
-    //
-  }),
-
-  mounted: function() {
-    // titleの設定
-    document.title = 'コマメーカー';
-  }
 };
 </script>
