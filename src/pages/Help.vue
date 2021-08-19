@@ -17,6 +17,7 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
+import axios from 'axios';
 import sanitizeHtml from 'sanitize-html';
 
 class Article {
@@ -36,19 +37,15 @@ export default class Help extends Vue{
   private articles: Array<Article> = [];
   private selectedArticleIndex: number = 0;
 
-  mounted() {
-    this.articles = [
-      new Article(
-        'test',
-        'test title',
-        'test article'
-      ),
-      new Article(
-        'test2',
-        'test2 title',
-        'test2 article'
-      ),
-    ];
+  async mounted() {
+    const response = await axios.get(
+      'https://koma-maker.microcms.io/api/v1/help',
+      {
+        headers: { 'X-API-KEY' : process.env.VUE_APP_X_API_KEY }
+      }
+    );
+
+    this.articles = response.data.contents;
   }
 
   // ---- Computed ----
