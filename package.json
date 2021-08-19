@@ -9,7 +9,9 @@
   },
   "dependencies": {
     "@doodle3d/clipper-js": "^1.0.11",
+    "@types/axios": "^0.14.0",
     "@types/sanitize-html": "^2.3.2",
+    "axios": "^0.21.1",
     "core-js": "^3.6.5",
     "sanitize-html": "^2.4.0",
     "vue": "^2.6.11",
