@@ -5,6 +5,7 @@
         v-subheader ヘルプ
         v-list-item-group(
           v-model="selectedArticleIndex"
+          mandatory
         )
           v-list-item(
             v-for="article in articles"
