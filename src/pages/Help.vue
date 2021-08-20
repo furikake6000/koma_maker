@@ -1,7 +1,7 @@
 <template lang="pug">
   #help.d-flex
     v-navigation-drawer
-      v-list(shaped)
+      v-list(dense)
         v-subheader ヘルプ
         v-list-item-group(
           v-model="selectedArticleIndex"
@@ -12,8 +12,9 @@
             :key="article.id"
           )
             v-list-item-content
-              v-list-item-title(v-text="article.title")
-    div(v-html="sanitizedContent")
+              v-list-item-title.body-2(v-text="article.title")
+    v-container.mx-auto
+      .cms-content(v-html="sanitizedContent")
 </template>
 
 <script lang="ts">
@@ -68,4 +69,10 @@ export default class Help extends Vue{
 <style lang="sass" scoped>
   #help
     height: 100%
+</style>
+
+<style lang="sass">
+  .cms-content
+    img
+      max-width: 100%
 </style>
