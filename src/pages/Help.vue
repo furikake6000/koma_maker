@@ -14,7 +14,7 @@
             v-list-item-content
               v-list-item-title.body-2(v-text="article.title")
     v-container
-      .ma-6.cms-content(v-html="sanitizedContent")
+      .cms-content(v-html="sanitizedContent")
 </template>
 
 <script lang="ts">
@@ -73,6 +73,8 @@ export default class Help extends Vue{
 
 <style lang="sass">
   .cms-content
+    padding: 1.5rem 1rem 12rem 1rem
+
     img
       max-width: 100%
 
