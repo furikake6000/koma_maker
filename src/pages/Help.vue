@@ -13,8 +13,8 @@
           )
             v-list-item-content
               v-list-item-title.body-2(v-text="article.title")
-    v-container.mx-auto
-      .cms-content(v-html="sanitizedContent")
+    v-container
+      .ma-6.cms-content(v-html="sanitizedContent")
 </template>
 
 <script lang="ts">
@@ -75,4 +75,19 @@ export default class Help extends Vue{
   .cms-content
     img
       max-width: 100%
+
+    h1
+      padding: 1rem
+      margin-bottom: 1.5rem
+      border-bottom: 3px solid #000
+
+    h2
+      padding: 0.5rem 1rem
+      margin-top: 1.5rem
+      margin-bottom: 1rem
+      border-left: 5px solid #000
+
+    h3
+      margin-top: 1rem
+      margin-bottom: 0.5rem
 </style>
