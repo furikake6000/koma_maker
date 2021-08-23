@@ -1,26 +1,31 @@
 <template lang="pug">
-  #help.d-flex
-    v-navigation-drawer
-      v-list(dense)
-        v-subheader ヘルプ
-        v-list-item-group(
-          v-model="selectedArticleIndex"
-          mandatory
-        )
-          v-list-item(
-            v-for="article in articles"
-            :key="article.id"
-          )
-            v-list-item-content
-              v-list-item-title.body-2(v-text="article.title")
-    v-container
-      .cms-content(v-html="sanitizedContent")
+  div
+    Header
+
+    v-main
+      #help.d-flex
+        v-navigation-drawer
+          v-list(dense)
+            v-subheader ヘルプ
+            v-list-item-group(
+              v-model="selectedArticleIndex"
+              mandatory
+            )
+              v-list-item(
+                v-for="article in articles"
+                :key="article.id"
+              )
+                v-list-item-content
+                  v-list-item-title.body-2(v-text="article.title")
+        v-container
+          .cms-content(v-html="sanitizedContent")
 </template>
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
 import axios from 'axios';
 import sanitizeHtml from 'sanitize-html';
+import Header from '../components/Header.vue';
 
 class Article {
   id: string = '';
@@ -34,7 +39,11 @@ class Article {
   }
 }
 
-@Component
+@Component({
+  components: {
+    Header,
+  }
+})
 export default class Help extends Vue{
   private articles: Array<Article> = [];
   private selectedArticleIndex: number = 0;
