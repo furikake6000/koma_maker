@@ -1,8 +1,10 @@
 <template lang="pug">  
   v-app-bar(app hide-on-scroll color="accent")
+    v-app-bar-nav-icon.d-sm-none(@click="$emit('clickBurger')")
+
     v-spacer
 
-    v-app-bar-title.ml-10
+    v-app-bar-title.ml-sm-10
       router-link(to="/")
         v-img(
           alt="koma maker logo"
