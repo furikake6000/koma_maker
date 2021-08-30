@@ -1,71 +1,75 @@
 <template lang="pug">
-  .draw-area.d-sm-flex
-    .flex-grow-1.grey.darken-4
-      .py-8
-        .text-center
-          canvas(
-            ref="canvasObject"
-            @mousedown="onMouseDown"
-            @mousemove="onMouseMove"
-            @mouseup="onMouseUp"
-            @touchstart="onTouchStart"
-            @touchmove="onTouchMove"
-            @touchend="onTouchEnd"
-            @touchcancel="onTouchCancel"
-            width="840"
-            height="1188"
-          )
-        .canvas-bottom-toolbar.pt-2.pr-6.d-flex.justify-end
-          v-select.drawtool-selector(
-            v-model="drawTool"
-            :items="drawTools"
-            solo
-            rounded
-          )
-    .property-panel.mb-4
-      v-list(expand)
-        PagePropertiesMenu(
-          @propertiesChanged="onPropertiesChanged($event)"
-        )
+  div
+    Header
 
-        GridsMenu(
-          @propertiesChanged="onPropertiesChanged($event)"
-        )
+    v-main
+      .draw-area.d-sm-flex
+        .flex-grow-1.grey.darken-4
+          .py-8
+            .text-center
+              canvas(
+                ref="canvasObject"
+                @mousedown="onMouseDown"
+                @mousemove="onMouseMove"
+                @mouseup="onMouseUp"
+                @touchstart="onTouchStart"
+                @touchmove="onTouchMove"
+                @touchend="onTouchEnd"
+                @touchcancel="onTouchCancel"
+                width="840"
+                height="1188"
+              )
+            .canvas-bottom-toolbar.pt-2.pr-6.d-flex.justify-end
+              v-select.drawtool-selector(
+                v-model="drawTool"
+                :items="drawTools"
+                solo
+                rounded
+              )
+        .property-panel.mb-4
+          v-list(expand)
+            PagePropertiesMenu(
+              @propertiesChanged="onPropertiesChanged($event)"
+            )
 
-        v-list-item.mt-4
-          v-checkbox.mx-auto(v-model="transparentMode" label="背景を透明にする")
+            GridsMenu(
+              @propertiesChanged="onPropertiesChanged($event)"
+            )
 
-        v-list-item
-          v-btn.bold-button(
-            @click = "download"
-            x-large rounded block
-            color = "accent"
-          ) ダウンロード(PNG)
+            v-list-item.mt-4
+              v-checkbox.mx-auto(v-model="transparentMode" label="背景を透明にする")
 
-        v-list-item.mt-3
-          v-dialog(v-model="resetDialog" width="400")
-            template(v-slot:activator="{ on, attrs }")
+            v-list-item
               v-btn.bold-button(
-                v-bind="attrs"
-                v-on="on"
-                x-large rounded block color="secondary lighten-3"
-              ) リセット
-            v-card
-              v-card-title リセット
-              v-card-text
-                span キャンバスをリセットしてもよろしいですか？
-                br
-                span この操作は取り消せません。
-              v-card-actions
-                v-spacer
-                v-btn(
-                  @click="resetDialog = false"
-                  text color="secondary"
-                ) キャンセル
-                v-btn(
-                  @click="resetCanvas"
-                  text color="warning"
-                ) はい(リセット)
+                @click = "download"
+                x-large rounded block
+                color = "accent"
+              ) ダウンロード(PNG)
+
+            v-list-item.mt-3
+              v-dialog(v-model="resetDialog" width="400")
+                template(v-slot:activator="{ on, attrs }")
+                  v-btn.bold-button(
+                    v-bind="attrs"
+                    v-on="on"
+                    x-large rounded block color="secondary lighten-3"
+                  ) リセット
+                v-card
+                  v-card-title リセット
+                  v-card-text
+                    span キャンバスをリセットしてもよろしいですか？
+                    br
+                    span この操作は取り消せません。
+                  v-card-actions
+                    v-spacer
+                    v-btn(
+                      @click="resetDialog = false"
+                      text color="secondary"
+                    ) キャンセル
+                    v-btn(
+                      @click="resetCanvas"
+                      text color="warning"
+                    ) はい(リセット)
 </template>
 
 <script lang="ts">
@@ -76,11 +80,13 @@ import FrameCanvas from '../helper/FrameCanvas';
 import ClickTouchHelper from '../helper/ClickTouchHelper';
 import PagePropertiesMenu from '../components/PagePropertiesMenu.vue';
 import GridsMenu from '../components/GridsMenu.vue';
+import Header from '../components/Header.vue';
 
 @Component({
   components: {
     PagePropertiesMenu,
-    GridsMenu
+    GridsMenu,
+    Header,
   }
 })
 export default class Top extends Vue{
