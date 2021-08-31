@@ -2,7 +2,7 @@
   .top
     Header(@clickBurger="toggleDrawer")
 
-    v-navigation-drawer(v-model="drawerEnabled" bottom fixed)
+    v-navigation-drawer.d-sm-none(v-model="drawerEnabled" bottom fixed)
       v-list(expand)
         PagePropertiesMenu(
           @propertiesChanged="onPropertiesChanged($event)"
@@ -52,6 +52,31 @@
                 solo
                 rounded
               )
+        .property-panel.d-none.d-sm-flex.mb-4
+          v-list(expand)
+            PagePropertiesMenu(
+              @propertiesChanged="onPropertiesChanged($event)"
+            )
+
+            GridsMenu(
+              @propertiesChanged="onPropertiesChanged($event)"
+            )
+
+            v-list-item.mt-4
+              v-checkbox.mx-auto(v-model="transparentMode" label="背景を透明にする")
+
+            v-list-item
+              v-btn.bold-button(
+                @click = "download"
+                x-large rounded block
+                color = "accent"
+              ) ダウンロード(PNG)
+
+            v-list-item.mt-3
+              v-btn.bold-button(
+                @click = "resetDialog = !resetDialog"
+                x-large rounded block color="secondary lighten-3"
+              ) リセット
     
     v-dialog(v-model="resetDialog" width="400")
       v-card
@@ -357,6 +382,10 @@ export default class Top extends Vue{
     max-width: 80%
     max-height: 90vh
     background-color: white
+
+  .property-panel
+    @media (min-width: 600px)
+      width: 300px
 
   .canvas-bottom-toolbar
     position: sticky
