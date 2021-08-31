@@ -2,8 +2,8 @@
   .top
     Header(@clickBurger="toggleDrawer")
 
-    v-navigation-drawer(v-model="drawerEnabled" fixed)
-      v-list.mb-4(expand)
+    v-navigation-drawer(v-model="drawerEnabled" bottom fixed)
+      v-list(expand)
         PagePropertiesMenu(
           @propertiesChanged="onPropertiesChanged($event)"
         )
@@ -23,29 +23,10 @@
           ) ダウンロード(PNG)
 
         v-list-item.mt-3
-          v-dialog(v-model="resetDialog" width="400")
-            template(v-slot:activator="{ on, attrs }")
-              v-btn.bold-button(
-                v-bind="attrs"
-                v-on="on"
-                x-large rounded block color="secondary lighten-3"
-              ) リセット
-            v-card
-              v-card-title リセット
-              v-card-text
-                span キャンバスをリセットしてもよろしいですか？
-                br
-                span この操作は取り消せません。
-              v-card-actions
-                v-spacer
-                v-btn(
-                  @click="resetDialog = false"
-                  text color="secondary"
-                ) キャンセル
-                v-btn(
-                  @click="resetCanvas"
-                  text color="warning"
-                ) はい(リセット)
+          v-btn.bold-button(
+            @click = "resetDialog = !resetDialog"
+            x-large rounded block color="secondary lighten-3"
+          ) リセット
 
     v-main
       .draw-area.d-sm-flex
@@ -71,6 +52,24 @@
                 solo
                 rounded
               )
+    
+    v-dialog(v-model="resetDialog" width="400")
+      v-card
+        v-card-title リセット
+        v-card-text
+          span キャンバスをリセットしてもよろしいですか？
+          br
+          span この操作は取り消せません。
+        v-card-actions
+          v-spacer
+          v-btn(
+            @click="resetDialog = false"
+            text color="secondary"
+          ) キャンセル
+          v-btn(
+            @click="resetCanvas"
+            text color="warning"
+          ) はい(リセット)
 </template>
 
 <script lang="ts">
