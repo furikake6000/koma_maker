@@ -45,12 +45,16 @@
                 width="840"
                 height="1188"
               )
-            .canvas-bottom-toolbar.pt-2.pr-6.d-flex.justify-end
+            .canvas-bottom-toolbar.pt-2.px-2.px-sm-6.d-flex
+              v-btn.d-sm-none(@click="toggleDrawer" fab small)
+                v-icon mdi-cog
+              v-spacer
               v-select.drawtool-selector(
                 v-model="drawTool"
                 :items="drawTools"
                 solo
                 rounded
+                dense
               )
         .property-panel.d-none.d-sm-flex.mb-4
           v-list(expand)
@@ -65,7 +69,7 @@
             v-list-item.mt-4
               v-checkbox.mx-auto(v-model="transparentMode" label="背景を透明にする")
 
-            v-list-item
+            v-list-item.d-flex.align-center
               v-btn.bold-button(
                 @click = "download"
                 x-large rounded block
