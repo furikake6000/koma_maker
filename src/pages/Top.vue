@@ -12,22 +12,6 @@
           @propertiesChanged="onPropertiesChanged($event)"
         )
 
-        v-list-item.mt-4
-          v-checkbox.mx-auto(v-model="transparentMode" label="背景を透明にする")
-
-        v-list-item
-          v-btn.bold-button(
-            @click = "download"
-            x-large rounded block
-            color = "accent"
-          ) ダウンロード(PNG)
-
-        v-list-item.mt-3
-          v-btn.bold-button(
-            @click = "resetDialog = !resetDialog"
-            x-large rounded block color="secondary lighten-3"
-          ) リセット
-
     v-main
       .draw-area.d-sm-flex
         .flex-grow-1.grey.darken-4
@@ -81,6 +65,23 @@
                 @click = "resetDialog = !resetDialog"
                 x-large rounded block color="secondary lighten-3"
               ) リセット
+
+      .d-sm-none.mb-6
+        v-list-item.mt-4
+          v-checkbox.mx-auto(v-model="transparentMode" label="背景を透明にする")
+
+        v-list-item.d-flex.align-center
+          v-btn.bold-button(
+            @click = "download"
+            x-large rounded block
+            color = "accent"
+          ) ダウンロード(PNG)
+
+        v-list-item.mt-3
+          v-btn.bold-button(
+            @click = "resetDialog = !resetDialog"
+            x-large rounded block color="secondary lighten-3"
+          ) リセット
     
     v-dialog(v-model="resetDialog" width="400")
       v-card
