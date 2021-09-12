@@ -1,28 +1,8 @@
 <template lang="pug">
-  .draw-area.d-sm-flex
-    .flex-grow-1.grey.darken-4
-      .py-8
-        .text-center
-          canvas(
-            ref="canvasObject"
-            @mousedown="onMouseDown"
-            @mousemove="onMouseMove"
-            @mouseup="onMouseUp"
-            @touchstart="onTouchStart"
-            @touchmove="onTouchMove"
-            @touchend="onTouchEnd"
-            @touchcancel="onTouchCancel"
-            width="840"
-            height="1188"
-          )
-        .canvas-bottom-toolbar.pt-2.pr-6.d-flex.justify-end
-          v-select.drawtool-selector(
-            v-model="drawTool"
-            :items="drawTools"
-            solo
-            rounded
-          )
-    .property-panel.mb-4
+  .top
+    Header(@clickBurger="toggleDrawer")
+
+    v-navigation-drawer.d-sm-none(v-model="drawerEnabled" bottom fixed)
       v-list(expand)
         PagePropertiesMenu(
           @propertiesChanged="onPropertiesChanged($event)"
@@ -32,10 +12,65 @@
           @propertiesChanged="onPropertiesChanged($event)"
         )
 
+    v-main
+      .draw-area.d-sm-flex
+        .flex-grow-1.grey.darken-4
+          .py-8
+            .text-center
+              canvas(
+                ref="canvasObject"
+                @mousedown="onMouseDown"
+                @mousemove="onMouseMove"
+                @mouseup="onMouseUp"
+                @touchstart="onTouchStart"
+                @touchmove="onTouchMove"
+                @touchend="onTouchEnd"
+                @touchcancel="onTouchCancel"
+                width="840"
+                height="1188"
+              )
+            .canvas-bottom-toolbar.pt-2.px-2.px-sm-6.d-flex
+              v-btn.d-sm-none(@click="toggleDrawer" fab small)
+                v-icon mdi-cog
+              v-spacer
+              v-select.drawtool-selector(
+                v-model="drawTool"
+                :items="drawTools"
+                solo
+                rounded
+                dense
+              )
+        .property-panel.d-none.d-sm-flex.mb-4
+          v-list(expand)
+            PagePropertiesMenu(
+              @propertiesChanged="onPropertiesChanged($event)"
+            )
+
+            GridsMenu(
+              @propertiesChanged="onPropertiesChanged($event)"
+            )
+
+            v-list-item.mt-4
+              v-checkbox.mx-auto(v-model="transparentMode" label="背景を透明にする")
+
+            v-list-item.d-flex.align-center
+              v-btn.bold-button(
+                @click = "download"
+                x-large rounded block
+                color = "accent"
+              ) ダウンロード(PNG)
+
+            v-list-item.mt-3
+              v-btn.bold-button(
+                @click = "resetDialog = !resetDialog"
+                x-large rounded block color="secondary lighten-3"
+              ) リセット
+
+      .d-sm-none.mb-6
         v-list-item.mt-4
           v-checkbox.mx-auto(v-model="transparentMode" label="背景を透明にする")
 
-        v-list-item
+        v-list-item.d-flex.align-center
           v-btn.bold-button(
             @click = "download"
             x-large rounded block
@@ -43,29 +78,28 @@
           ) ダウンロード(PNG)
 
         v-list-item.mt-3
-          v-dialog(v-model="resetDialog" width="400")
-            template(v-slot:activator="{ on, attrs }")
-              v-btn.bold-button(
-                v-bind="attrs"
-                v-on="on"
-                x-large rounded block color="secondary lighten-3"
-              ) リセット
-            v-card
-              v-card-title リセット
-              v-card-text
-                span キャンバスをリセットしてもよろしいですか？
-                br
-                span この操作は取り消せません。
-              v-card-actions
-                v-spacer
-                v-btn(
-                  @click="resetDialog = false"
-                  text color="secondary"
-                ) キャンセル
-                v-btn(
-                  @click="resetCanvas"
-                  text color="warning"
-                ) はい(リセット)
+          v-btn.bold-button(
+            @click = "resetDialog = !resetDialog"
+            x-large rounded block color="secondary lighten-3"
+          ) リセット
+    
+    v-dialog(v-model="resetDialog" width="400")
+      v-card
+        v-card-title リセット
+        v-card-text
+          span キャンバスをリセットしてもよろしいですか？
+          br
+          span この操作は取り消せません。
+        v-card-actions
+          v-spacer
+          v-btn(
+            @click="resetDialog = false"
+            text color="secondary"
+          ) キャンセル
+          v-btn(
+            @click="resetCanvas"
+            text color="warning"
+          ) はい(リセット)
 </template>
 
 <script lang="ts">
@@ -76,11 +110,13 @@ import FrameCanvas from '../helper/FrameCanvas';
 import ClickTouchHelper from '../helper/ClickTouchHelper';
 import PagePropertiesMenu from '../components/PagePropertiesMenu.vue';
 import GridsMenu from '../components/GridsMenu.vue';
+import Header from '../components/Header.vue';
 
 @Component({
   components: {
     PagePropertiesMenu,
-    GridsMenu
+    GridsMenu,
+    Header,
   }
 })
 export default class Top extends Vue{
@@ -95,6 +131,7 @@ export default class Top extends Vue{
   private canvas: FrameCanvas | null = null;
   private transparentMode: boolean = true;
   private resetDialog: boolean = false;
+  private drawerEnabled: boolean = true;
 
   private currentTouchID: number = 0; // 現在線を引いているTouchのidentifier
 
@@ -163,6 +200,11 @@ export default class Top extends Vue{
       // 非outputModeで再描画
       canvas.render(false);
     });
+  }
+
+  // drawerのトグル
+  public toggleDrawer() {
+    this.drawerEnabled = !this.drawerEnabled;
   }
 
   // キャンバスの初期化
@@ -338,6 +380,9 @@ export default class Top extends Vue{
 </script>
 
 <style lang="sass" scoped>
+  .top
+    position: relative
+
   canvas
     max-width: 80%
     max-height: 90vh
@@ -346,7 +391,7 @@ export default class Top extends Vue{
   .property-panel
     @media (min-width: 600px)
       width: 300px
-  
+
   .canvas-bottom-toolbar
     position: sticky
     bottom: 0

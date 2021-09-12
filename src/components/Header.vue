@@ -1,11 +1,18 @@
 <template lang="pug">  
   v-app-bar(app hide-on-scroll color="accent")
-    v-img(
-      alt="koma maker logo"
-      contain
-      src="@/assets/koma_maker_logo.svg"
-      height="40"
-    )
+    v-spacer
+
+    v-app-bar-title
+      router-link(to="/")
+        v-img(
+          alt="koma maker logo"
+          contain
+          src="@/assets/koma_maker_logo.svg"
+          width="200"
+          height="40"
+        )
+
+    v-spacer
 </template>
 
 <script lang="ts">
