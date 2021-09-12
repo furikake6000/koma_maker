@@ -2,7 +2,7 @@
   .top
     Header(@clickBurger="toggleDrawer")
 
-    v-navigation-drawer.d-sm-none(v-model="drawerEnabled" bottom fixed)
+    v-navigation-drawer.d-md-none(v-model="drawerEnabled" bottom fixed)
       v-list(expand)
         PagePropertiesMenu(
           @propertiesChanged="onPropertiesChanged($event)"
@@ -13,7 +13,7 @@
         )
 
     v-main
-      .draw-area.d-sm-flex
+      .draw-area.d-md-flex
         .flex-grow-1.grey.darken-4
           .py-8
             .text-center
@@ -29,8 +29,8 @@
                 width="840"
                 height="1188"
               )
-            .canvas-bottom-toolbar.pt-2.px-2.px-sm-6.d-flex
-              v-btn.d-sm-none(@click="toggleDrawer" fab small)
+            .canvas-bottom-toolbar.pt-2.px-2.px-md-6.d-flex
+              v-btn.d-md-none(@click="toggleDrawer" fab small)
                 v-icon mdi-cog
               v-spacer
               v-select.drawtool-selector(
@@ -40,7 +40,7 @@
                 rounded
                 dense
               )
-        .property-panel.d-none.d-sm-flex.mb-4
+        .property-panel.d-none.d-md-flex.mb-4
           v-list(expand)
             PagePropertiesMenu(
               @propertiesChanged="onPropertiesChanged($event)"
@@ -66,7 +66,7 @@
                 x-large rounded block color="secondary lighten-3"
               ) リセット
 
-      .d-sm-none.mb-6
+      .d-md-none.mb-6
         v-list-item.mt-4
           v-checkbox.mx-auto(v-model="transparentMode" label="背景を透明にする")
 
